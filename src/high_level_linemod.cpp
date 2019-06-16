@@ -1,17 +1,17 @@
 #include "high_level_linemod.h"
 
 namespace lineMOD{
-HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, uint16 in_videoWidth, uint16 in_videoHeight, float32 in_lowInplaneRotAngle, float32 in_upInplaneRotAngle, float32 in_angleStep, float32 in_stepSize, cv::Mat in_camMat) :
+HighLevelLinemod::HighLevelLinemod(bool in_onlyColor,CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
 	onlyColor(in_onlyColor),
-	videoWidth(in_videoWidth),
-	videoHeight(in_videoHeight),
-	lowerAngleStop(in_lowInplaneRotAngle),
-	upperAngleStop(in_upInplaneRotAngle),
-	angleStep(in_angleStep),
-	stepSize(in_stepSize),
-	cx(in_camMat.at<float64>(0, 2)),
-	cy(in_camMat.at<float64>(1, 2)),
-	fieldOfView(360.0f / M_PI * atanf(videoHeight / (2 * in_camMat.at<float64>(1, 1))))
+	videoWidth(in_camParams.videoWidth),
+	videoHeight(in_camParams.videoHeight),
+	lowerAngleStop(in_templateSettings.angleStart),
+	upperAngleStop(in_templateSettings.angleStop),
+	angleStep(in_templateSettings.angleStep),
+	stepSize(in_templateSettings.stepSize),
+	cx(in_camParams.cx),
+	cy(in_camParams.cy),
+	fieldOfView(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy)))
 {
 
 	if (!in_onlyColor) {

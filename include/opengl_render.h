@@ -17,13 +17,14 @@
 class OpenGLRender
 {
 public:
-	OpenGLRender(uint16 in_width, uint16 in_height, cv::Mat in_camMat) {
+	OpenGLRender(CameraParameters const& in_camParams):
+	{
 
-		width = in_width;
-		height = in_height;
-		cx = in_camMat.at<float64>(0, 2);
-		cy = in_camMat.at<float64>(1, 2);
-		fieldOfView = 360.0f/M_PI * atanf(height / (2 * in_camMat.at<float64>(1, 1)));
+		width = in_camParams.videoWidth;
+		height = in_camParams.videoHeight;
+		cx = in_camParams.cx;
+		cy = in_camParams.cy;
+		fieldOfView = 360.0f/M_PI * atanf(height / (2 * in_camParams.fy));
 		projection = glm::perspective(glm::radians(fieldOfView), (float)width / (float)height, 100.0f, 10000.0f);
 
 

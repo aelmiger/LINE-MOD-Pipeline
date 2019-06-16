@@ -16,29 +16,6 @@ std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3> & a, const std::v
 	return result;
 }
 
-void printProgBar(int in_percent, std::string in_mfile) {
-	std::string bar;
-
-	for (int i = 0; i < 50; i++) {
-		if (i < (in_percent / 2)) {
-			bar.replace(i, 1, "=");
-		}
-		else if (i == (in_percent / 2)) {
-			bar.replace(i, 1, ">");
-		}
-		else {
-			bar.replace(i, 1, " ");
-		}
-	}
-	std::cout << "\r" "[" << bar << "] ";
-	std::cout.width(3);
-	std::cout << in_percent << "%     " + in_mfile << std::flush;
-	if (in_percent == 100) {
-		std::cout << std::endl;
-	}
-
-}
-
 
 
 void remove_if(const cv::Mat &mat, cv::Mat &res, remove_predicate pred, bool removeRows)

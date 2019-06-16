@@ -58,3 +58,31 @@ struct ObjectPose
 	glm::qua<float32> quaternions;
 	cv::Rect boundingBox;
 };
+
+struct CameraParameters
+{
+	const float32 fx = 1044.871;
+	const float32 cx = 309.26110;
+	const float32 fy = 1045.69141;
+	const float32 cy = 239.04899;
+	cv::Mat cameraMatrix = (cv::Mat1d(3, 3) << fx, 0, cx, 0, fy, cy, 0, 0, 1);
+	cv::Mat distortionCoefficients = (cv::Mat1d(1, 5) << -2.7167827743927644e-03, 2.0942424424199252e-01,
+		1.1120545920170163e-03, -6.6420567497010334e-03, 0.);
+	const uint16 videoWidth = 640;
+	const uint16 videoHeight = 480;
+};
+
+struct TemplateGenerationSettings
+{	
+	const std::string modelFileEnding = ".bmf";
+	const std::string modelFolder = "models/";
+
+
+	const float32 startDistance = 800;
+	const float32 endDistance = 1500;
+	const float32 stepSize = 50.0f;
+	const uint8 subdivisions = 2;
+	const float32 angleStart = -45;
+	const float32 angleStop = 45;
+	const float32 angleStep = 15;
+};

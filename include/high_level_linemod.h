@@ -23,7 +23,7 @@ namespace lineMOD {
 	{
 
 	public:
-		HighLevelLinemod(bool in_onlyColor, uint16 in_videoWidth, uint16 in_videoHeight, float32 in_lowInplaneRotAngle, float32 in_upInplaneRotAngle, float32 in_angleStep, float32 in_stepSize, cv::Mat in_camMat);
+		HighLevelLinemod(bool in_onlyColor, CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings);
 		~HighLevelLinemod();
 
 		std::vector<cv::String> getClassIds();
