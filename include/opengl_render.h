@@ -17,7 +17,7 @@
 class OpenGLRender
 {
 public:
-	OpenGLRender(CameraParameters const& in_camParams):
+	OpenGLRender(CameraParameters const& in_camParams)
 	{
 
 		width = in_camParams.videoWidth;
@@ -45,13 +45,13 @@ public:
 	~OpenGLRender() {
 		glDeleteProgram(depthShaderProgram);
 		glDeleteProgram(colorShaderProgram);
-
+		SDL_DestroyWindow(window);
 	}
 
 	cv::Mat getColorImgFromBuff() {
 		glReadBuffer(GL_FRONT);
 		glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, renderedColorImg.data);
-		cv::flip(renderedColorImg, renderedColorImg, 0);
+		cv::flip(renderedColorImg, renderedColorImg, 0); //TODO Wird flip wirklich benötigt?
 		return renderedColorImg;
 	}
 	cv::Mat getDepthImgFromBuff() {
@@ -61,7 +61,9 @@ public:
 		return renderedDepthImg;
 	}
 
-	void renderColorToFrontBuff(ModelBuffer *model, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
+	void renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
+		ModelBuffer* modPointer = &modBuff[in_modelIndice];
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glUseProgram(colorShaderProgram);
 		glPixelStorei(GL_PACK_ALIGNMENT, (renderedColorImg.step & 3) ? 1 : 4);
@@ -71,13 +73,14 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 		translateCam(camPositon, in_rotate, in_x, in_y);
-		model->bind();
+		modPointer->bind();
 		glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
-		glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0);
-		model->unbind();
+		glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+		modPointer->unbind();
 		SDL_GL_SwapWindow(window);
 	}
-	void renderColorToFrontBuff(ModelBuffer *model, glm::mat4 in_rotMat, glm::vec3 in_traVec) {
+	void renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec) {
+		ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glUseProgram(colorShaderProgram);
@@ -94,16 +97,19 @@ public:
 		view[3][3] = 1.0f;
 		modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 		viewProj = projection * view*modelMat;
-		model->bind();
+		modPointer->bind();
 		glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
-		glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0);
-		model->unbind();
+		glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+		modPointer->unbind();
 		SDL_GL_SwapWindow(window);
 	}
 
 
 
-	void renderDepthToFrontBuff(ModelBuffer *model, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
+	void renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
+		ModelBuffer* modPointer = &modBuff[in_modelIndice];
+
+
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glUseProgram(depthShaderProgram);
 		glPixelStorei(GL_PACK_ALIGNMENT, (renderedDepthImg.step & 3) ? 1 : 4);
@@ -113,16 +119,17 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 		translateCam(camPositon, in_rotate, in_x, in_y);
-		model->bind();
+		modPointer->bind();
 		glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
-		glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0);
-		model->unbind();
+		glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+		modPointer->unbind();
 		SDL_GL_SwapWindow(window);
 	}
 
 	
 
-	void renderDepthToFrontBuff(ModelBuffer *model, glm::mat4 in_rotMat,glm::vec3 in_traVec) {
+	void renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat,glm::vec3 in_traVec) {
+		ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glUseProgram(depthShaderProgram);
@@ -139,13 +146,22 @@ public:
 		view[3][3] = 1.0f;
 		modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 		viewProj = projection * view*modelMat;
-		model->bind();
+		modPointer->bind();
 		glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
-		glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0);
-		model->unbind();
+		glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+		modPointer->unbind();
 		SDL_GL_SwapWindow(window);
 	}
 
+
+	void creatModBuffFromFiles(std::string in_modelLocation) {
+		modBuff.clear();
+		Model tmp;
+		readModelFile(in_modelLocation, tmp);
+		std::vector<glm::vec3> tempVert;
+		tempVert = zipVectors(tmp.vertices, tmp.colors);
+		modBuff.push_back(ModelBuffer(tempVert.data(), tmp.numVertices, tmp.indices.data(), tmp.numIndices, sizeof(tmp.indices[0])));
+	}
 
 	void readModelFile(std::string in_file,Model &in_model) {
 		std::ifstream input = std::ifstream(in_file, std::ios::in | std::ios::binary);
@@ -210,6 +226,7 @@ public:
 
 private:
 	SDL_Window* window;
+	std::vector<ModelBuffer> modBuff;
 	cv::Mat renderedColorImg;
 	cv::Mat renderedDepthImg;
 	uint16 width;
@@ -370,6 +387,16 @@ private:
 	}
 
 
+	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3> & a, const std::vector<glm::vec3> & b) {
+		std::vector <glm::vec3> result;
+		result.reserve(a.size() + b.size());
+
+		for (size_t i = 0; i < a.size(); i++) {
+			result.push_back(a[i]);
+			result.push_back(b[i]);
+		}
+		return result;
+	}
 
 	void translateCam(glm::vec3 in_vec,float32 in_rotate, float32 in_x, float32 in_y) {
 		position = in_vec;

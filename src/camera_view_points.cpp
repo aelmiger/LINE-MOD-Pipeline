@@ -31,7 +31,7 @@ void CameraViewPoints::icosahedronPointsFromRadius() {
 	icosahedronPointB = icosahedronPointA * goldenRatio;
 }
 void CameraViewPoints::createVerticesForRotSym() {
-	for (size_t i = 0; i < 90; i = i + 10)
+	for (float32 i = -90; i < 90; i = i + 5)
 	{
 		vertices.push_back(glm::vec3{ cos(i*M_PI / 180.0f)*radius,sin(i*M_PI / 180.0f)*radius,0.0f });
 	}

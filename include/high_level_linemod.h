@@ -57,7 +57,7 @@ namespace lineMOD {
 		float32 stepSize;
 
 		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-
+		int32 tempDepth;
 
 
 		struct Template

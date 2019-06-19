@@ -25,8 +25,6 @@
 #################### GENERAL UTILITY ####################
 */
 
-std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3> & a, const std::vector<glm::vec3> & b);
-void printProgBar(int in_percent, std::string in_mfile);
 typedef bool(*remove_predicate)(const cv::Mat &rc);
 void remove_if(const cv::Mat &mat, cv::Mat &res, remove_predicate pred, bool removeRows = true);
 bool is_zero(const cv::Mat &rc);

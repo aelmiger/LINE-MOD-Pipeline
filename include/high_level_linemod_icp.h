@@ -25,7 +25,7 @@ namespace lineMODIcp {
 		void loadModel(std::string in_model);
 		void prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& in_camMatrix, cv::Rect& bb);
 		void registerToScene(std::vector<ObjectPose>& in_poses);
-		uint16 estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender& in_openglRend, ModelBuffer& in_modBuff);
+		uint16 estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender* in_openglRend, uint16 in_modelIndice);
 	private:
 		cv::ppf_match_3d::ICP* icp;
 		cv::Mat modelVertices;

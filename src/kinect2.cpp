@@ -48,7 +48,7 @@ void Kinect2::getKinectFrames(cv::Mat& in_rgb, cv::Mat& in_depth) {
 	rgbmat(cv::Rect(cv::Point(320 + 320, 61 + 240), cv::Point(1600 - 320, 1021 - 240))).copyTo(croppedBgr);
 
 	cv::cvtColor(croppedBgr, croppedBgr, cv::COLOR_BGRA2BGR);
-	in_rgb = croppedBgr;
-	in_depth = croppedDepth;
+	cv::flip(croppedBgr,in_rgb,1);
+	cv::flip(croppedDepth, in_depth, 1);
 	listener->release(frames);
 }

@@ -20,16 +20,15 @@ private:
 	lineMOD::HighLevelLinemod* line;
 	std::vector<glm::vec3> camVertices;
 
-	std::vector<ModelBuffer> modBuff;
 	std::vector<std::string> modelFiles;
 	std::string modelFolder;
 	float32 startDistance;
 	float32 endDistance;
 	float32 stepSize;
+	uint16 subdivisions;
 
 	uint32 numCameraVertices;
 	
-	void creatModBuffFromFile(uint16 in_iteration);
 	void createCamViewPoints(float32 in_radiusToModel);
 	void renderImages(std::vector<cv::Mat>& in_imgVec, uint16 in_modelIterator, uint16 in_vertIterator);
 

@@ -5,19 +5,6 @@
 #################### GENERAL UTILITY ####################
 */
 
-std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3> & a, const std::vector<glm::vec3> & b) {
-	std::vector <glm::vec3> result;
-	result.reserve(a.size() + b.size());
-
-	for (size_t i = 0; i < a.size(); i++) {
-		result.push_back(a[i]);
-		result.push_back(b[i]);
-	}
-	return result;
-}
-
-
-
 void remove_if(const cv::Mat &mat, cv::Mat &res, remove_predicate pred, bool removeRows)
 {
 	res.release();

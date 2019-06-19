@@ -16,18 +16,18 @@ HighLevelLinemod::HighLevelLinemod(bool in_onlyColor,CameraParameters const& in_
 
 	if (!in_onlyColor) {
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
-		//modality.push_back(cv::makePtr<cv::linemod::ColorGradient>());
-		modality.push_back(cv::makePtr<cv::linemod::ColorGradient>(10.0f, 30, 55.0f));
-		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>());
-		modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
+		modality.push_back(cv::makePtr<cv::linemod::ColorGradient>());
+		//modality.push_back(cv::makePtr<cv::linemod::ColorGradient>(10.0f, 30, 55.0f));
+		modality.push_back(cv::makePtr<cv::linemod::DepthNormal>());
+		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
-		static const int T_DEFAULTS[] = { 5,8 };
+		static const int T_DEFAULTS[] = { 2,5 };
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else {
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
 		modality.push_back(cv::makePtr<cv::linemod::ColorGradient>());
-		static const int T_DEFAULTS[] = { 5,8 };
+		static const int T_DEFAULTS[] = { 2,5 };
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 
@@ -101,14 +101,20 @@ bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs) {
 
 	matches.clear();
 	objectPoses.clear();
-	detector->match(in_imgs, 90.0f, matches);
+	cv::Mat tmpDepth;
+	if (onlyColor && in_imgs.size() == 2) {
+		tmpDepth = in_imgs[1];
+		in_imgs.pop_back();
+	}
+	detector->match(in_imgs, 80.0f, matches);
+	in_imgs.push_back(tmpDepth);
 	if (matches.size() > 0) {
 		applyPostProcessing(in_imgs);
 
 		//DRAW FEATURES OF BEST LINEMOD MATCH
 		if (objectPoses.size() != 0) {
 			const std::vector<cv::linemod::Template>& templates = detector->getTemplates(matches[0].class_id, matches[0].template_id);
-			drawResponse(templates, 2, in_imgs[0], cv::Point(matches[0].x, matches[0].y), detector->getT(0));
+			drawResponse(templates, 1 , in_imgs[0], cv::Point(matches[0].x, matches[0].y), detector->getT(0));
 		}
 
 	}
@@ -217,12 +223,16 @@ glm::qua<float32> HighLevelLinemod::openglCoordinatesystem2opencv(glm::mat4& in_
 bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	cv::Mat colorImgHue;
 	cv::cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-	cv::inRange(colorImgHue, cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255), colorImgHue); //TODO RANGE
+	cv::inRange(colorImgHue, cv::Scalar(0, 0, 0), cv::Scalar(255, 30, 255), colorImgHue); //TODO RANGE
 
 	for (uint32 i = 0; i < matches.size(); i++)
 	{
-
 		if (!onlyColor) {
+			if (colorCheck(colorImgHue, i, 50) && depthCheck(in_imgs[1], i)) {
+				updateTranslationAndCreateObjectPose(i);
+			}
+		}
+		else if (onlyColor && in_imgs.size() == 2) {
 			if (colorCheck(colorImgHue, i, 50) && depthCheck(in_imgs[1], i)) {
 				updateTranslationAndCreateObjectPose(i);
 			}
@@ -274,7 +284,8 @@ bool HighLevelLinemod::depthCheck(cv::Mat &in_depth, uint32& in_numMatch) {
 		templates[matches[in_numMatch].template_id].boundingBox.width,
 		templates[matches[in_numMatch].template_id].boundingBox.height);
 	int32 diff = (int32)medianMat(in_depth, bb, 4) - (int32)templates[matches[in_numMatch].template_id].medianDepth;
-	//templates[matches[in_numMatch].template_id].translation.z += (float32)diff;
+	tempDepth = templates[matches[in_numMatch].template_id].translation.z + diff;
+	return true;
 	if (abs(diff) < stepSize / 2) {
 		return true;
 	}
@@ -287,7 +298,7 @@ void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 in_numMatch) 
 	glm::vec3 updatedTanslation;
 	float32 alpha;
 
-	updatedTanslation.z = templates[matches[in_numMatch].template_id].translation.z;
+	updatedTanslation.z = tempDepth; //templates[matches[in_numMatch].template_id].translation.z;
 	alpha = ((1.0f - (matches[in_numMatch].y + cy -
 		templates[matches[in_numMatch].template_id].boundingBox.y) / (cy)) * fieldOfView / 2.0f);
 

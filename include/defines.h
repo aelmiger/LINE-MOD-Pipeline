@@ -61,6 +61,12 @@ struct ObjectPose
 
 struct CameraParameters
 {
+	/////CAMERA PARAMETER LINE_MOD BENCHMARK
+	//const float32 fx = 572.41140;
+	//const float32 cx = 325.26110;
+	//const float32 fy = 573.57043;
+	//const float32 cy = 242.04899;
+	///////CAMERA PARAMETER KINECT V2
 	const float32 fx = 1044.871;
 	const float32 cx = 309.26110;
 	const float32 fy = 1045.69141;
@@ -78,11 +84,11 @@ struct TemplateGenerationSettings
 	const std::string modelFolder = "models/";
 
 
-	const float32 startDistance = 800;
-	const float32 endDistance = 1500;
+	const float32 startDistance = 500;
+	const float32 endDistance = 1200;
 	const float32 stepSize = 50.0f;
 	const uint8 subdivisions = 2;
 	const float32 angleStart = -45;
 	const float32 angleStop = 45;
-	const float32 angleStep = 15;
+	const float32 angleStep = 5;
 };

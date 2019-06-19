@@ -71,7 +71,7 @@ namespace lineMODIcp {
 
 	}
 
-	uint16 HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender& in_openglRend, ModelBuffer& in_modBuff) {
+	uint16 HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender* in_openglRend, uint16 in_modelIndice) {
 		uint16 bestMean = 0;
 		uint16 bestPose = 0;
 		for (size_t i = 0; i < poses.size(); i++)
@@ -79,8 +79,8 @@ namespace lineMODIcp {
 			glm::vec3 eul = glm::eulerAngles(in_poses[i].quaternions);
 			glm::qua quats(glm::vec3(eul.x + M_PI / 2.0f, -eul.y, -eul.z));
 			glm::mat4 newViewMat = glm::toMat4(quats);
-			in_openglRend.renderDepthToFrontBuff(&in_modBuff, newViewMat, in_poses[i].translation);
-			cv::Mat depth = in_openglRend.getDepthImgFromBuff();
+			in_openglRend->renderDepthToFrontBuff(in_modelIndice, newViewMat, in_poses[i].translation);
+			cv::Mat depth = in_openglRend->getDepthImgFromBuff();
 			cv::Mat binary;
 			depthToBinary(depth, binary);
 			cv::Mat mask;
