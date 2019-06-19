@@ -39,7 +39,7 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	modelMat = modelMat * 1000;
 	cv::patchNaNs(modelMat);
 	cv::Mat patchedNaNs;
-	remove_if(modelMat, patchedNaNs, is_zero, true);
+	remove_if(modelMat, patchedNaNs, true);
 	cv::Vec3d viewpoint(0, 0, 0);
 	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint);
 }
@@ -108,15 +108,19 @@ uint16 HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<O
 
 
 
-void HighLevelLinemodIcp::remove_if(const cv::Mat &in_mat, cv::Mat &in_res, remove_predicate in_pred, bool in_removeRows)
+void HighLevelLinemodIcp::remove_if(const cv::Mat &in_mat, cv::Mat &in_res, bool in_removeRows)
 {
 	in_res.release();
 	int n = in_removeRows ? in_mat.rows : in_mat.cols;
 	for (int i = 0; i < n; i++)
 	{
 		cv::Mat rc = in_removeRows ? in_mat.row(i) : in_mat.col(i);
-		if (in_pred(rc)) continue; // remove element
-		if (in_res.empty()) in_res = rc;
+		if (cv::sum(rc)[0] == 0) {
+			continue; // remove element
+		}
+		if (in_res.empty()) {
+			in_res = rc;
+		}
 		else
 		{
 			if (in_removeRows)
@@ -128,10 +132,6 @@ void HighLevelLinemodIcp::remove_if(const cv::Mat &in_mat, cv::Mat &in_res, remo
 }
 
 
-bool HighLevelLinemodIcp::is_zero(const cv::Mat &in_rc)
-{
-	return (cv::sum(in_rc)[0] == 0);
-}
 
 void HighLevelLinemodIcp::depthToBinary(cv::Mat &in_gray, cv::Mat &in_binary, uint32 in_threshold) {
 	cv::threshold(in_gray, in_binary, in_threshold, 65535, cv::THRESH_BINARY);

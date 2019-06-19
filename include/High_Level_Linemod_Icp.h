@@ -31,9 +31,7 @@ private:
 	cv::Mat sceneVertices;
 	uint16 sampleStep;
 	std::vector< cv::ppf_match_3d::Pose3DPtr> poses;
-	typedef bool(*remove_predicate)(const cv::Mat &in_rc);
-	void remove_if(const cv::Mat &in_mat, cv::Mat &in_res, remove_predicate in_pred, bool in_removeRows = true);
-	bool is_zero(const cv::Mat &in_rc);
+	void remove_if(const cv::Mat &in_mat, cv::Mat &in_res, bool in_removeRows = true);
 	void depthToBinary(cv::Mat &in_gray, cv::Mat &in_binary, uint32 in_threshold = 1);
 };
 
