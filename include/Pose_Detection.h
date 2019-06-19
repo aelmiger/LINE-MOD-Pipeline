@@ -6,7 +6,7 @@
 #include <opencv2/videoio.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "opengl_render.h"
+#include "Opengl_Render.h"
 #include "high_level_linemod.h"
 #include "high_level_linemod_icp.h"
 #include "kinect2.h"

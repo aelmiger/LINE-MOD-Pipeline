@@ -5,7 +5,7 @@
 #include "model_buffer.h"
 #include "utility.h"
 #include "high_level_linemod.h"
-#include "opengl_render.h"
+#include "Opengl_Render.h"
 #include "camera_view_points.h"
 
 class Template_Generator
