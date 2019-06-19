@@ -20,12 +20,15 @@ For compilation the following libraries must be included and linked
 * [SDL2](https://www.libsdl.org/download-2.0.php) - Creates a window for OpenGL
 * [GLEW](http://glew.sourceforge.net/) - OpenGL Extension Library
 * [OPENCV](https://opencv.org/) - Computer vision library
-OpenCV needs to be built with:
-- additional contrib libraries
-- atleast SSE 3 support
-- OpenMP
 * [GLM](https://glm.g-truc.net/0.9.9/index.html) - Graphics math library
 * [libfreenect2](https://github.com/OpenKinect/libfreenect2) - Kinect V2 driver (only if Kinect is used)
+
+### Installing
+
+OpenCV needs to be built with:
+- additional contrib libraries for LINE-MOD and ICP
+- atleast SSE 3 support
+- OpenMP
 
 ## Authors
 
