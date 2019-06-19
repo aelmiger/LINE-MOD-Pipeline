@@ -23,6 +23,8 @@ For compilation the following libraries must be included and linked
 * [GLM](https://glm.g-truc.net/0.9.9/index.html) - Graphics math library
 * [libfreenect2](https://github.com/OpenKinect/libfreenect2) - Kinect V2 driver (only if Kinect is used)
 
+Currently the Windows ppl.h library is used for parallelism. This will be changed to the platform independant OpenMP.
+
 ### Installing
 
 OpenCV needs to be built with:
