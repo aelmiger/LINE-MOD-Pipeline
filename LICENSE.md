@@ -1,7 +1,10 @@
 Copyright (c) 2019
-TU Berlin, Institut für Werkzeugmaschinen und Fabrikbetrieb
+TU Berlin, Institut fÃ¼r Werkzeugmaschinen und Fabrikbetrieb
+
 Fachgebiet Industrielle Automatisierungstechnik
+
 Authors: Anton Elmiger
+
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 following conditions are met:
