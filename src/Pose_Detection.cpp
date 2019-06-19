@@ -6,8 +6,8 @@ Pose_Detection::Pose_Detection(CameraParameters const& in_camParams, TemplateGen
 	cameraMatrix(in_camParams.cameraMatrix)
 {
 	opengl = new OpenGLRender(in_camParams);
-	line = new lineMOD::HighLevelLinemod(true, in_camParams, in_templateSettings);
-	icp = new lineMODIcp::HighLevelLinemodIcp(5, 0.1f, 3.5f, 8, 10);
+	line = new HighLevelLinemod(true, in_camParams, in_templateSettings);
+	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 10);
 	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
 }
 
@@ -73,20 +73,7 @@ void Pose_Detection::run() {
 		//opengl->readModelFile(modelFolder + modelFiles[0], tmp); //TODO welches file
 
 		if (!detectedPoses.empty()) {
-			///////////////////////////////////////////////////
-			/*
-			glm::vec3 eult = glm::eulerAngles(detectedPoses[0].quaternions);
-			glm::qua quatst(glm::vec3(eult.x + M_PI / 2.0f, -eult.y, -eult.z));
 
-			glm::mat4 newViewMatt = glm::toMat4(quatst);
-			opengl.renderDepthToFrontBuff(&modBuff[0], newViewMatt, detectedPoses[0].translation); //TODO include translation in new view mat
-			cv::Mat deptht = opengl.getDepthImgFromBuff();
-
-			cv::Mat binaryt;
-
-			depthToBinary(deptht, binaryt);
-			*/
-			///////////////////////////////////////////////////
 			//icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPoses[0].boundingBox);
 			//icp->registerToScene(detectedPoses);
 

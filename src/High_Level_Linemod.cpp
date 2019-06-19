@@ -1,7 +1,6 @@
 #include "high_level_linemod.h"
 
-namespace lineMOD{
-HighLevelLinemod::HighLevelLinemod(bool in_onlyColor,CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
+HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
 	onlyColor(in_onlyColor),
 	videoWidth(in_camParams.videoWidth),
 	videoHeight(in_camParams.videoHeight),
@@ -114,7 +113,7 @@ bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs) {
 		//DRAW FEATURES OF BEST LINEMOD MATCH
 		if (objectPoses.size() != 0) {
 			const std::vector<cv::linemod::Template>& templates = detector->getTemplates(matches[0].class_id, matches[0].template_id);
-			drawResponse(templates, 1 , in_imgs[0], cv::Point(matches[0].x, matches[0].y), detector->getT(0));
+			drawResponse(templates, 1, in_imgs[0], cv::Point(matches[0].x, matches[0].y), detector->getT(0));
 		}
 
 	}
@@ -228,21 +227,21 @@ bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	for (uint32 i = 0; i < matches.size(); i++)
 	{
 		if (!onlyColor) {
-			if (colorCheck(colorImgHue, i, 50) && depthCheck(in_imgs[1], i)) {
+			if (colorCheck(colorImgHue, i, percentToPassCheck) && depthCheck(in_imgs[1], i)) {
 				updateTranslationAndCreateObjectPose(i);
 			}
 		}
 		else if (onlyColor && in_imgs.size() == 2) {
-			if (colorCheck(colorImgHue, i, 50) && depthCheck(in_imgs[1], i)) {
+			if (colorCheck(colorImgHue, i, percentToPassCheck) && depthCheck(in_imgs[1], i)) {
 				updateTranslationAndCreateObjectPose(i);
 			}
 		}
 		else {
-			if (colorCheck(colorImgHue, i, 50)) {
+			if (colorCheck(colorImgHue, i, percentToPassCheck)) {
 				updateTranslationAndCreateObjectPose(i);
 			}
 		}
-		if (objectPoses.size() == 3) {//TODO NON HARDCODE
+		if (objectPoses.size() == numberWantedPoses) {
 			return true;
 		}
 		if (i == (matches.size() - 1)) {
@@ -250,7 +249,6 @@ bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 				return true;
 			}
 			else {
-				//updateTranslationAndCreateObjectPose(0);
 				return false;
 			}
 		}
@@ -258,7 +256,7 @@ bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	}
 }
 
-bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float32 in_percentCorrectColor) {
+bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float32 in_percentToPassCheck) {
 	cv::Mat croppedImage;
 	croppedImage = in_colImg(cv::Rect(
 		matches[in_numMatch].x,
@@ -269,7 +267,7 @@ bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float
 	float32 nonZer = cv::countNonZero(croppedImage) * 100 /
 		(templates[matches[in_numMatch].template_id].boundingBox.width *
 			templates[matches[in_numMatch].template_id].boundingBox.height);
-	if (nonZer > in_percentCorrectColor) {
+	if (nonZer > in_percentToPassCheck) {
 		return true;
 	}
 	else {
@@ -283,10 +281,10 @@ bool HighLevelLinemod::depthCheck(cv::Mat &in_depth, uint32& in_numMatch) {
 		matches[in_numMatch].y,
 		templates[matches[in_numMatch].template_id].boundingBox.width,
 		templates[matches[in_numMatch].template_id].boundingBox.height);
-	int32 diff = (int32)medianMat(in_depth, bb, 4) - (int32)templates[matches[in_numMatch].template_id].medianDepth;
-	tempDepth = templates[matches[in_numMatch].template_id].translation.z + diff;
+	int32 depthDiff = (int32)medianMat(in_depth, bb, 4) - (int32)templates[matches[in_numMatch].template_id].medianDepth;
+	tempDepth = templates[matches[in_numMatch].template_id].translation.z + depthDiff;
 	return true;
-	if (abs(diff) < stepSize / 2) {
+	if (abs(depthDiff) < stepSize / 2) {
 		return true;
 	}
 	else {
@@ -315,5 +313,4 @@ void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 in_numMatch) 
 		templates[matches[in_numMatch].template_id].boundingBox.height);
 
 	objectPoses.push_back(ObjectPose(updatedTanslation, templates[matches[in_numMatch].template_id].quaternions, boundingBox));
-}
 }

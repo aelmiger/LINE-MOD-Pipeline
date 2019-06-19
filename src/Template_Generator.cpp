@@ -10,7 +10,7 @@ Template_Generator::Template_Generator(CameraParameters const& in_camParams, Tem
 	modelFolder(in_templateSettings.modelFolder)
 {
 	opengl = new OpenGLRender(in_camParams);
-	line = new lineMOD::HighLevelLinemod(true, in_camParams, in_templateSettings);
+	line = new HighLevelLinemod(true, in_camParams, in_templateSettings);
 	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
 
 }
@@ -60,9 +60,9 @@ void Template_Generator::createCamViewPoints(float32 in_radiusToModel) {
 
 void Template_Generator::renderImages(std::vector<cv::Mat>& in_imgVec, uint16 in_modelIterator, uint16 in_vertIterator) {
 	in_imgVec.clear();
-	opengl->renderDepthToFrontBuff(in_modelIterator, glm::vec3(camVertices[in_vertIterator]), 0.0f, 0.0f, 0.0f);
+	opengl->renderDepthToFrontBuff(in_modelIterator, glm::vec3(camVertices[in_vertIterator]));
 	cv::Mat depth = opengl->getDepthImgFromBuff();
-	opengl->renderColorToFrontBuff(in_modelIterator, glm::vec3(camVertices[in_vertIterator]), 0.0f, 0.0f, 0.0f);
+	opengl->renderColorToFrontBuff(in_modelIterator, glm::vec3(camVertices[in_vertIterator]));
 	cv::Mat color = opengl->getColorImgFromBuff();
 	std::vector<cv::Mat> images;
 	in_imgVec.push_back(color);
@@ -96,3 +96,4 @@ uint16 Template_Generator::calculateCurrentPercent(uint16 const& in_spehreRadius
 	uint16 numberOfDiffRadius = std::floor((endDistance - startDistance + stepSize) / stepSize);
 	return((((in_currentIteration + 1) * 100) / numCameraVertices) / numberOfDiffRadius + (in_spehreRadius - startDistance) / stepSize * 100 / numberOfDiffRadius);
 }
+

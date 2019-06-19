@@ -31,7 +31,7 @@ struct Index {
 	uint32 c;
 };
 
-struct Model{
+struct Model {
 	uint64 numVertices;
 	uint64 numIndices;
 	std::vector<glm::vec3> vertices;
@@ -79,7 +79,7 @@ struct CameraParameters
 };
 
 struct TemplateGenerationSettings
-{	
+{
 	const std::string modelFileEnding = ".bmf";
 	const std::string modelFolder = "models/";
 

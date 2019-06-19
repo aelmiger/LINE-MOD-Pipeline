@@ -1,34 +1,7 @@
 #include "utility.h"
 
 
-/*
-#################### GENERAL UTILITY ####################
-*/
 
-void remove_if(const cv::Mat &mat, cv::Mat &res, remove_predicate pred, bool removeRows)
-{
-	res.release();
-	int n = removeRows ? mat.rows : mat.cols;
-	for (int i = 0; i < n; i++)
-	{
-		cv::Mat rc = removeRows ? mat.row(i) : mat.col(i);
-		if (pred(rc)) continue; // remove element
-		if (res.empty()) res = rc;
-		else
-		{
-			if (removeRows)
-				vconcat(res, rc, res);
-			else
-				hconcat(res, rc, res);
-		}
-	}
-}
-
-
-bool is_zero(const cv::Mat &rc)
-{
-	return (cv::sum(rc)[0] == 0);
-}
 
 /*
 #################### CONVERSION UTILITY ####################
@@ -127,63 +100,6 @@ std::string fileToString(const char* filename) {
 	return buffer.str();
 }
 
-
-static void writeLinemod(const cv::Ptr<cv::linemod::Detector>& detector, std::vector<TemplatePosition> &in_templatePositions)
-{
-	std::string filename = "linemod_templates.yml";
-	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
-	detector->write(fs);
-
-	std::vector<cv::String> ids = detector->classIds();
-	fs << "classes" << "[";
-	for (int i = 0; i < (int)ids.size(); ++i)
-	{
-		fs << "{";
-		detector->writeClass(ids[i], fs);
-		fs << "}";
-	}
-	fs << "]";
-
-	std::ofstream templatePositionFile("linemod_tempPosFile.bin", std::ios::binary | std::ios::out);
-	uint64 numTemp = in_templatePositions.size();
-	templatePositionFile.write((char*)&numTemp, sizeof(uint64));
-	for (uint64 i = 0; i < numTemp; i++)
-	{
-		templatePositionFile.write((char *)&in_templatePositions[i], sizeof(TemplatePosition));
-	}
-	templatePositionFile.close();
-
-}
-
-static cv::Ptr<cv::linemod::Detector> readLinemod(std::vector<TemplatePosition> &in_templatePositions)
-{
-	std::string filename = "linemod_templates.yml";
-	cv::Ptr<cv::linemod::Detector> detector = cv::makePtr<cv::linemod::Detector>();
-	cv::FileStorage fs(filename, cv::FileStorage::READ);
-	detector->read(fs.root());
-
-	cv::FileNode fn = fs["classes"];
-	for (cv::FileNodeIterator i = fn.begin(), iend = fn.end(); i != iend; ++i) {
-		detector->readClass(*i);
-	}
-
-	std::ifstream input = std::ifstream("linemod_tempPosFile.bin", std::ios::in | std::ios::binary);
-	if (!input.is_open()) {
-		std::cout << "Error loading " << "linemod_tempPosFile.bin" << std::endl;
-	}
-	uint64 numTemp;
-	input.read((char*)&numTemp, sizeof(uint64));
-	TemplatePosition tp;
-	for (size_t i = 0; i < numTemp; i++)
-	{
-		input.read((char*)&tp, sizeof(TemplatePosition));
-		in_templatePositions.push_back(tp);
-	}
-	input.close();
-
-	return detector;
-}
-
 cv::Mat loadDepth(std::string a_name)
 {
 	std::ifstream l_file(a_name, std::ios::in | std::ios::binary);
@@ -220,17 +136,6 @@ cv::Mat loadDepth(std::string a_name)
 #################### CALC UTILITY ####################
 */
 
-uint16 medianMat(cv::Mat in_mat, cv::Rect &in_bb, uint8 in_medianPosition) {
-	cv::Mat invBinRot;
-	cv::threshold(in_mat, invBinRot, 1, 65535, cv::THRESH_BINARY);
-	invBinRot = 65535 - invBinRot;
-	cv::Mat croppedDepth = in_mat + invBinRot;
-	croppedDepth = croppedDepth(in_bb);
-
-	std::vector<uint16>vecFromMat(croppedDepth.begin<uint16>(), croppedDepth.end<uint16>());
-	std::nth_element(vecFromMat.begin(), vecFromMat.begin() + vecFromMat.size() / 4, vecFromMat.end());
-	return vecFromMat[vecFromMat.size() / in_medianPosition];
-}
 
 float32 length(cv::Vec3f &in_vecA) {
 	return sqrt(in_vecA[0] * in_vecA[0] + in_vecA[1] * in_vecA[1] + in_vecA[2] * in_vecA[2]);
@@ -311,17 +216,9 @@ float32 matchingScoreParallel(Model &in_model, ObjectPose &in_groundTruth, Objec
 #################### IMAGE UTILITY ####################
 */
 
-void depthToBinary(cv::Mat &in_gray, cv::Mat &in_binary, int in_threshold) {
-	cv::threshold(in_gray, in_binary, in_threshold, 65535, cv::THRESH_BINARY);
-	in_binary.convertTo(in_binary, CV_8UC1);
-}
 
 void erodeMask(cv::Mat &in_mask, cv::Mat &in_erode, int in_numberIterations) {
 	cv::erode(in_mask, in_erode, cv::Mat(), cv::Point(-1, -1), in_numberIterations);
-}
-
-void rotateCvMat(cv::Mat &in_mat, cv::Mat &in_dstMat, cv::Mat &in_rotMat) {
-	cv::warpAffine(in_mat, in_dstMat, in_rotMat, in_mat.size());
 }
 
 void drawResponse(const std::vector<cv::linemod::Template>& templates,

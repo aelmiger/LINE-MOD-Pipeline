@@ -21,9 +21,9 @@ public:
 	~OpenGLRender();
 	cv::Mat getColorImgFromBuff();
 	cv::Mat getDepthImgFromBuff();
-	void renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y);
+	void renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate = 0.0f, float32 in_x = 0.0f, float32 in_y = 0.0f);
 	void renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec);
-	void renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y);
+	void renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate = 0.0f, float32 in_x = 0.0f, float32 in_y = 0.0f);
 	void renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec);
 	void creatModBuffFromFiles(std::string in_modelLocation);
 	void readModelFile(std::string in_file, Model &in_model);

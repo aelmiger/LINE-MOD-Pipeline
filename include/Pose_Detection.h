@@ -7,9 +7,9 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "Opengl_Render.h"
-#include "high_level_linemod.h"
-#include "high_level_linemod_icp.h"
-#include "kinect2.h"
+#include "High_Level_Linemod.h"
+#include "High_Level_Linemod_Icp.h"
+#include "Kinect2.h"
 
 
 class Pose_Detection
@@ -20,8 +20,8 @@ public:
 	void run();
 private:
 	OpenGLRender* opengl;
-	lineMOD::HighLevelLinemod* line;
-	lineMODIcp::HighLevelLinemodIcp* icp;
+	HighLevelLinemod* line;
+	HighLevelLinemodIcp* icp;
 
 	std::vector<cv::Mat> inputImg;
 	std::vector<ObjectPose> detectedPoses;

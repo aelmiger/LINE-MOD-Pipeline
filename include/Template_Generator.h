@@ -4,9 +4,9 @@
 #include "defines.h"
 #include "model_buffer.h"
 #include "utility.h"
-#include "high_level_linemod.h"
+#include "High_Level_Linemod.h"
 #include "Opengl_Render.h"
-#include "camera_view_points.h"
+#include "Camera_View_Points.h"
 
 class Template_Generator
 {
@@ -17,7 +17,7 @@ public:
 
 private:
 	OpenGLRender* opengl;
-	lineMOD::HighLevelLinemod* line;
+	HighLevelLinemod* line;
 	std::vector<glm::vec3> camVertices;
 
 	std::vector<std::string> modelFiles;
@@ -28,12 +28,11 @@ private:
 	uint16 subdivisions;
 
 	uint32 numCameraVertices;
-	
+
 	void createCamViewPoints(float32 in_radiusToModel);
 	void renderImages(std::vector<cv::Mat>& in_imgVec, uint16 in_modelIterator, uint16 in_vertIterator);
 
 	void printProgBar(uint16 in_percent, std::string in_mfile);
 	uint16 calculateCurrentPercent(uint16 const& in_spehreRadius, uint16 const& in_currentIteration);
-
 };
 
