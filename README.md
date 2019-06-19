@@ -22,9 +22,9 @@ For compilation the following libraries must be included and linked
 * [OPENCV](https://opencv.org/) - Computer vision library
 ```
 OpenCV needs to be built with:
-* additional contrib libraries
-* atleast SSE 3 support
-* OpenMP
+- additional contrib libraries
+- atleast SSE 3 support
+- OpenMP
 
 ```
 * [GLM](https://glm.g-truc.net/0.9.9/index.html) - Graphics math library
