@@ -85,10 +85,10 @@ struct TemplateGenerationSettings
 
 
 	const float32 startDistance = 500;
-	const float32 endDistance = 1200;
+	const float32 endDistance = 1000;
 	const float32 stepSize = 50.0f;
 	const uint8 subdivisions = 2;
 	const float32 angleStart = -45;
 	const float32 angleStop = 45;
-	const float32 angleStep = 5;
+	const float32 angleStep = 10;
 };
