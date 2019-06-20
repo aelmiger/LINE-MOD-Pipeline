@@ -8,6 +8,7 @@ Kinect2::Kinect2()
 		std::cout << "ERROR:: No kinect connected!" << std::endl;
 	}
 	std::string serial = freenect2.getDefaultDeviceSerialNumber();
+	pipeline = new libfreenect2::CpuPacketPipeline(); //Necessary to prevent issues with OpenGL
 	if (pipeline)
 	{
 		dev = freenect2.openDevice(serial, pipeline);
