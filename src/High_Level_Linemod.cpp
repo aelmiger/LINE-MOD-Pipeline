@@ -294,26 +294,34 @@ bool HighLevelLinemod::depthCheck(cv::Mat &in_depth, uint32& in_numMatch) {
 	}
 }
 
-void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 in_numMatch) {
+void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 const& in_numMatch) {
 	glm::vec3 updatedTanslation;
-	float32 pixelX, pixelY;
-	matchToPixelCoord(in_numMatch, pixelX, pixelY);
-	float32 offsetFromCenter = pixelDistToCenter(pixelX, pixelY);
-	float32 angleFromCenter = atan(offsetFromCenter / fy);
-	updatedTanslation.z = calcTrueZ(tempDepth, angleFromCenter);
-
-	float32 mmOffsetFromCenter = updatedTanslation.z* (offsetFromCenter / fy);
-	updatedTanslation.x = (pixelX - cx) / offsetFromCenter * mmOffsetFromCenter;
-	updatedTanslation.y = (pixelY - cy) / offsetFromCenter * mmOffsetFromCenter;
+	glm::qua<float32> updatedRotation;
+	calcPosition(in_numMatch,updatedTanslation,tempDepth);
+	calcRotation(in_numMatch, updatedTanslation, updatedRotation);
 	cv::Rect boundingBox(
 		matches[in_numMatch].x,
 		matches[in_numMatch].y,
 		templates[matches[in_numMatch].template_id].boundingBox.width,
 		templates[matches[in_numMatch].template_id].boundingBox.height);
+	objectPoses.push_back(ObjectPose(updatedTanslation, updatedRotation, boundingBox));
+}
+void HighLevelLinemod::calcPosition(float32 const& in_numMatch,glm::vec3& in_position,float32 const& in_directDepth ) {
+	float32 pixelX, pixelY;
+	matchToPixelCoord(in_numMatch, pixelX, pixelY);
+	float32 offsetFromCenter = pixelDistToCenter(pixelX, pixelY);
+	float32 angleFromCenter = atan(offsetFromCenter / fy);
+	in_position.z = calcTrueZ(in_directDepth, angleFromCenter);
 
-	objectPoses.push_back(ObjectPose(updatedTanslation, templates[matches[in_numMatch].template_id].quaternions, boundingBox));
+	float32 mmOffsetFromCenter = in_position.z* (offsetFromCenter / fy);
+	in_position.x = (pixelX - cx) / offsetFromCenter * mmOffsetFromCenter;
+	in_position.y = (pixelY - cy) / offsetFromCenter * mmOffsetFromCenter;
 }
 
+void HighLevelLinemod::calcRotation(float32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats) {
+	glm::mat4 adjustRotation = glm::lookAt(glm::vec3(-in_position.x, -in_position.y, in_position.z), glm::vec3(0.f), up);
+	in_quats = glm::toQuat(adjustRotation * glm::toMat4(templates[matches[in_numMatch].template_id].quaternions));
+}
 void HighLevelLinemod::matchToPixelCoord(uint32 const& in_numMatch,float32& in_x, float32& in_y) {
 	in_x = (matches[in_numMatch].x + cx - templates[matches[in_numMatch].template_id].boundingBox.x);
 	in_y = (matches[in_numMatch].y + cy - templates[matches[in_numMatch].template_id].boundingBox.y);
