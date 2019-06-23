@@ -68,9 +68,9 @@ struct CameraParameters
 	//const float32 cy = 242.04899;
 	///////CAMERA PARAMETER KINECT V2
 	const float32 fx = 1044.871;
-	const float32 cx = 309.26110;
+	const float32 cx = 320;
 	const float32 fy = 1045.69141;
-	const float32 cy = 239.04899;
+	const float32 cy = 240;
 	cv::Mat cameraMatrix = (cv::Mat1d(3, 3) << fx, 0, cx, 0, fy, cy, 0, 0, 1);
 	cv::Mat distortionCoefficients = (cv::Mat1d(1, 5) << -2.7167827743927644e-03, 2.0942424424199252e-01,
 		1.1120545920170163e-03, -6.6420567497010334e-03, 0.);
