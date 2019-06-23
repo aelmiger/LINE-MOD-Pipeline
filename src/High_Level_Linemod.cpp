@@ -10,7 +10,9 @@ HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, CameraParameters const& in
 	stepSize(in_templateSettings.stepSize),
 	cx(in_camParams.cx),
 	cy(in_camParams.cy),
-	fieldOfView(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy)))
+	fx(in_camParams.fx),
+	fy(in_camParams.fy),
+	fieldOfViewHeight(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy)))
 {
 
 	if (!in_onlyColor) {
@@ -222,7 +224,7 @@ glm::qua<float32> HighLevelLinemod::openglCoordinatesystem2opencv(glm::mat4& in_
 bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	cv::Mat colorImgHue;
 	cv::cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-	cv::inRange(colorImgHue, cv::Scalar(0, 0, 0), cv::Scalar(255, 30, 255), colorImgHue); //TODO RANGE
+	cv::inRange(colorImgHue, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255), colorImgHue); //TODO RANGE
 
 	for (uint32 i = 0; i < matches.size(); i++)
 	{
@@ -294,18 +296,15 @@ bool HighLevelLinemod::depthCheck(cv::Mat &in_depth, uint32& in_numMatch) {
 
 void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 in_numMatch) {
 	glm::vec3 updatedTanslation;
-	float32 alpha;
+	float32 pixelX, pixelY;
+	matchToPixelCoord(in_numMatch, pixelX, pixelY);
+	float32 offsetFromCenter = pixelDistToCenter(pixelX, pixelY);
+	float32 angleFromCenter = atan(offsetFromCenter / fy);
+	updatedTanslation.z = calcTrueZ(tempDepth, angleFromCenter);
 
-	updatedTanslation.z = tempDepth; //templates[matches[in_numMatch].template_id].translation.z;
-	alpha = ((1.0f - (matches[in_numMatch].y + cy -
-		templates[matches[in_numMatch].template_id].boundingBox.y) / (cy)) * fieldOfView / 2.0f);
-
-	updatedTanslation.y = -tan(alpha*M_PI / 180) * updatedTanslation.z;
-	alpha = ((1.0f - (matches[in_numMatch].x + cx -
-		templates[matches[in_numMatch].template_id].boundingBox.x) / (cx)) * fieldOfView * ((float32)videoWidth / (float32)videoHeight) / 2.0f);
-
-	updatedTanslation.x = -tan(alpha*M_PI / 180) * updatedTanslation.z;
-
+	float32 mmOffsetFromCenter = updatedTanslation.z* (offsetFromCenter / fy);
+	updatedTanslation.x = (pixelX - cx) / offsetFromCenter * mmOffsetFromCenter;
+	updatedTanslation.y = (pixelY - cy) / offsetFromCenter * mmOffsetFromCenter;
 	cv::Rect boundingBox(
 		matches[in_numMatch].x,
 		matches[in_numMatch].y,
@@ -313,4 +312,19 @@ void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 in_numMatch) 
 		templates[matches[in_numMatch].template_id].boundingBox.height);
 
 	objectPoses.push_back(ObjectPose(updatedTanslation, templates[matches[in_numMatch].template_id].quaternions, boundingBox));
+}
+
+void HighLevelLinemod::matchToPixelCoord(uint32 const& in_numMatch,float32& in_x, float32& in_y) {
+	in_x = (matches[in_numMatch].x + cx - templates[matches[in_numMatch].template_id].boundingBox.x);
+	in_y = (matches[in_numMatch].y + cy - templates[matches[in_numMatch].template_id].boundingBox.y);
+}
+
+float32 HighLevelLinemod::pixelDistToCenter(float32 in_x, float32 in_y) {
+	in_x -= cx;
+	in_y -= cy;
+	return sqrt(in_x*in_x + in_y * in_y);
+}
+
+float32 HighLevelLinemod::calcTrueZ(float32 const& in_directDist,float32 const& in_angleFromCenter) {
+	return cos(in_angleFromCenter)*in_directDist;
 }

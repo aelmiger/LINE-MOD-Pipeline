@@ -50,7 +50,9 @@ private:
 	uint16 videoHeight;
 	float32 cx;
 	float32 cy;
-	float32 fieldOfView;
+	float32 fx;
+	float32 fy;
+	float32 fieldOfViewHeight;
 
 	std::vector<cv::Mat> inPlaneRotationMat;
 	float32 lowerAngleStop;
@@ -92,5 +94,8 @@ private:
 	bool colorCheck(cv::Mat &in_hueImg, uint32& in_numMatch, float32 in_percentCorrectColor);
 	bool depthCheck(cv::Mat &in_depth, uint32& in_numMatch);
 	void updateTranslationAndCreateObjectPose(uint32 in_numMatch);
+	void matchToPixelCoord(uint32 const& in_numMatch, float32& in_x, float32& in_y);
+	float32 pixelDistToCenter(float32 in_x, float32 in_y);
+	float32 calcTrueZ(float32 const& in_directDist, float32 const& in_angleFromCenter);
 };
 
