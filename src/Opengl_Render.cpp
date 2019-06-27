@@ -139,7 +139,7 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 
 
 void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
-	modBuff.clear();
+	//modBuff.clear();
 	Model tmp;
 	readModelFile(in_modelLocation, tmp);
 	std::vector<glm::vec3> tempVert;
