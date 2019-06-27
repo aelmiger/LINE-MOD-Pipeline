@@ -25,6 +25,7 @@ private:
 
 	std::vector<cv::Mat> inputImg;
 	std::vector<ObjectPose> detectedPoses;
+	std::vector<ObjectPose> finalObjectPoses;
 	cv::Mat colorImg;
 	cv::Mat depthImg;
 

@@ -28,7 +28,6 @@ void Template_Generator::run()
 	for (size_t i = 0; i < modelFiles.size(); i++)
 	{
 		opengl->creatModBuffFromFiles(modelFolder + modelFiles[i]);
-		
 		for (float32 radiusToModel = startDistance; radiusToModel <= endDistance; radiusToModel += stepSize)
 		{
 			createCamViewPoints(radiusToModel);
@@ -45,6 +44,7 @@ void Template_Generator::run()
 			}
 
 		}
+		line->pushBackTemplates();
 	}
 	line->writeLinemod();
 

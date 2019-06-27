@@ -30,9 +30,10 @@ public:
 	uint32 getNumTemplates();
 
 	bool addTemplate(std::vector<cv::Mat> in_images, std::string in_modelName, glm::vec3 in_cameraPosition);
-	bool detectTemplate(std::vector<cv::Mat>& in_imgs);
+	bool detectTemplate(std::vector<cv::Mat>& in_imgs,uint16 in_classNumber);
 	void writeLinemod();
 	void readLinemod();
+	void pushBackTemplates();
 
 	std::vector<ObjectPose> getObjectPoses();
 
@@ -67,20 +68,19 @@ private:
 	struct Template
 	{
 		Template() {}
-		Template(std::string str, glm::vec3 tra, glm::qua<float32> qua, cv::Rect bb, uint16 med) :
-			modelName(str),
+		Template(glm::vec3 tra, glm::qua<float32> qua, cv::Rect bb, uint16 med) :
 			translation(tra),
 			quaternions(qua),
 			boundingBox(bb),
 			medianDepth(med)
 		{}
-		std::string modelName;
 		glm::vec3 translation;
 		glm::qua<float32> quaternions;
 		cv::Rect boundingBox;
 		uint16 medianDepth;
 	};
 	std::vector<Template> templates;
+	std::vector<std::vector<Template>> modelTemplates;
 	std::vector<ObjectPose> objectPoses;
 	std::vector<cv::linemod::Match> matches;
 
@@ -94,8 +94,8 @@ private:
 	bool colorCheck(cv::Mat &in_hueImg, uint32& in_numMatch, float32 in_percentCorrectColor);
 	bool depthCheck(cv::Mat &in_depth, uint32& in_numMatch);
 	void updateTranslationAndCreateObjectPose(uint32 const& in_numMatch);
-	void calcPosition(float32 const& in_numMatch, glm::vec3& in_position, float32 const& in_directDepth);
-	void calcRotation(float32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats);
+	void calcPosition(uint32 const& in_numMatch, glm::vec3& in_position, float32 const& in_directDepth);
+	void calcRotation(uint32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats);
 	void matchToPixelCoord(uint32 const& in_numMatch, float32& in_x, float32& in_y);
 	float32 pixelDistToCenter(float32 in_x, float32 in_y);
 	float32 calcTrueZ(float32 const& in_directDist, float32 const& in_angleFromCenter);

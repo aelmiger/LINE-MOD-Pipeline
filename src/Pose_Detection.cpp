@@ -63,44 +63,46 @@ void Pose_Detection::run() {
 
 		inputImg.push_back(colorImg);
 		inputImg.push_back(depthImg);
-		line->detectTemplate(inputImg);
-		detectedPoses = line->getObjectPoses();
+		for (size_t numClass = 0; numClass < line->getNumClasses(); numClass++)
+		{	
+			finalObjectPoses.clear();
+			line->detectTemplate(inputImg, numClass);
+			detectedPoses = line->getObjectPoses();
+			uint16 bestPose = 0;
+			if (!detectedPoses.empty()) {
+
+				//icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPoses[0].boundingBox);
+				//icp->registerToScene(detectedPoses);
+
+				counter++;
+
+				//bestPose = icp->estimateBestMatch(depthImg, detectedPoses, opengl, 0); //TODO ANPASSEN
+				drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPoses[bestPose]);
+				finalObjectPoses.push_back(detectedPoses[bestPose]);
+				//float32 scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[bestPose]);
+				//std::cout << "final " << bestPose << ": " << scoreNew << " : "<<bestMean<< std::endl;
+
+				//if (scoreNew <= 14) {
+				//	accumDiff++;
+				//}
+				//cv::putText(colorImg, glm::to_string(detectedPoses[bestPose].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
+				//cv::putText(colorImg, glm::to_string(glm::degrees(glm::eulerAngles(detectedPoses[bestPose].quaternions))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
+
+			}
+		}
 
 		//Model tmp;
-		uint16 bestPose = 0;
 		//ObjectPose groundTruth;
 		//readGroundTruthLinemodDataset(counter, groundTruth);
 		//opengl->readModelFile(modelFolder + modelFiles[0], tmp); //TODO welches file
 
-		if (!detectedPoses.empty()) {
 
-			//icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPoses[0].boundingBox);
-			//icp->registerToScene(detectedPoses);
-
-			counter++;
-
-			//bestPose = icp->estimateBestMatch(depthImg, detectedPoses, opengl, 0); //TODO ANPASSEN
-			drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPoses[bestPose]);
-
-
-			//float32 scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[bestPose]);
-			//std::cout << "final " << bestPose << ": " << scoreNew << " : "<<bestMean<< std::endl;
-
-			//if (scoreNew <= 14) {
-			//	accumDiff++;
-			//}
-			
-		}
-		if (!detectedPoses.empty()) {
-			cv::putText(colorImg, glm::to_string(detectedPoses[bestPose].translation), cv::Point(50, 50), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
-
-		}
 		cv::imshow("color", colorImg);
 		if (cv::waitKey(1) == 27) {
 			break;
 		}
 		inputImg.clear();
-		detectedPoses.clear();
+		finalObjectPoses.clear();
 	}
 }
 

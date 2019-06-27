@@ -89,7 +89,7 @@ bool HighLevelLinemod::addTemplate(std::vector<cv::Mat> in_images, std::string i
 			glm::qua<float32> quaternions;
 			float32 currentInplaneAngle = -(lowerAngleStop + q * angleStep);
 			calculateTemplatePose(translation, quaternions, in_cameraPosition, currentInplaneAngle);
-			templates.push_back(Template(in_modelName, translation, quaternions, boundingBox, medianDepth));
+			templates.push_back(Template(translation, quaternions, boundingBox, medianDepth));
 		}
 
 
@@ -119,17 +119,19 @@ void HighLevelLinemod::templateMask(cv::linemod::Match const& in_match, cv::Mat&
 	const cv::Point* hull_pts = &hull[0];
 	cv::fillPoly(dst, &hull_pts, &hull_count, 1, cv::Scalar(255));
 }
-bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs) {
+bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs,uint16 in_classNumber) {
 	//TODO generate automatic Hue Check
-
+	templates.clear();
+	templates = modelTemplates[in_classNumber];
 	matches.clear();
 	objectPoses.clear();
 	cv::Mat tmpDepth;
+	const std::vector<std::string> currentClass(1, detector->classIds()[in_classNumber]);
 	if (onlyColor && in_imgs.size() == 2) {
 		tmpDepth = in_imgs[1];
 		in_imgs.pop_back();
 	}
-	detector->match(in_imgs, 80.0f, matches);
+	detector->match(in_imgs, 80.0f, matches, currentClass);
 	in_imgs.push_back(tmpDepth);
 	if (matches.size() > 0) {
 		applyPostProcessing(in_imgs);
@@ -165,17 +167,24 @@ void HighLevelLinemod::writeLinemod() {
 	fs << "]";
 
 	std::ofstream templatePositionFile("linemod_tempPosFile.bin", std::ios::binary | std::ios::out);
-	uint64 numTemp = templates.size();
-	templatePositionFile.write((char*)&numTemp, sizeof(uint64));
-	for (uint64 i = 0; i < numTemp; i++)
+	uint32 numTempVecs = modelTemplates.size();
+	templatePositionFile.write((char*)&numTempVecs, sizeof(uint32));
+	for (uint32 numTemplateVec = 0; numTemplateVec < numTempVecs; numTemplateVec++)
 	{
-		templatePositionFile.write((char *)&templates[i], sizeof(Template));
+		uint64 numTemp = modelTemplates[numTemplateVec].size();
+		templatePositionFile.write((char*)&numTemp, sizeof(uint64));
+		for (uint64 i = 0; i < numTemp; i++)
+		{
+			templatePositionFile.write((char *)&modelTemplates[numTemplateVec][i], sizeof(Template));
+		}
 	}
+
 	templatePositionFile.close();
 }
 
 void HighLevelLinemod::readLinemod() {
 	templates.clear();
+	modelTemplates.clear();
 	std::string filename = "linemod_templates.yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	detector->read(fs.root());
@@ -189,14 +198,22 @@ void HighLevelLinemod::readLinemod() {
 	if (!input.is_open()) {
 		//TODO raise error
 	}
-	uint64 numTemp;
-	input.read((char*)&numTemp, sizeof(uint64));
-	Template tp;
-	for (size_t i = 0; i < numTemp; i++)
+	uint32 numTempVecs;
+	input.read((char*)&numTempVecs, sizeof(uint32));
+	for (uint32 numTempVec = 0; numTempVec < numTempVecs; numTempVec++)
 	{
-		input.read((char*)&tp, sizeof(Template));
-		templates.push_back(tp);
+		uint64 numTemp;
+		input.read((char*)&numTemp, sizeof(uint64));
+		Template tp;
+		for (size_t i = 0; i < numTemp; i++)
+		{
+			input.read((char*)&tp, sizeof(Template));
+			templates.push_back(tp);
+		}
+		modelTemplates.push_back(templates);
+		templates.clear();
 	}
+
 	input.close();
 }
 
@@ -215,7 +232,7 @@ void HighLevelLinemod::generateRotMatForInplaneRotation() {
 }
 
 uint16 HighLevelLinemod::medianMat(cv::Mat in_mat, cv::Rect &in_bb, uint8 in_medianPosition) {
-	cv::Mat invBinRot;
+	cv::Mat invBinRot;												//Turn depth values 0 into 65535 
 	cv::threshold(in_mat, invBinRot, 1, 65535, cv::THRESH_BINARY);
 	invBinRot = 65535 - invBinRot;
 	cv::Mat croppedDepth = in_mat + invBinRot;
@@ -249,7 +266,7 @@ glm::qua<float32> HighLevelLinemod::openglCoordinatesystem2opencv(glm::mat4& in_
 bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	cv::Mat colorImgHue;
 	cv::cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-	cv::inRange(colorImgHue, cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255), colorImgHue); //TODO RANGE
+	cv::inRange(colorImgHue, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255), colorImgHue); //TODO RANGE
 
 	for (uint32 i = 0; i < matches.size(); i++)
 	{
@@ -289,12 +306,6 @@ bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float
 	templateMask(matches[in_numMatch], mask);
 	cv::bitwise_and(in_colImg, mask, croppedImage);
 
-	//croppedImage = in_colImg(cv::Rect(
-	//	matches[in_numMatch].x,
-	//	matches[in_numMatch].y,
-	//	templates[matches[in_numMatch].template_id].boundingBox.width,
-	//	templates[matches[in_numMatch].template_id].boundingBox.height));
-
 	float32 nonZer = cv::countNonZero(croppedImage) * 100 / cv::countNonZero(mask);
 	if (nonZer > in_percentToPassCheck) {
 		return true;
@@ -333,7 +344,7 @@ void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 const& in_num
 		templates[matches[in_numMatch].template_id].boundingBox.height);
 	objectPoses.push_back(ObjectPose(updatedTanslation, updatedRotation, boundingBox));
 }
-void HighLevelLinemod::calcPosition(float32 const& in_numMatch,glm::vec3& in_position,float32 const& in_directDepth ) {
+void HighLevelLinemod::calcPosition(uint32 const& in_numMatch,glm::vec3& in_position,float32 const& in_directDepth ) {
 	float32 pixelX, pixelY;
 	matchToPixelCoord(in_numMatch, pixelX, pixelY);
 	float32 offsetFromCenter = pixelDistToCenter(pixelX, pixelY);
@@ -345,7 +356,7 @@ void HighLevelLinemod::calcPosition(float32 const& in_numMatch,glm::vec3& in_pos
 	in_position.y = (pixelY - cy) / offsetFromCenter * mmOffsetFromCenter;
 }
 
-void HighLevelLinemod::calcRotation(float32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats) {
+void HighLevelLinemod::calcRotation(uint32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats) {
 	glm::mat4 adjustRotation = glm::lookAt(glm::vec3(-in_position.x, -in_position.y, in_position.z), glm::vec3(0.f), up);
 	in_quats = glm::toQuat(adjustRotation * glm::toMat4(templates[matches[in_numMatch].template_id].quaternions));
 }
@@ -362,4 +373,9 @@ float32 HighLevelLinemod::pixelDistToCenter(float32 in_x, float32 in_y) {
 
 float32 HighLevelLinemod::calcTrueZ(float32 const& in_directDist,float32 const& in_angleFromCenter) {
 	return cos(in_angleFromCenter)*in_directDist;
+}
+
+void HighLevelLinemod::pushBackTemplates() {
+	modelTemplates.push_back(templates);
+	templates.clear();
 }
