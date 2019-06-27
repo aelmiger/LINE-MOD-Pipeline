@@ -80,7 +80,7 @@ struct CameraParameters
 
 struct TemplateGenerationSettings
 {
-	const std::string modelFileEnding = ".bmf";
+	const std::string modelFileEnding = ".ply";
 	const std::string modelFolder = "models/";
 
 

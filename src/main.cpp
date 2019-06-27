@@ -16,6 +16,7 @@
 #pragma comment(lib, "opencv_surface_matching410d.lib")
 #pragma comment(lib, "opencv_videoio410d.lib")
 #pragma comment(lib, "freenect2.lib")
+#pragma comment(lib, "assimp-vc140-mt.lib")
 
 #else
 #pragma comment(lib, "SDL2.lib")
@@ -32,7 +33,7 @@
 #pragma comment(lib, "opencv_surface_matching410.lib")
 #pragma comment(lib, "opencv_videoio410.lib")
 #pragma comment(lib, "freenect2.lib")
-
+#pragma comment(lib, "assimp-vc140-mt.lib")
 
 #endif
 

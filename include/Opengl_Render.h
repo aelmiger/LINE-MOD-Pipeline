@@ -13,6 +13,7 @@
 #include "defines.h"
 #include "utility.h"
 #include "model_buffer.h"
+#include "Model_Importer.h"
 
 class OpenGLRender
 {

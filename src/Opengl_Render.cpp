@@ -139,7 +139,6 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 
 
 void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
-	//modBuff.clear();
 	Model tmp;
 	readModelFile(in_modelLocation, tmp);
 	std::vector<glm::vec3> tempVert;
@@ -148,6 +147,9 @@ void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
 }
 
 void OpenGLRender::readModelFile(std::string in_file, Model &in_model) {
+	Model_Importer modImport;
+	modImport.importModel(in_file, in_model);
+	/*
 	std::ifstream input = std::ifstream(in_file, std::ios::in | std::ios::binary);
 	if (!input.is_open()) {
 		std::cout << "Error loading " << in_file << " file" << std::endl;
@@ -185,6 +187,7 @@ void OpenGLRender::readModelFile(std::string in_file, Model &in_model) {
 	}
 
 	input.close();
+	*/
 }
 
 
