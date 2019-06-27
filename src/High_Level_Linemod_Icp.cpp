@@ -41,7 +41,7 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	cv::Mat patchedNaNs;
 	remove_if(modelMat, patchedNaNs, true);
 	cv::Vec3d viewpoint(0, 0, 0);
-	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint);
+	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint); //TODO Change what to do if patchedNaNs = 0
 }
 void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses) {
 	poses.clear();
