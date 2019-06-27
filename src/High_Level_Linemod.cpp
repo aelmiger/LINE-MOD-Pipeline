@@ -96,7 +96,29 @@ bool HighLevelLinemod::addTemplate(std::vector<cv::Mat> in_images, std::string i
 	}
 	return true;
 }
+void HighLevelLinemod::templateMask(cv::linemod::Match const& in_match, cv::Mat& dst)
+{
+	const std::vector<cv::linemod::Template>& templates = detector->getTemplates(in_match.class_id, in_match.template_id);
+	cv::Point offset(in_match.x, in_match.y);
+	std::vector<cv::Point> points;
+	uint16 num_modalities = detector->getModalities().size();
+	for (int m = 0; m < num_modalities; ++m)
+	{
+		for (int i = 0; i < (int)templates[m].features.size(); ++i)
+		{
+			cv::linemod::Feature f = templates[m].features[i];
+			points.push_back(cv::Point(f.x, f.y) + offset);
+		}
+	}
 
+	std::vector<cv::Point> hull;
+	cv::convexHull(points, hull);
+
+	dst = cv::Mat::zeros(cv::Size(videoWidth,videoHeight), CV_8U);
+	const int hull_count = (int)hull.size();
+	const cv::Point* hull_pts = &hull[0];
+	cv::fillPoly(dst, &hull_pts, &hull_count, 1, cv::Scalar(255));
+}
 bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs) {
 	//TODO generate automatic Hue Check
 
@@ -118,11 +140,14 @@ bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs) {
 			drawResponse(templates, 1, in_imgs[0], cv::Point(matches[0].x, matches[0].y), detector->getT(0));
 		}
 
+
 	}
 	else {
 		return false;
 	}
 }
+
+
 
 void HighLevelLinemod::writeLinemod() {
 	std::string filename = "linemod_templates.yml";
@@ -224,7 +249,7 @@ glm::qua<float32> HighLevelLinemod::openglCoordinatesystem2opencv(glm::mat4& in_
 bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	cv::Mat colorImgHue;
 	cv::cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-	cv::inRange(colorImgHue, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255), colorImgHue); //TODO RANGE
+	cv::inRange(colorImgHue, cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255), colorImgHue); //TODO RANGE
 
 	for (uint32 i = 0; i < matches.size(); i++)
 	{
@@ -260,15 +285,17 @@ bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 
 bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float32 in_percentToPassCheck) {
 	cv::Mat croppedImage;
-	croppedImage = in_colImg(cv::Rect(
-		matches[in_numMatch].x,
-		matches[in_numMatch].y,
-		templates[matches[in_numMatch].template_id].boundingBox.width,
-		templates[matches[in_numMatch].template_id].boundingBox.height));
+	cv::Mat mask;
+	templateMask(matches[in_numMatch], mask);
+	cv::bitwise_and(in_colImg, mask, croppedImage);
 
-	float32 nonZer = cv::countNonZero(croppedImage) * 100 /
-		(templates[matches[in_numMatch].template_id].boundingBox.width *
-			templates[matches[in_numMatch].template_id].boundingBox.height);
+	//croppedImage = in_colImg(cv::Rect(
+	//	matches[in_numMatch].x,
+	//	matches[in_numMatch].y,
+	//	templates[matches[in_numMatch].template_id].boundingBox.width,
+	//	templates[matches[in_numMatch].template_id].boundingBox.height));
+
+	float32 nonZer = cv::countNonZero(croppedImage) * 100 / cv::countNonZero(mask);
 	if (nonZer > in_percentToPassCheck) {
 		return true;
 	}

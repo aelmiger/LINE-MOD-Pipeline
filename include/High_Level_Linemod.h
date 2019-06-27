@@ -39,7 +39,7 @@ public:
 
 
 private:
-	const uint16 percentToPassCheck = 50;
+	const uint16 percentToPassCheck = 70;
 	const uint16 numberWantedPoses = 3;
 
 	cv::Ptr<cv::linemod::Detector> detector;
@@ -99,5 +99,6 @@ private:
 	void matchToPixelCoord(uint32 const& in_numMatch, float32& in_x, float32& in_y);
 	float32 pixelDistToCenter(float32 in_x, float32 in_y);
 	float32 calcTrueZ(float32 const& in_directDist, float32 const& in_angleFromCenter);
+	void templateMask(cv::linemod::Match const& in_match, cv::Mat& dst);
 };
 
