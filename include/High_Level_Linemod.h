@@ -39,6 +39,7 @@ public:
 
 
 
+
 private:
 	const uint16 percentToPassCheck = 70;
 	const uint16 numberWantedPoses = 3;

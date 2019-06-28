@@ -10,7 +10,7 @@ Template_Generator::Template_Generator(CameraParameters const& in_camParams, Tem
 	modelFolder(in_templateSettings.modelFolder)
 {
 	opengl = new OpenGLRender(in_camParams);
-	line = new HighLevelLinemod(true, in_camParams, in_templateSettings);
+	line = new HighLevelLinemod(false, in_camParams, in_templateSettings);
 	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
 
 }
@@ -35,9 +35,9 @@ void Template_Generator::run()
 			{
 				printProgBar(calculateCurrentPercent(radiusToModel, j), modelFiles[i]);
 
-				//if (!(camVertices[j].y >= 0)) { //TODO NON HARDCODE
-				//	continue;
-				//}
+				if (!(camVertices[j].y >= 0)) { //TODO NON HARDCODE
+					continue;
+				}
 				std::vector<cv::Mat> images;
 				renderImages(images, i, j);
 				line->addTemplate(images, modelFiles[i], camVertices[j]);
@@ -52,8 +52,8 @@ void Template_Generator::run()
 
 
 void Template_Generator::createCamViewPoints(float32 in_radiusToModel) {
-	CameraViewPoints camPoints(in_radiusToModel);
-	//CameraViewPoints camPoints(in_radiusToModel, subdivisions);
+	//CameraViewPoints camPoints(in_radiusToModel);
+	CameraViewPoints camPoints(in_radiusToModel, subdivisions);
 	camVertices = camPoints.getVertices();
 	numCameraVertices = camVertices.size();
 }

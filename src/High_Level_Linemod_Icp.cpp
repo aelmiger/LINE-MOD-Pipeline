@@ -1,10 +1,13 @@
 #include "high_level_linemod_icp.h"
 
 
-HighLevelLinemodIcp::HighLevelLinemodIcp(uint16 in_iteration, float32 in_tolerance, float32 in_rejectionScale, uint16 in_numIterations, uint16 in_sampleStep) :
-	sampleStep(in_sampleStep)
+HighLevelLinemodIcp::HighLevelLinemodIcp(uint16 in_iteration, float32 in_tolerance, float32 in_rejectionScale, uint16 in_numIterations, uint16 in_sampleStep, std::vector<std::string> in_modelFiles, std::string in_modFolder) :
+	sampleStep(in_sampleStep),
+	modelFiles(in_modelFiles),
+	modelFolder(in_modFolder)
 {
 	icp = new cv::ppf_match_3d::ICP(in_iteration, in_tolerance, in_rejectionScale, in_numIterations);
+	loadModels();
 }
 
 HighLevelLinemodIcp::~HighLevelLinemodIcp()
@@ -12,16 +15,19 @@ HighLevelLinemodIcp::~HighLevelLinemodIcp()
 	delete icp;
 }
 
-void HighLevelLinemodIcp::loadModel(std::string in_model) {
-	modelVertices = cv::ppf_match_3d::loadPLYSimple(std::string("mesh.ply").c_str(), 1);
-	int numRows = modelVertices.rows / sampleStep;
-	cv::Mat sampledPC = cv::Mat(numRows, modelVertices.cols, modelVertices.type());
-	int c = 0;
-	for (int i = 0; i < modelVertices.rows && c < numRows; i += sampleStep)
+void HighLevelLinemodIcp::loadModels() {
+	for (size_t i = 0; i < modelFiles.size(); i++)
 	{
-		modelVertices.row(i).copyTo(sampledPC.row(c++));
+		cv::Mat tempModel = cv::ppf_match_3d::loadPLYSimple((modelFolder + modelFiles[i]).c_str(), 1);
+		int numRows = tempModel.rows / sampleStep;
+		cv::Mat sampledPC = cv::Mat(numRows, tempModel.cols, tempModel.type());
+		int c = 0;
+		for (int i = 0; i < tempModel.rows && c < numRows; i += sampleStep)
+		{
+			tempModel.row(i).copyTo(sampledPC.row(c++));
+		}
+		modelVertices.push_back(sampledPC);
 	}
-	modelVertices = sampledPC;
 }
 
 
@@ -43,7 +49,7 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	cv::Vec3d viewpoint(0, 0, 0);
 	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint); //TODO Change what to do if patchedNaNs = 0
 }
-void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses) {
+void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses,uint16 in_modelNumber) {
 	poses.clear();
 	for (size_t i = 0; i < in_poses.size(); i++)
 	{
@@ -60,7 +66,7 @@ void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses) {
 		poses.push_back(pose);
 
 	}
-	icp->registerModelToScene(modelVertices, sceneVertices, poses);
+	icp->registerModelToScene(modelVertices[in_modelNumber], sceneVertices, poses);
 
 
 	for (size_t n = 0; n < poses.size(); n++)
@@ -90,7 +96,7 @@ uint16 HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<O
 		cv::Mat maskedDepthImg;
 		cv::Mat maskedDepth;
 		cv::Mat diffImg;
-		//erodeMask(binary, binary, 2);
+		erodeMask(binary, binary, 2);
 		in_depthImg.copyTo(maskedDepthImg, binary);
 		depth.copyTo(maskedDepth, binary);
 		cv::absdiff(maskedDepthImg, maskedDepth, diffImg);

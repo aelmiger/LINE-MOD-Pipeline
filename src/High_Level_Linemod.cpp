@@ -22,7 +22,7 @@ HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, CameraParameters const& in
 		modality.push_back(cv::makePtr<cv::linemod::DepthNormal>());
 		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
-		static const int T_DEFAULTS[] = { 2,5 };
+		static const int T_DEFAULTS[] = { 5,8 };
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else {
@@ -131,7 +131,7 @@ bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs,uint16 in_cl
 		tmpDepth = in_imgs[1];
 		in_imgs.pop_back();
 	}
-	detector->match(in_imgs, 80.0f, matches, currentClass);
+	detector->match(in_imgs, 85.0f, matches, currentClass);
 	in_imgs.push_back(tmpDepth);
 	if (matches.size() > 0) {
 		applyPostProcessing(in_imgs);
@@ -266,7 +266,7 @@ glm::qua<float32> HighLevelLinemod::openglCoordinatesystem2opencv(glm::mat4& in_
 bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 	cv::Mat colorImgHue;
 	cv::cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-	cv::inRange(colorImgHue, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255), colorImgHue); //TODO RANGE
+	cv::inRange(colorImgHue, cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255), colorImgHue); //TODO RANGE
 
 	for (uint32 i = 0; i < matches.size(); i++)
 	{
