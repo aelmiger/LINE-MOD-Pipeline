@@ -12,7 +12,8 @@ HighLevelLinemod::HighLevelLinemod(CameraParameters const& in_camParams, Templat
 	cy(in_camParams.cy),
 	fx(in_camParams.fx),
 	fy(in_camParams.fy),
-	fieldOfViewHeight(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy)))
+	fieldOfViewHeight(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy))),
+	modelFolder(in_templateSettings.modelFolder)
 {
 
 	if (!onlyColor) {
@@ -32,10 +33,6 @@ HighLevelLinemod::HighLevelLinemod(CameraParameters const& in_camParams, Templat
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 
-	ColorRangeOfObject t1(cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255));
-	ColorRangeOfObject t2(cv::Scalar(0, 0, 0), cv::Scalar(255, 40, 255));
-	modelColors.push_back(t1);
-	modelColors.push_back(t2);
 
 	generateRotMatForInplaneRotation();
 
@@ -63,7 +60,6 @@ bool HighLevelLinemod::addTemplate(std::vector<cv::Mat> in_images, std::string i
 	std::vector<cv::Mat> templateImgs;
 	cv::Mat colorRotated;
 	cv::Mat depthRotated;
-
 	cv::threshold(in_images[1], mask, 1, 65535, cv::THRESH_BINARY);
 	mask.convertTo(mask, CV_8UC1);
 
@@ -251,21 +247,12 @@ void HighLevelLinemod::writeLinemod() {
 			templatePositionFile.write((char *)&modelTemplates[numTemplateVec][i], sizeof(Template));
 		}
 	}
-	uint32 numModelColors = modelColors.size();
-	templatePositionFile.write((char*)&numModelColors, sizeof(uint32));
-
-	for (size_t numModels = 0; numModels < modelColors.size(); numModels++)
-	{
-		templatePositionFile.write((char *)&modelColors[numModels], sizeof(ColorRangeOfObject));
-	}
-
 	templatePositionFile.close();
 }
 
 void HighLevelLinemod::readLinemod() {
 	templates.clear();
 	modelTemplates.clear();
-	modelColors.clear();
 	std::string filename = "linemod_templates.yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	detector->read(fs.root());
@@ -294,16 +281,8 @@ void HighLevelLinemod::readLinemod() {
 		modelTemplates.push_back(templates);
 		templates.clear();
 	}
-	uint32 numModelColors = modelColors.size();
-	input.read((char*)&numModelColors, sizeof(uint32));
-	ColorRangeOfObject tmpColor;
-	for (size_t numModels = 0; numModels < numModelColors; numModels++)
-	{	
-		input.read((char*)&tmpColor, sizeof(ColorRangeOfObject));
-		modelColors.push_back(tmpColor);
-	}
-
 	input.close();
+	readColorRanges();
 }
 
 
@@ -466,4 +445,32 @@ float32 HighLevelLinemod::calcTrueZ(float32 const& in_directDist,float32 const& 
 void HighLevelLinemod::pushBackTemplates() {
 	modelTemplates.push_back(templates);
 	templates.clear();
+}
+
+void HighLevelLinemod::readColorRanges() {
+	modelColors.clear();
+	modelFiles = detector->classIds();
+	for (size_t i = 0; i < detector->numClasses(); i++)
+	{
+		std::string file = modelFolder + modelFiles[i].substr(0, modelFiles[i].size() - 4) + ".txt";
+		std::ifstream fsColor(file);
+		if (!fsColor.is_open()) {
+			std::cout << "ERROR:: Cant read color info" << std::endl;
+		}
+		uint16 lowerHue;
+		uint16 lowerSat;
+		uint16 lowerLum;
+		uint16 upperHue;
+		uint16 upperSat;
+		uint16 upperLum;
+
+		fsColor >> lowerHue;
+		fsColor >> lowerSat;
+		fsColor >> lowerLum;
+		fsColor >> upperHue;
+		fsColor >> upperSat;
+		fsColor >> upperLum;
+		fsColor.close();
+		modelColors.push_back(ColorRangeOfObject(cv::Scalar(lowerHue, lowerSat, lowerLum), cv::Scalar(upperHue, upperSat, upperLum)));
+	}
 }

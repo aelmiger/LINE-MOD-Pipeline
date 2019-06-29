@@ -108,6 +108,9 @@ private:
 	std::vector<cv::linemod::Match> groupedMatches;
 	std::vector<PotentialMatch> potentialMatches;
 
+	std::vector<std::string> modelFiles;
+	std::string modelFolder;
+
 	//Utility Functions
 	void generateRotMatForInplaneRotation();
 	uint16 medianMat(cv::Mat in_mat, cv::Rect &in_bb, uint8 in_medianPosition);
@@ -126,6 +129,7 @@ private:
 	void groupSimilarMatches();
 	void discardSmallMatchGroups();
 	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches, std::vector<size_t> in_indices);
+	void readColorRanges();
 
 };
 
