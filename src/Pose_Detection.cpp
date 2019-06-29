@@ -7,7 +7,7 @@ Pose_Detection::Pose_Detection(CameraParameters const& in_camParams, TemplateGen
 {
 	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
 	opengl = new OpenGLRender(in_camParams);
-	line = new HighLevelLinemod(false, in_camParams, in_templateSettings);
+	line = new HighLevelLinemod(in_camParams, in_templateSettings);
 	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 5, modelFiles,modelFolder);
 }
 
@@ -32,35 +32,35 @@ void Pose_Detection::run() {
 	////////////////ONLY RELEVANT FOR BENCHMARK
 	//Model tmp;
 	int counter = 0;
-	float64 accumDiff = 0;
+	//float64 accumDiff = 0;
 	//opengl.readModelFile(modelFolder + modelFiles[0], tmp); //TODO welches file
 	///////////////
 
 
 
-	//Kinect2 kin2;
+	Kinect2 kin2;
 	//cv::VideoCapture cap(0);
-	cv::VideoCapture sequence("data/color%0d.jpg");
+	//cv::VideoCapture sequence("data/color%0d.jpg");
 	//glPolygonMode(GL_FRONT, GL_LINE);
 
 
-	Model tmp;
-	ObjectPose groundTruth;
-	opengl->readModelFile(modelFolder + modelFiles[0], tmp); //TODO welches file
+	//Model tmp;
+	//ObjectPose groundTruth;
+	//opengl->readModelFile(modelFolder + modelFiles[0], tmp); //TODO welches file
 	while (true) {
 		std::string numb;
 		//cap.read(A);
-		sequence >> colorImg;
-		//kin2.getKinectFrames(colorImg, depthImg);
-		readGroundTruthLinemodDataset(counter, groundTruth);
+		//sequence >> colorImg;
+		kin2.getKinectFrames(colorImg, depthImg);
+		//readGroundTruthLinemodDataset(counter, groundTruth);
 
-		if (colorImg.empty())
-		{
-			std::cout << "End of Sequence" << std::endl;
-			std::cout << "Mean Diff: " <<accumDiff / counter<<std::endl;
-			break;
-		}
-		depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
+		//if (colorImg.empty())
+		//{
+		//	std::cout << "End of Sequence" << std::endl;
+		//	std::cout << "Mean Diff: " <<accumDiff / counter<<std::endl;
+		//	break;
+		//}
+		//depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
 
 
 		inputImg.push_back(colorImg);
@@ -72,20 +72,20 @@ void Pose_Detection::run() {
 			detectedPoses = line->getObjectPoses();
 			uint16 bestPose = 0;
 			if (!detectedPoses.empty()) {
-				icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPoses[0].boundingBox);
-				icp->registerToScene(detectedPoses,numClass);
-
-				counter++;
-
-				bestPose = icp->estimateBestMatch(depthImg, detectedPoses, opengl, numClass);
-				drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPoses[bestPose]);
-				finalObjectPoses.push_back(detectedPoses[bestPose]);
-				float32 scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[bestPose]);
-				std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
-
-				if (scoreNew <= 14) {
-					accumDiff++;
+				for (size_t numDetectedPoses = 0; numDetectedPoses < detectedPoses.size(); numDetectedPoses++)
+				{
+					//icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPoses[numDetectedPoses][0].boundingBox);
+					//icp->registerToScene(detectedPoses[numDetectedPoses], numClass);
+					//bestPose = icp->estimateBestMatch(depthImg, detectedPoses[numDetectedPoses], opengl, numClass);
+					drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPoses[numDetectedPoses][bestPose]);
+					finalObjectPoses.push_back(detectedPoses[numDetectedPoses][bestPose]);
 				}
+				//float32 scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[bestPose]);
+				//std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
+
+				//if (scoreNew <= 14) {
+				//	accumDiff++;
+				//}
 				//cv::putText(colorImg, glm::to_string(detectedPoses[bestPose].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
 				//cv::putText(colorImg, glm::to_string(glm::degrees(glm::eulerAngles(detectedPoses[bestPose].quaternions))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
 
@@ -93,7 +93,7 @@ void Pose_Detection::run() {
 		}
 
 
-
+		counter++;
 		cv::imshow("color", colorImg);
 		if (cv::waitKey(1) == 27) {
 			break;

@@ -22,7 +22,7 @@ class HighLevelLinemod
 {
 
 public:
-	HighLevelLinemod(bool in_onlyColor, CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings);
+	HighLevelLinemod(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings);
 	~HighLevelLinemod();
 
 	std::vector<cv::String> getClassIds();
@@ -35,7 +35,7 @@ public:
 	void readLinemod();
 	void pushBackTemplates();
 
-	std::vector<ObjectPose> getObjectPoses();
+	std::vector<std::vector<ObjectPose>> getObjectPoses();
 
 
 
@@ -65,7 +65,15 @@ private:
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	int32 tempDepth;
 
-
+	struct ColorRangeOfObject {
+		ColorRangeOfObject(){}
+		ColorRangeOfObject(cv::Scalar s1, cv::Scalar s2) :
+			lowerBoundary(s1),
+			upperBoundary(s2) {
+		}
+		cv::Scalar lowerBoundary;
+		cv::Scalar upperBoundary;
+	};
 	struct Template
 	{
 		Template() {}
@@ -80,26 +88,44 @@ private:
 		cv::Rect boundingBox;
 		uint16 medianDepth;
 	};
-	std::vector<Template> templates;
-	std::vector<std::vector<Template>> modelTemplates;
-	std::vector<ObjectPose> objectPoses;
-	std::vector<cv::linemod::Match> matches;
 
+	struct PotentialMatch
+	{
+		PotentialMatch(cv::Point in_point, size_t in_indices) :
+			position(in_point) {
+			matchIndices.push_back(in_indices);
+	}
+		cv::Point position;
+		std::vector<size_t> matchIndices;
+	};
+
+	std::vector<Template> templates;
+	ColorRangeOfObject currentColorRange;
+	std::vector<std::vector<Template>> modelTemplates;
+	std::vector<ColorRangeOfObject> modelColors;
+	std::vector<std::vector<ObjectPose>> posesMultipleObj;
+	std::vector<cv::linemod::Match> matches;
+	std::vector<cv::linemod::Match> groupedMatches;
+	std::vector<PotentialMatch> potentialMatches;
 
 	//Utility Functions
 	void generateRotMatForInplaneRotation();
 	uint16 medianMat(cv::Mat in_mat, cv::Rect &in_bb, uint8 in_medianPosition);
 	void calculateTemplatePose(glm::vec3& in_translation, glm::qua<float32>& in_quats, glm::vec3& in_cameraPosition, float32& in_inplaneRot);
 	glm::qua<float32> openglCoordinatesystem2opencv(glm::mat4& in_viewMat);
-	bool applyPostProcessing(std::vector<cv::Mat>& in_imgs);
+	bool applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::vector<ObjectPose>& in_objPoses);
 	bool colorCheck(cv::Mat &in_hueImg, uint32& in_numMatch, float32 in_percentCorrectColor);
 	bool depthCheck(cv::Mat &in_depth, uint32& in_numMatch);
-	void updateTranslationAndCreateObjectPose(uint32 const& in_numMatch);
+	void updateTranslationAndCreateObjectPose(uint32 const& in_numMatch, std::vector<ObjectPose>& in_objPoses);
 	void calcPosition(uint32 const& in_numMatch, glm::vec3& in_position, float32 const& in_directDepth);
 	void calcRotation(uint32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats);
 	void matchToPixelCoord(uint32 const& in_numMatch, float32& in_x, float32& in_y);
 	float32 pixelDistToCenter(float32 in_x, float32 in_y);
 	float32 calcTrueZ(float32 const& in_directDist, float32 const& in_angleFromCenter);
 	void templateMask(cv::linemod::Match const& in_match, cv::Mat& dst);
+	void groupSimilarMatches();
+	void discardSmallMatchGroups();
+	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches, std::vector<size_t> in_indices);
+
 };
 

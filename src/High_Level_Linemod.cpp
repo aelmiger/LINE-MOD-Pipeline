@@ -1,7 +1,7 @@
 #include "high_level_linemod.h"
 
-HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
-	onlyColor(in_onlyColor),
+HighLevelLinemod::HighLevelLinemod(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
+	onlyColor(in_templateSettings.onlyUseColorModality),
 	videoWidth(in_camParams.videoWidth),
 	videoHeight(in_camParams.videoHeight),
 	lowerAngleStop(in_templateSettings.angleStart),
@@ -15,7 +15,7 @@ HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, CameraParameters const& in
 	fieldOfViewHeight(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy)))
 {
 
-	if (!in_onlyColor) {
+	if (!onlyColor) {
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
 		modality.push_back(cv::makePtr<cv::linemod::ColorGradient>());
 		//modality.push_back(cv::makePtr<cv::linemod::ColorGradient>(10.0f, 30, 55.0f));
@@ -28,10 +28,14 @@ HighLevelLinemod::HighLevelLinemod(bool in_onlyColor, CameraParameters const& in
 	else {
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
 		modality.push_back(cv::makePtr<cv::linemod::ColorGradient>());
-		static const int T_DEFAULTS[] = { 2,5 };
+		static const int T_DEFAULTS[] = { 2,8 };
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 
+	ColorRangeOfObject t1(cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255));
+	ColorRangeOfObject t2(cv::Scalar(0, 0, 0), cv::Scalar(255, 40, 255));
+	modelColors.push_back(t1);
+	modelColors.push_back(t2);
 
 	generateRotMatForInplaneRotation();
 
@@ -121,25 +125,43 @@ void HighLevelLinemod::templateMask(cv::linemod::Match const& in_match, cv::Mat&
 }
 bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs,uint16 in_classNumber) {
 	//TODO generate automatic Hue Check
-	templates.clear();
 	templates = modelTemplates[in_classNumber];
-	matches.clear();
-	objectPoses.clear();
+	currentColorRange = modelColors[in_classNumber];
+	posesMultipleObj.clear();
 	cv::Mat tmpDepth;
+	bool depthCheckForColorDetector = false;
+
 	const std::vector<std::string> currentClass(1, detector->classIds()[in_classNumber]);
 	if (onlyColor && in_imgs.size() == 2) {
 		tmpDepth = in_imgs[1];
 		in_imgs.pop_back();
+		depthCheckForColorDetector = true;
 	}
-	detector->match(in_imgs, 85.0f, matches, currentClass);
-	in_imgs.push_back(tmpDepth);
+	detector->match(in_imgs, 80.0f, matches, currentClass);
+	if (depthCheckForColorDetector) {
+		in_imgs.push_back(tmpDepth);
+	}
 	if (matches.size() > 0) {
-		applyPostProcessing(in_imgs);
+		groupSimilarMatches();
+		discardSmallMatchGroups();
+		for (size_t i = 0; i < potentialMatches.size(); i++)
+		{	
+			groupedMatches = elementsFromListOfIndices(matches, potentialMatches[i].matchIndices);
+			std::vector<ObjectPose> objPoses;
+			applyPostProcessing(in_imgs, objPoses);
+			if (!objPoses.empty()) {
+				posesMultipleObj.push_back(objPoses);
+			}
+		}
 
 		//DRAW FEATURES OF BEST LINEMOD MATCH
-		if (objectPoses.size() != 0) {
-			const std::vector<cv::linemod::Template>& templates = detector->getTemplates(matches[0].class_id, matches[0].template_id);
-			drawResponse(templates, 1, in_imgs[0], cv::Point(matches[0].x, matches[0].y), detector->getT(0));
+		if (posesMultipleObj.size() != 0) {
+			for (size_t i = 0; i < potentialMatches.size(); i++)
+			{
+				const std::vector<cv::linemod::Template>& templates = detector->getTemplates(matches[potentialMatches[i].matchIndices[0]].class_id, matches[potentialMatches[i].matchIndices[0]].template_id);
+				drawResponse(templates, 1, in_imgs[0], potentialMatches[i].position, detector->getT(0));
+
+			}
 		}
 
 
@@ -149,6 +171,57 @@ bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs,uint16 in_cl
 	}
 }
 
+std::vector<cv::linemod::Match> HighLevelLinemod::elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches, std::vector<size_t> in_indices) {
+	std::vector<cv::linemod::Match> tmpMatches;
+	for (size_t i = 0; i < in_indices.size(); i++)
+	{
+		tmpMatches.push_back(in_matches[in_indices[i]]);
+	}
+	return tmpMatches;
+}
+
+void HighLevelLinemod::groupSimilarMatches() {
+	potentialMatches.clear();
+	for (size_t i = 0; i < matches.size(); i++)
+	{
+		cv::Point matchPosition = cv::Point(matches[i].x, matches[i].y);
+		uint16 numCurrentGroups = potentialMatches.size();
+		bool foundGroupForMatch = false;
+
+		for (size_t q = 0; q < numCurrentGroups; q++)
+		{
+			if (cv::norm(matchPosition - potentialMatches[q].position) < 100) { //TODO Non magic number
+				potentialMatches[q].matchIndices.push_back(i);
+				foundGroupForMatch = true;
+				break;
+			}
+		}
+		if (!foundGroupForMatch) {
+			potentialMatches.push_back(PotentialMatch(cv::Point(matches[i].x, matches[i].y), i));
+		}
+	}
+}
+
+void HighLevelLinemod::discardSmallMatchGroups() {
+	uint32 numMatchGroups = potentialMatches.size();
+	uint32 biggestGroup=0;
+	std::vector<PotentialMatch> tmp;
+	for (size_t i = 0; i < numMatchGroups; i++)
+	{
+		if (potentialMatches[i].matchIndices.size() > biggestGroup) {
+			biggestGroup = potentialMatches[i].matchIndices.size();
+		}
+	}
+	std::vector<size_t> eraseIndices;
+	for (size_t j = 0; j < numMatchGroups; j++)
+	{
+		float32 ratioToBiggestGroup = potentialMatches[j].matchIndices.size()*100 / biggestGroup;
+		if (ratioToBiggestGroup > 25) { //TODO Non magic number
+			tmp.push_back(potentialMatches[j]);
+		}
+	}
+	potentialMatches.swap(tmp);
+}
 
 
 void HighLevelLinemod::writeLinemod() {
@@ -178,6 +251,13 @@ void HighLevelLinemod::writeLinemod() {
 			templatePositionFile.write((char *)&modelTemplates[numTemplateVec][i], sizeof(Template));
 		}
 	}
+	uint32 numModelColors = modelColors.size();
+	templatePositionFile.write((char*)&numModelColors, sizeof(uint32));
+
+	for (size_t numModels = 0; numModels < modelColors.size(); numModels++)
+	{
+		templatePositionFile.write((char *)&modelColors[numModels], sizeof(ColorRangeOfObject));
+	}
 
 	templatePositionFile.close();
 }
@@ -185,6 +265,7 @@ void HighLevelLinemod::writeLinemod() {
 void HighLevelLinemod::readLinemod() {
 	templates.clear();
 	modelTemplates.clear();
+	modelColors.clear();
 	std::string filename = "linemod_templates.yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	detector->read(fs.root());
@@ -213,13 +294,21 @@ void HighLevelLinemod::readLinemod() {
 		modelTemplates.push_back(templates);
 		templates.clear();
 	}
+	uint32 numModelColors = modelColors.size();
+	input.read((char*)&numModelColors, sizeof(uint32));
+	ColorRangeOfObject tmpColor;
+	for (size_t numModels = 0; numModels < numModelColors; numModels++)
+	{	
+		input.read((char*)&tmpColor, sizeof(ColorRangeOfObject));
+		modelColors.push_back(tmpColor);
+	}
 
 	input.close();
 }
 
 
-std::vector<ObjectPose> HighLevelLinemod::getObjectPoses() {
-	return objectPoses;
+std::vector<std::vector<ObjectPose>> HighLevelLinemod::getObjectPoses() {
+	return posesMultipleObj;
 }
 
 
@@ -263,33 +352,33 @@ glm::qua<float32> HighLevelLinemod::openglCoordinatesystem2opencv(glm::mat4& in_
 	return glm::qua(glm::vec3(eul.x - M_PI / 2.0f, -eul.y, -eul.z));
 }
 
-bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
+bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::vector<ObjectPose>& in_objPoses) {
 	cv::Mat colorImgHue;
 	cv::cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-	cv::inRange(colorImgHue, cv::Scalar(10, 0, 0), cv::Scalar(30, 255, 255), colorImgHue); //TODO RANGE
+	cv::inRange(colorImgHue,currentColorRange.lowerBoundary, currentColorRange.upperBoundary, colorImgHue); //TODO RANGE
 
-	for (uint32 i = 0; i < matches.size(); i++)
+	for (uint32 i = 0; i < groupedMatches.size(); i++)
 	{
 		if (!onlyColor) {
 			if (colorCheck(colorImgHue, i, percentToPassCheck) && depthCheck(in_imgs[1], i)) {
-				updateTranslationAndCreateObjectPose(i);
+				updateTranslationAndCreateObjectPose(i, in_objPoses);
 			}
 		}
 		else if (onlyColor && in_imgs.size() == 2) {
 			if (colorCheck(colorImgHue, i, percentToPassCheck) && depthCheck(in_imgs[1], i)) {
-				updateTranslationAndCreateObjectPose(i);
+				updateTranslationAndCreateObjectPose(i, in_objPoses);
 			}
 		}
 		else {
 			if (colorCheck(colorImgHue, i, percentToPassCheck)) {
-				updateTranslationAndCreateObjectPose(i);
+				updateTranslationAndCreateObjectPose(i, in_objPoses);
 			}
 		}
-		if (objectPoses.size() == numberWantedPoses) {
+		if (in_objPoses.size() == numberWantedPoses) {
 			return true;
 		}
-		if (i == (matches.size() - 1)) {
-			if (!objectPoses.empty()) {
+		if (i == (groupedMatches.size() - 1)) {
+			if (!in_objPoses.empty()) {
 				return true;
 			}
 			else {
@@ -303,7 +392,7 @@ bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs) {
 bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float32 in_percentToPassCheck) {
 	cv::Mat croppedImage;
 	cv::Mat mask;
-	templateMask(matches[in_numMatch], mask);
+	templateMask(groupedMatches[in_numMatch], mask);
 	cv::bitwise_and(in_colImg, mask, croppedImage);
 
 	float32 nonZer = cv::countNonZero(croppedImage) * 100 / cv::countNonZero(mask);
@@ -317,14 +406,13 @@ bool HighLevelLinemod::colorCheck(cv::Mat &in_colImg, uint32& in_numMatch, float
 
 bool HighLevelLinemod::depthCheck(cv::Mat &in_depth, uint32& in_numMatch) {
 	cv::Rect bb(
-		matches[in_numMatch].x,
-		matches[in_numMatch].y,
-		templates[matches[in_numMatch].template_id].boundingBox.width,
-		templates[matches[in_numMatch].template_id].boundingBox.height);
-	int32 depthDiff = (int32)medianMat(in_depth, bb, 4) - (int32)templates[matches[in_numMatch].template_id].medianDepth;
-	tempDepth = templates[matches[in_numMatch].template_id].translation.z + depthDiff;
-	return true;
-	if (abs(depthDiff) < stepSize / 2) {
+		groupedMatches[in_numMatch].x,
+		groupedMatches[in_numMatch].y,
+		templates[groupedMatches[in_numMatch].template_id].boundingBox.width,
+		templates[groupedMatches[in_numMatch].template_id].boundingBox.height);
+	int32 depthDiff = (int32)medianMat(in_depth, bb, 4) - (int32)templates[groupedMatches[in_numMatch].template_id].medianDepth;
+	tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z + depthDiff;
+	if (abs(depthDiff) < stepSize) {
 		return true;
 	}
 	else {
@@ -332,17 +420,17 @@ bool HighLevelLinemod::depthCheck(cv::Mat &in_depth, uint32& in_numMatch) {
 	}
 }
 
-void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 const& in_numMatch) {
+void HighLevelLinemod::updateTranslationAndCreateObjectPose(uint32 const& in_numMatch,std::vector<ObjectPose>& in_objPoses) {
 	glm::vec3 updatedTanslation;
 	glm::qua<float32> updatedRotation;
 	calcPosition(in_numMatch,updatedTanslation,tempDepth);
 	calcRotation(in_numMatch, updatedTanslation, updatedRotation);
 	cv::Rect boundingBox(
-		matches[in_numMatch].x,
-		matches[in_numMatch].y,
-		templates[matches[in_numMatch].template_id].boundingBox.width,
-		templates[matches[in_numMatch].template_id].boundingBox.height);
-	objectPoses.push_back(ObjectPose(updatedTanslation, updatedRotation, boundingBox));
+		groupedMatches[in_numMatch].x,
+		groupedMatches[in_numMatch].y,
+		templates[groupedMatches[in_numMatch].template_id].boundingBox.width,
+		templates[groupedMatches[in_numMatch].template_id].boundingBox.height);
+	in_objPoses.push_back(ObjectPose(updatedTanslation, updatedRotation, boundingBox));
 }
 void HighLevelLinemod::calcPosition(uint32 const& in_numMatch,glm::vec3& in_position,float32 const& in_directDepth ) {
 	float32 pixelX, pixelY;
@@ -358,11 +446,11 @@ void HighLevelLinemod::calcPosition(uint32 const& in_numMatch,glm::vec3& in_posi
 
 void HighLevelLinemod::calcRotation(uint32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats) {
 	glm::mat4 adjustRotation = glm::lookAt(glm::vec3(-in_position.x, -in_position.y, in_position.z), glm::vec3(0.f), up);
-	in_quats = glm::toQuat(adjustRotation * glm::toMat4(templates[matches[in_numMatch].template_id].quaternions));
+	in_quats = glm::toQuat(adjustRotation * glm::toMat4(templates[groupedMatches[in_numMatch].template_id].quaternions));
 }
 void HighLevelLinemod::matchToPixelCoord(uint32 const& in_numMatch,float32& in_x, float32& in_y) {
-	in_x = (matches[in_numMatch].x + cx - templates[matches[in_numMatch].template_id].boundingBox.x);
-	in_y = (matches[in_numMatch].y + cy - templates[matches[in_numMatch].template_id].boundingBox.y);
+	in_x = (groupedMatches[in_numMatch].x + cx - templates[groupedMatches[in_numMatch].template_id].boundingBox.x);
+	in_y = (groupedMatches[in_numMatch].y + cy - templates[groupedMatches[in_numMatch].template_id].boundingBox.y);
 }
 
 float32 HighLevelLinemod::pixelDistToCenter(float32 in_x, float32 in_y) {

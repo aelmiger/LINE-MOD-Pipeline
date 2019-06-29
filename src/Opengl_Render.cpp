@@ -149,45 +149,6 @@ void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
 void OpenGLRender::readModelFile(std::string in_file, Model &in_model) {
 	Model_Importer modImport;
 	modImport.importModel(in_file, in_model);
-	/*
-	std::ifstream input = std::ifstream(in_file, std::ios::in | std::ios::binary);
-	if (!input.is_open()) {
-		std::cout << "Error loading " << in_file << " file" << std::endl;
-	}
-
-	input.read((char*)&in_model.numVertices, sizeof(uint64));
-	input.read((char*)&in_model.numIndices, sizeof(uint64));
-
-	for (uint64 i = 0; i < in_model.numVertices; i++) {
-		glm::vec3 vertex;
-		input.read((char*)&vertex.x, sizeof(float));
-		input.read((char*)&vertex.y, sizeof(float));
-		input.read((char*)&vertex.z, sizeof(float));
-		in_model.vertices.push_back(vertex);
-	}
-	for (uint64 i = 0; i < in_model.numIndices; i++) {
-		uint32 index;
-		input.read((char*)&index, sizeof(uint32));
-		in_model.indices.push_back(index);
-	}
-	if (input.peek() == EOF) {
-		for (uint64 i = 0; i < in_model.numVertices; i++) {
-			glm::vec3 color(1.0f, 1.0f, 1.0f);
-			in_model.colors.push_back(color);
-		}
-	}
-	else {
-		for (uint64 i = 0; i < in_model.numVertices; i++) {
-			glm::vec3 color;
-			input.read((char*)&color.x, sizeof(float));
-			input.read((char*)&color.y, sizeof(float));
-			input.read((char*)&color.z, sizeof(float));
-			in_model.colors.push_back(color);
-		}
-	}
-
-	input.close();
-	*/
 }
 
 
