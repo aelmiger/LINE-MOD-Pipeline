@@ -4,8 +4,10 @@
 #include "defines.h"
 #include <cstddef>
 
-struct ModelBuffer {
-	ModelBuffer(void* in_vertData, uint32 in_numVertices, void* in_indData, uint32 in_numIndices, uint8 in_elementSize) {
+struct ModelBuffer
+{
+	ModelBuffer(void* in_vertData, uint32 in_numVertices, void* in_indData, uint32 in_numIndices, uint8 in_elementSize)
+	{
 		glGenBuffers(1, &indBufferId);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indBufferId);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, in_numIndices * in_elementSize, in_indData, GL_STATIC_DRAW);
@@ -26,12 +28,14 @@ struct ModelBuffer {
 		glBindVertexArray(0);
 	}
 
-	void bind() {
+	void bind()
+	{
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indBufferId);
 	}
 
-	void unbind() {
+	void unbind()
+	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}

@@ -21,13 +21,15 @@ typedef uint64_t uint64;
 typedef float float32;
 typedef double float64;
 
-struct Index {
+struct Index
+{
 	uint32 a;
 	uint32 b;
 	uint32 c;
 };
 
-struct Model {
+struct Model
+{
 	uint64 numVertices;
 	uint64 numIndices;
 	std::vector<glm::vec3> vertices;
@@ -35,9 +37,11 @@ struct Model {
 	std::vector<uint32> indices;
 };
 
-struct TemplatePosition {
+struct TemplatePosition
+{
 	TemplatePosition();
-	TemplatePosition(std::string in_s, glm::vec3 in_v, float32 in_rotation, cv::Rect in_boundingBox, uint16 in_depthAtCenter);
+	TemplatePosition(std::string in_s, glm::vec3 in_v, float32 in_rotation, cv::Rect in_boundingBox,
+	                 uint16 in_depthAtCenter);
 	std::string modelName;
 	glm::vec3 positionCam;
 	float32 rotation;
@@ -81,11 +85,11 @@ struct TemplateGenerationSettings
 
 	const bool onlyUseColorModality = false;
 
-	const float32 startDistance = 600;
-	const float32 endDistance = 1200;
-	const float32 stepSize = 50.0f;
+	const uint16 startDistance = 600;
+	const uint16 endDistance = 1200;
+	const uint16 stepSize = 50;
 	const uint8 subdivisions = 2;
-	const float32 angleStart = -45;
-	const float32 angleStop = 45;
-	const float32 angleStep = 10;
+	const uint16 angleStart = -45;
+	const uint16 angleStop = 45;
+	const uint16 angleStep = 10;
 };

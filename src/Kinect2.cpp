@@ -1,8 +1,8 @@
-#include "kinect2.h"
+#include "Kinect2.h"
 
 Kinect2::Kinect2()
 {
-	libfreenect2::setGlobalLogger(NULL);
+	libfreenect2::setGlobalLogger(nullptr);
 	if (freenect2.enumerateDevices() == 0)
 	{
 		std::cout << "ERROR:: No kinect connected!" << std::endl;
@@ -13,10 +13,11 @@ Kinect2::Kinect2()
 	{
 		dev = freenect2.openDevice(serial, pipeline);
 	}
-	else {
+	else
+	{
 		dev = freenect2.openDevice(serial);
 	}
-	if (dev == 0)
+	if (dev == nullptr)
 	{
 		std::cout << "ERROR:: opening device!" << std::endl;
 	}
@@ -35,10 +36,11 @@ Kinect2::~Kinect2()
 	delete listener;
 }
 
-void Kinect2::getKinectFrames(cv::Mat& in_rgb, cv::Mat& in_depth) {
+void Kinect2::getKinectFrames(cv::Mat& in_rgb, cv::Mat& in_depth)
+{
 	listener->waitForNewFrame(frames);
-	libfreenect2::Frame *rgb = frames[libfreenect2::Frame::Color];
-	libfreenect2::Frame *depth = frames[libfreenect2::Frame::Depth];
+	libfreenect2::Frame* rgb = frames[libfreenect2::Frame::Color];
+	libfreenect2::Frame* depth = frames[libfreenect2::Frame::Depth];
 	libfreenect2::Frame undistorted(512, 424, 4), registered(512, 424, 4), depth2rgb(1920, 1080 + 2, 4);
 
 	cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmat);
@@ -48,8 +50,8 @@ void Kinect2::getKinectFrames(cv::Mat& in_rgb, cv::Mat& in_depth) {
 	rgbd2(cv::Rect(cv::Point(320 + 320, 61 + 240), cv::Point(1600 - 320, 1021 - 240))).copyTo(croppedDepth);
 	rgbmat(cv::Rect(cv::Point(320 + 320, 61 + 240), cv::Point(1600 - 320, 1021 - 240))).copyTo(croppedBgr);
 
-	cv::cvtColor(croppedBgr, croppedBgr, cv::COLOR_BGRA2BGR);
-	cv::flip(croppedBgr, in_rgb, 1);
-	cv::flip(croppedDepth, in_depth, 1);
+	cvtColor(croppedBgr, croppedBgr, cv::COLOR_BGRA2BGR);
+	flip(croppedBgr, in_rgb, 1);
+	flip(croppedDepth, in_depth, 1);
 	listener->release(frames);
 }

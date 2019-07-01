@@ -37,7 +37,8 @@
 
 #endif
 
-int main() {
+int main()
+{
 	Template_Generator templateGen = Template_Generator(CameraParameters(), TemplateGenerationSettings());
 	//templateGen.run();
 	templateGen.~Template_Generator();

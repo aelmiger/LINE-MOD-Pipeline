@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
+//#include <vector>
 #include <string>
-#include <cassert>
+//#include <cassert>
 #include <iostream>
 
 #include <assimp/Importer.hpp>
@@ -9,13 +9,14 @@
 #include <assimp/postprocess.h>
 
 #include "defines.h"
+
 class Model_Importer
 {
 public:
 	Model_Importer();
 	~Model_Importer();
 
-	void importModel(std::string in_modelFile, Model& in_model);
+	void importModel(std::string const& in_modelFile, Model& in_model);
 private:
 	Assimp::Importer* importer;
 

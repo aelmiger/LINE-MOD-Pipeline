@@ -11,7 +11,7 @@ OpenGLRender::OpenGLRender(CameraParameters const& in_camParams)
 
 	view = glm::mat4(1.0f);
 	position = glm::vec3(0.0f);
-	up = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
+	up = normalize(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	renderedDepthImg.create(height, width, CV_16UC1);
 	renderedColorImg.create(height, width, CV_8UC3);
@@ -21,26 +21,33 @@ OpenGLRender::OpenGLRender(CameraParameters const& in_camParams)
 	setupFramebuffer();
 	setupShader();
 }
-OpenGLRender::~OpenGLRender() {
+
+OpenGLRender::~OpenGLRender()
+{
 	glDeleteProgram(depthShaderProgram);
 	glDeleteProgram(colorShaderProgram);
 	SDL_DestroyWindow(window);
 }
 
-cv::Mat OpenGLRender::getColorImgFromBuff() {
+cv::Mat OpenGLRender::getColorImgFromBuff()
+{
 	glReadBuffer(GL_FRONT);
 	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, renderedColorImg.data);
-	cv::flip(renderedColorImg, renderedColorImg, 0); //TODO Wird flip wirklich benötigt?
+	flip(renderedColorImg, renderedColorImg, 0); //TODO Wird flip wirklich benötigt?
 	return renderedColorImg;
 }
-cv::Mat OpenGLRender::getDepthImgFromBuff() {
+
+cv::Mat OpenGLRender::getDepthImgFromBuff()
+{
 	glReadBuffer(GL_FRONT);
 	glReadPixels(0, 0, width, height, GL_RED, GL_UNSIGNED_SHORT, renderedDepthImg.data);
-	cv::flip(renderedDepthImg, renderedDepthImg, 0);
+	flip(renderedDepthImg, renderedDepthImg, 0);
 	return renderedDepthImg;
 }
 
-void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
+void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x,
+                                          float32 in_y)
+{
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -50,7 +57,7 @@ void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPo
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	translateCam(camPositon, in_rotate, in_x, in_y);
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
@@ -58,7 +65,9 @@ void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPo
 	modPointer->unbind();
 	SDL_GL_SwapWindow(window);
 }
-void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec) {
+
+void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec)
+{
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -74,8 +83,8 @@ void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 	view[3][1] = -in_traVec[1];
 	view[3][2] = -in_traVec[2];
 	view[3][3] = 1.0f;
-	modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	viewProj = projection * view*modelMat;
+	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+	viewProj = projection * view * modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -83,7 +92,9 @@ void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
+void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x,
+                                          float32 in_y)
+{
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -93,7 +104,7 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPo
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	translateCam(camPositon, in_rotate, in_x, in_y);
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
@@ -102,7 +113,8 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPo
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec) {
+void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec)
+{
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -118,8 +130,8 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 	view[3][1] = -in_traVec[1];
 	view[3][2] = -in_traVec[2];
 	view[3][3] = 1.0f;
-	modelMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	viewProj = projection * view*modelMat;
+	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+	viewProj = projection * view * modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -127,7 +139,8 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
+void OpenGLRender::creatModBuffFromFiles(std::string const& in_modelLocation)
+{
 	Model tmp;
 	readModelFile(in_modelLocation, tmp);
 	std::vector<glm::vec3> tempVert;
@@ -135,28 +148,32 @@ void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
 	modBuff.emplace_back(tempVert.data(), tmp.numVertices, tmp.indices.data(), tmp.numIndices, sizeof(tmp.indices[0]));
 }
 
-void OpenGLRender::readModelFile(std::string in_file, Model &in_model) {
+void OpenGLRender::readModelFile(std::string const& in_file, Model& in_model)
+{
 	Model_Importer modImport;
 	modImport.importModel(in_file, in_model);
 }
 
-void OpenGLRender::calculateMatch3DPosition(ObjectPose &in_objectPos, TemplatePosition &in_templatePosition, cv::linemod::Match &in_match) {
+void OpenGLRender::calculateMatch3DPosition(ObjectPose& in_objectPos, TemplatePosition& in_templatePosition,
+                                            cv::linemod::Match& in_match)
+{
 	glm::vec3 translation;
-	float64 alpha;
 	cv::Vec3f angles;
 
 	translation.z = glm::length(in_templatePosition.positionCam);
-	alpha = ((1.0f - (in_match.y + cy - in_templatePosition.boundingBox.y) / (cy)) * fieldOfView / 2.0f);
-	translation.y = -tan(alpha*M_PI / 180) * translation.z;
-	alpha = ((1.0f - (in_match.x + cx - in_templatePosition.boundingBox.x) / (cx)) * fieldOfView * ((float64)width / (float64)height) / 2.0f);
-	translation.x = -tan(alpha*M_PI / 180) * translation.z;
+	float64 alpha = ((1.0f - (in_match.y + cy - in_templatePosition.boundingBox.y) / (cy)) * fieldOfView / 2.0f);
+	translation.y = -tan(alpha * M_PI / 180) * translation.z;
+	alpha = ((1.0f - (in_match.x + cx - in_templatePosition.boundingBox.x) / (cx)) * fieldOfView * ((float64)width / (
+		float64)height) / 2.0f);
+	translation.x = -tan(alpha * M_PI / 180) * translation.z;
 
 	translateCam(in_templatePosition.positionCam, in_templatePosition.rotation, 0.0f, 0.0f);
 	glm::qua quats = openGL2openCVRotation(view);
-	in_objectPos = { translation, quats };
+	in_objectPos = {translation, quats};
 }
 
-void OpenGLRender::setupSDLWindow() {
+void OpenGLRender::setupSDLWindow()
+{
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -172,19 +189,23 @@ void OpenGLRender::setupSDLWindow() {
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 }
 
-void OpenGLRender::setupOpenGL() {
+void OpenGLRender::setupOpenGL()
+{
 	GLenum errorMsg = glewInit();
-	if (errorMsg != GLEW_OK) {
+	if (errorMsg != GLEW_OK)
+	{
 		std::cout << "Error: " << glewGetErrorString(errorMsg) << std::endl;
 		std::cin.get();
 	}
-	else {
+	else
+	{
 		std::cout << "OpenGL successfully initiated. Version: " << glGetString(GL_VERSION) << std::endl;
 	}
 	glEnable(GL_DEPTH_TEST);
 }
 
-void OpenGLRender::setupFramebuffer() {
+void OpenGLRender::setupFramebuffer()
+{
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	unsigned int texture;
@@ -202,13 +223,15 @@ void OpenGLRender::setupFramebuffer() {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void OpenGLRender::setupShader() {
+void OpenGLRender::setupShader()
+{
 	colorShaderProgram = glCreateProgram();
 
 	GLuint vertShadId = glCreateShader(GL_VERTEX_SHADER);
@@ -219,7 +242,8 @@ void OpenGLRender::setupShader() {
 
 	int result;
 	glGetShaderiv(vertShadId, GL_COMPILE_STATUS, &result);
-	if (result != GL_TRUE) {
+	if (result != GL_TRUE)
+	{
 		std::cout << "Vertex Shader compilation error" << std::endl;
 	}
 	srcString.clear();
@@ -231,7 +255,8 @@ void OpenGLRender::setupShader() {
 	glCompileShader(fragShadId);
 
 	glGetShaderiv(fragShadId, GL_COMPILE_STATUS, &result);
-	if (result != GL_TRUE) {
+	if (result != GL_TRUE)
+	{
 		std::cout << "Fragment Shader compilation error" << std::endl;
 	}
 
@@ -240,7 +265,8 @@ void OpenGLRender::setupShader() {
 	glLinkProgram(colorShaderProgram);
 
 	glGetProgramiv(colorShaderProgram, GL_LINK_STATUS, &result);
-	if (!result) {
+	if (!result)
+	{
 		std::cout << "Shader Program Linking error" << std::endl;
 	}
 
@@ -258,7 +284,8 @@ void OpenGLRender::setupShader() {
 	glCompileShader(vertShadId);
 
 	glGetShaderiv(vertShadId, GL_COMPILE_STATUS, &result);
-	if (result != GL_TRUE) {
+	if (result != GL_TRUE)
+	{
 		std::cout << "Vertex Shader compilation error" << std::endl;
 	}
 	srcString.clear();
@@ -270,7 +297,8 @@ void OpenGLRender::setupShader() {
 	glCompileShader(fragShadId);
 
 	glGetShaderiv(fragShadId, GL_COMPILE_STATUS, &result);
-	if (result != GL_TRUE) {
+	if (result != GL_TRUE)
+	{
 		std::cout << "Fragment Shader compilation error" << std::endl;
 	}
 
@@ -279,7 +307,8 @@ void OpenGLRender::setupShader() {
 	glLinkProgram(depthShaderProgram);
 
 	glGetProgramiv(depthShaderProgram, GL_LINK_STATUS, &result);
-	if (!result) {
+	if (!result)
+	{
 		std::cout << "Shader Program Linking error" << std::endl;
 	}
 
@@ -289,28 +318,33 @@ void OpenGLRender::setupShader() {
 	glDeleteShader(fragShadId);
 }
 
-std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3> & a, const std::vector<glm::vec3> & b) {
-	std::vector <glm::vec3> result;
+std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3>& a, const std::vector<glm::vec3>& b)
+{
+	std::vector<glm::vec3> result;
 	result.reserve(a.size() + b.size());
 
-	for (size_t i = 0; i < a.size(); i++) {
+	for (size_t i = 0; i < a.size(); i++)
+	{
 		result.push_back(a[i]);
 		result.push_back(b[i]);
 	}
 	return result;
 }
 
-void OpenGLRender::translateCam(glm::vec3 in_vec, float32 in_rotate, float32 in_x, float32 in_y) {
+void OpenGLRender::translateCam(glm::vec3 in_vec, float32 in_rotate, float32 in_x, float32 in_y)
+{
 	position = in_vec;
-	if (in_vec[0] == 0 && in_vec[2] == 0) { //Looking straight up or down fails the cross product
+	if (in_vec[0] == 0 && in_vec[2] == 0)
+	{
+		//Looking straight up or down fails the cross product
 		position[0] = 0.000001;
 		position[2] = 0.000001;
 	}
-	glm::vec3 fakeup = glm::normalize(glm::cross(position, glm::cross(position, up)));
-	glm::vec3 mov = (glm::normalize(glm::cross(position, up)) * in_x);
+	glm::vec3 fakeup = normalize(cross(position, cross(position, up)));
+	glm::vec3 mov = (normalize(cross(position, up)) * in_x);
 	glm::vec3 movu = fakeup * in_y;
 
-	glm::vec3 temporaryUp = glm::rotate(-fakeup, glm::radians(in_rotate), glm::normalize(position));
-	view = glm::lookAt(position + mov + movu, mov + movu, temporaryUp);
+	glm::vec3 temporaryUp = rotate(-fakeup, glm::radians(in_rotate), normalize(position));
+	view = lookAt(position + mov + movu, mov + movu, temporaryUp);
 	viewProj = projection * view * modelMat;
 }

@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
-#include <stdio.h>
-#include <iomanip>
-#include <time.h>
-#include <signal.h>
+//#include <iostream>
+//#include <cstdio>
+//#include <iomanip>
+//#include <ctime>
+//#include <csignal>
 #include <opencv2/opencv.hpp>
 
 #include <libfreenect2/libfreenect2.hpp>
@@ -21,8 +21,8 @@ public:
 	void getKinectFrames(cv::Mat& in_rgb, cv::Mat& in_depth);
 private:
 	libfreenect2::Freenect2 freenect2;
-	libfreenect2::Freenect2Device *dev = 0;
-	libfreenect2::PacketPipeline *pipeline = 0;
+	libfreenect2::Freenect2Device* dev = nullptr;
+	libfreenect2::PacketPipeline* pipeline = nullptr;
 	libfreenect2::Registration* registration;
 	libfreenect2::FrameMap frames;
 	cv::Mat rgbmat, depthmat, depthmatUndistorted, rgbd, rgbd2, croppedBgr, croppedDepth;

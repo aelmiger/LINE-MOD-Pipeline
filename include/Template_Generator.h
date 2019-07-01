@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 #include "defines.h"
-#include "model_buffer.h"
+//#include "model_buffer.h"
 #include "utility.h"
 #include "High_Level_Linemod.h"
 #include "Opengl_Render.h"
@@ -22,9 +23,9 @@ private:
 
 	std::vector<std::string> modelFiles;
 	std::string modelFolder;
-	float32 startDistance;
-	float32 endDistance;
-	float32 stepSize;
+	uint16 startDistance;
+	uint16 endDistance;
+	uint16 stepSize;
 	uint16 subdivisions;
 
 	uint32 numCameraVertices;
@@ -32,6 +33,6 @@ private:
 	void createCamViewPoints(float32 in_radiusToModel);
 	void renderImages(std::vector<cv::Mat>& in_imgVec, uint16 in_modelIterator, uint16 in_vertIterator);
 
-	void printProgBar(uint16 in_percent, std::string in_mfile);
+	void printProgBar(uint16 in_percent, std::string const& in_mfile);
 	uint16 calculateCurrentPercent(uint16 const& in_spehreRadius, uint16 const& in_currentIteration);
 };

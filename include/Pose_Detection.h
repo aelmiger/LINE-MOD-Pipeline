@@ -1,10 +1,10 @@
 #pragma once
 
 #include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <glm/gtx/string_cast.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/imgcodecs.hpp>
+//#include <opencv2/videoio.hpp>
+//#include <glm/gtx/string_cast.hpp>
 
 #include "Opengl_Render.h"
 #include "High_Level_Linemod.h"
@@ -32,7 +32,6 @@ private:
 	std::string modelFolder;
 	std::vector<cv::String> ids;
 	cv::Mat cameraMatrix;
-	float32 bestMean;
 
 	void readLinemodFromFile();
 };

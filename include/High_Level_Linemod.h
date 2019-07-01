@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <utility>
 
 #include "defines.h"
 #include "utility.h"
@@ -24,7 +25,7 @@ public:
 	uint16 getNumClasses();
 	uint32 getNumTemplates();
 
-	bool addTemplate(std::vector<cv::Mat> in_images, std::string in_modelName, glm::vec3 in_cameraPosition);
+	bool addTemplate(std::vector<cv::Mat> in_images, const std::string& in_modelName, glm::vec3 in_cameraPosition);
 	bool detectTemplate(std::vector<cv::Mat>& in_imgs, uint16 in_classNumber);
 	void writeLinemod();
 	void readLinemod();
@@ -49,32 +50,44 @@ private:
 	float32 fieldOfViewHeight;
 
 	std::vector<cv::Mat> inPlaneRotationMat;
-	float32 lowerAngleStop;
-	float32 upperAngleStop;
-	float32 angleStep;
-	float32 stepSize;
+	uint16 lowerAngleStop;
+	uint16 upperAngleStop;
+	uint16 angleStep;
+	uint16 stepSize;
 
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	int32 tempDepth;
 
-	struct ColorRangeOfObject {
-		ColorRangeOfObject() {}
-		ColorRangeOfObject(cv::Scalar s1, cv::Scalar s2) :
-			lowerBoundary(s1),
-			upperBoundary(s2) {
+	struct ColorRangeOfObject
+	{
+		ColorRangeOfObject()
+		{
 		}
+
+		ColorRangeOfObject(cv::Scalar s1, cv::Scalar s2) :
+			lowerBoundary(std::move(s1)),
+			upperBoundary(std::move(s2))
+		{
+		}
+
 		cv::Scalar lowerBoundary;
 		cv::Scalar upperBoundary;
 	};
+
 	struct Template
 	{
-		Template() {}
+		Template()
+		{
+		}
+
 		Template(glm::vec3 tra, glm::qua<float32> qua, cv::Rect bb, uint16 med) :
 			translation(tra),
 			quaternions(qua),
-			boundingBox(bb),
+			boundingBox(std::move(bb)),
 			medianDepth(med)
-		{}
+		{
+		}
+
 		glm::vec3 translation;
 		glm::qua<float32> quaternions;
 		cv::Rect boundingBox;
@@ -84,12 +97,15 @@ private:
 	struct PotentialMatch
 	{
 		PotentialMatch(cv::Point in_point, size_t in_indices) :
-			position(in_point) {
+			position(std::move(in_point))
+		{
 			matchIndices.push_back(in_indices);
 		}
+
 		cv::Point position;
-		std::vector<size_t> matchIndices;
+		std::vector<uint32> matchIndices;
 	};
+
 	cv::Mat colorImgHue;
 	std::vector<Template> templates;
 	ColorRangeOfObject currentColorRange;
@@ -105,12 +121,13 @@ private:
 
 	//Utility Functions
 	void generateRotMatForInplaneRotation();
-	uint16 medianMat(cv::Mat in_mat, cv::Rect &in_bb, uint8 in_medianPosition);
-	void calculateTemplatePose(glm::vec3& in_translation, glm::qua<float32>& in_quats, glm::vec3& in_cameraPosition, float32& in_inplaneRot);
+	uint16 medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uint8 in_medianPosition);
+	void calculateTemplatePose(glm::vec3& in_translation, glm::qua<float32>& in_quats, glm::vec3& in_cameraPosition,
+	                           float32& in_inplaneRot);
 	glm::qua<float32> openglCoordinatesystem2opencv(glm::mat4& in_viewMat);
 	bool applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::vector<ObjectPose>& in_objPoses);
-	bool colorCheck(cv::Mat &in_hueImg, uint32& in_numMatch, float32 in_percentCorrectColor);
-	bool depthCheck(cv::Mat &in_depth, uint32& in_numMatch);
+	bool colorCheck(cv::Mat& in_hueImg, uint32& in_numMatch, float32 in_percentCorrectColor);
+	bool depthCheck(cv::Mat& in_depth, uint32& in_numMatch);
 	void updateTranslationAndCreateObjectPose(uint32 const& in_numMatch, std::vector<ObjectPose>& in_objPoses);
 	void calcPosition(uint32 const& in_numMatch, glm::vec3& in_position, float32 const& in_directDepth);
 	void calcRotation(uint32 const& in_numMatch, glm::vec3 const& in_position, glm::qua<float32>& in_quats);
@@ -120,6 +137,7 @@ private:
 	void templateMask(cv::linemod::Match const& in_match, cv::Mat& dst);
 	void groupSimilarMatches();
 	void discardSmallMatchGroups();
-	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches, std::vector<size_t> in_indices);
+	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches,
+	                                                          const std::vector<uint32>& in_indices);
 	void readColorRanges();
 };

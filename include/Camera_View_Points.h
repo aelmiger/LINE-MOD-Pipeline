@@ -1,14 +1,15 @@
 #pragma once
 #include "defines.h"
 #include <vector>
-#include <math.h>
+//#include <cmath>
 #include <ppl.h>
 
 #include <glm/glm.hpp>
 
 const float32 goldenRatio = 1.61803398875;
 
-class CameraViewPoints {
+class CameraViewPoints
+{
 	float32 radius;
 	float32 icosahedronPointA;
 	float32 icosahedronPointB;

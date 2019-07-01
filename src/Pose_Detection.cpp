@@ -1,6 +1,7 @@
 #include "Pose_Detection.h"
 
-Pose_Detection::Pose_Detection(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
+Pose_Detection::Pose_Detection(CameraParameters const& in_camParams,
+                               TemplateGenerationSettings const& in_templateSettings) :
 	modelFolder(in_templateSettings.modelFolder),
 	cameraMatrix(in_camParams.cameraMatrix)
 {
@@ -17,10 +18,11 @@ Pose_Detection::~Pose_Detection()
 	delete icp;
 }
 
-void Pose_Detection::run() {
-	for (size_t i = 0; i < modelFiles.size(); i++)
+void Pose_Detection::run()
+{
+	for (const auto& modelFile : modelFiles)
 	{
-		opengl->creatModBuffFromFiles(modelFolder + modelFiles[i]);
+		opengl->creatModBuffFromFiles(modelFolder + modelFile);
 	}
 	readLinemodFromFile();
 
@@ -37,7 +39,8 @@ void Pose_Detection::run() {
 	//cv::VideoCapture cap(0);
 	cv::VideoCapture sequence("data/color%0d.jpg");
 
-	while (true) {
+	while (true)
+	{
 		std::string numb;
 		//cap.read(A);
 		sequence >> colorImg;
@@ -61,19 +64,22 @@ void Pose_Detection::run() {
 			line->detectTemplate(inputImg, numClass);
 			detectedPoses = line->getObjectPoses();
 			uint16 bestPose = 0;
-			if (!detectedPoses.empty()) {
-				for (size_t numDetectedPoses = 0; numDetectedPoses < detectedPoses.size(); numDetectedPoses++)
+			if (!detectedPoses.empty())
+			{
+				for (auto& detectedPose : detectedPoses)
 				{
-					//icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPoses[numDetectedPoses][0].boundingBox);
-					//icp->registerToScene(detectedPoses[numDetectedPoses], numClass);
-					//bestPose = icp->estimateBestMatch(depthImg, detectedPoses[numDetectedPoses], opengl, numClass);
-					drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPoses[numDetectedPoses][bestPose]);
-					finalObjectPoses.push_back(detectedPoses[numDetectedPoses][bestPose]);
+					icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPose[0].boundingBox);
+					icp->registerToScene(detectedPose, numClass);
+					bestPose = icp->estimateBestMatch(depthImg, detectedPose, opengl, numClass);
+					drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPose[bestPose]);
+					finalObjectPoses.push_back(detectedPose[bestPose]);
 				}
 				scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[0][bestPose]);
 				std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
 
-				if (scoreNew <= 11) { //TODO MAGIC NUMBER
+				if (scoreNew <= 11)
+				{
+					//TODO MAGIC NUMBER
 					accumDiff++;
 				}
 				//cv::putText(colorImg, glm::to_string(detectedPoses[bestPose].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
@@ -83,8 +89,9 @@ void Pose_Detection::run() {
 		score.push_back(scoreNew);
 
 		counter++;
-		cv::imshow("color", colorImg);
-		if (cv::waitKey(1) == 27) {
+		imshow("color", colorImg);
+		if (cv::waitKey(1) == 27)
+		{
 			break;
 		}
 		inputImg.clear();
@@ -92,17 +99,20 @@ void Pose_Detection::run() {
 	}
 }
 
-void Pose_Detection::readLinemodFromFile() {
+void Pose_Detection::readLinemodFromFile()
+{
 	line->readLinemod();
 	ids = line->getClassIds();
 	int num_classes = line->getNumClasses();
-	std::cout << "Loaded with " << num_classes << " classes and " << line->getNumTemplates() << " templates\n" << std::endl;
+	std::cout << "Loaded with " << num_classes << " classes and " << line->getNumTemplates() << " templates\n" << std::
+		endl;
 	if (!ids.empty())
 	{
 		std::cout << "Class ids: " << std::endl;
 		std::copy(ids.begin(), ids.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 	}
-	if (ids != modelFiles) {
+	if (ids != modelFiles)
+	{
 		std::cout << "ERROR::Models in file folder do not match with generated models!" << std::endl;
 	}
 }
