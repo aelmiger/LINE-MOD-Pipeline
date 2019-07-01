@@ -1,8 +1,5 @@
 #include "utility.h"
 
-
-
-
 /*
 #################### CONVERSION UTILITY ####################
 */
@@ -65,12 +62,9 @@ bool fromGLM2CV(const glm::mat3& glmmat, cv::Matx33d* in_mat) {
 	return true;
 }
 
-
 /*
 #################### FILE UTILITY ####################
 */
-
-
 
 void filesInDirectory(std::vector<std::string>& in_filePathVector, std::string in_path, std::string in_extension) {
 	in_filePathVector.clear();
@@ -84,14 +78,11 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, std::string i
 	}
 	else {
 		std::cout << "Found " << in_filePathVector.size() << " " << in_extension << " files in " << in_path << std::endl;
-
 	}
 	std::filesystem::current_path("../");
-
 }
 
 std::string fileToString(const char* filename) {
-
 	std::ifstream t(filename);
 	std::stringstream buffer;
 	buffer << t.rdbuf();
@@ -123,7 +114,6 @@ cv::Mat loadDepth(std::string a_name)
 			uint16 depthVal;
 			l_file.read((char*)&depthVal, sizeof(uint16));
 			lp_image.at<uint16>(l_r, l_c) = depthVal;
-
 		}
 	}
 	l_file.close();
@@ -131,16 +121,13 @@ cv::Mat loadDepth(std::string a_name)
 	return lp_image;
 }
 
-
 /*
 #################### CALC UTILITY ####################
 */
 
-
 float32 length(cv::Vec3f &in_vecA) {
 	return sqrt(in_vecA[0] * in_vecA[0] + in_vecA[1] * in_vecA[1] + in_vecA[2] * in_vecA[2]);
 }
-
 
 void readGroundTruthLinemodDataset(uint32 in_fileNumber, ObjectPose &in_objectPos) {
 	glm::vec3 translation;
@@ -186,7 +173,6 @@ void readGroundTruthLinemodDataset(uint32 in_fileNumber, ObjectPose &in_objectPo
 	in_objectPos = { translation,quaternions };
 }
 
-
 float32 matchingScoreParallel(Model &in_model, ObjectPose &in_groundTruth, ObjectPose &in_estimate) {
 	cv::Mat rotMatGroundTruth;
 	cv::Mat rotMatEstimate;
@@ -210,12 +196,9 @@ float32 matchingScoreParallel(Model &in_model, ObjectPose &in_groundTruth, Objec
 	return mean;
 }
 
-
-
 /*
 #################### IMAGE UTILITY ####################
 */
-
 
 void erodeMask(cv::Mat &in_mask, cv::Mat &in_erode, int in_numberIterations) {
 	cv::erode(in_mask, in_erode, cv::Mat(), cv::Point(-1, -1), in_numberIterations);
@@ -241,7 +224,6 @@ void drawResponse(const std::vector<cv::linemod::Template>& templates,
 		}
 	}
 }
-
 
 void drawCoordinateSystem(cv::Mat &in_srcDstImage, cv::Mat in_camMat, float32 in_coordinateSystemLength, ObjectPose &in_objPos) {
 	cv::Mat rotMat;
@@ -269,10 +251,7 @@ void drawCoordinateSystem(cv::Mat &in_srcDstImage, cv::Mat in_camMat, float32 in
 	cv::line(in_srcDstImage, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 2);
 }
 
-
-
 void updatePosition(cv::Matx44d in_mat, ObjectPose &in_objPose) {
-
 	glm::mat4 transMat;
 	fromCV2GLM(cv::Mat(in_mat), &transMat);
 	in_objPose.quaternions = glm::toQuat(transMat);

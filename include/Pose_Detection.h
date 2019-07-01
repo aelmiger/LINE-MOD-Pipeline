@@ -11,7 +11,6 @@
 #include "High_Level_Linemod_Icp.h"
 #include "Kinect2.h"
 
-
 class Pose_Detection
 {
 public:
@@ -37,4 +36,3 @@ private:
 
 	void readLinemodFromFile();
 };
-

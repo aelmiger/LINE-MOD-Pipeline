@@ -35,4 +35,3 @@ private:
 	void printProgBar(uint16 in_percent, std::string in_mfile);
 	uint16 calculateCurrentPercent(uint16 const& in_spehreRadius, uint16 const& in_currentIteration);
 };
-

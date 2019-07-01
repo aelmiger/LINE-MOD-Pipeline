@@ -1,7 +1,5 @@
 #include "Model_Importer.h"
 
-
-
 Model_Importer::Model_Importer() {
 	importer = new Assimp::Importer;
 }
@@ -19,7 +17,6 @@ void Model_Importer::importModel(std::string in_modelFile, Model& in_model) {
 Assimp::Importer* importer;
 
 void Model_Importer::processNode(aiNode* in_node, const aiScene* in_scene, Model& in_model) {
-
 	for (unsigned int i = 0; i < in_node->mNumMeshes; i++) {
 		aiMesh* mesh = in_scene->mMeshes[in_node->mMeshes[i]];
 		processMesh(mesh, in_scene, in_model);

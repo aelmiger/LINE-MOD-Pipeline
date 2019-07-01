@@ -26,7 +26,6 @@ struct ModelBuffer {
 		glBindVertexArray(0);
 	}
 
-
 	void bind() {
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indBufferId);

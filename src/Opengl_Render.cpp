@@ -1,16 +1,13 @@
 #include "Opengl_Render.h"
 
-
 OpenGLRender::OpenGLRender(CameraParameters const& in_camParams)
 {
-
 	width = in_camParams.videoWidth;
 	height = in_camParams.videoHeight;
 	cx = in_camParams.cx;
 	cy = in_camParams.cy;
 	fieldOfView = 360.0f / M_PI * atanf(height / (2 * in_camParams.fy));
 	projection = glm::perspective(glm::radians(fieldOfView), (float)width / (float)height, 100.0f, 10000.0f);
-
 
 	view = glm::mat4(1.0f);
 	position = glm::vec3(0.0f);
@@ -23,8 +20,6 @@ OpenGLRender::OpenGLRender(CameraParameters const& in_camParams)
 	setupOpenGL();
 	setupFramebuffer();
 	setupShader();
-
-
 }
 OpenGLRender::~OpenGLRender() {
 	glDeleteProgram(depthShaderProgram);
@@ -59,7 +54,7 @@ void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::vec3 camPo
 	translateCam(camPositon, in_rotate, in_x, in_y);
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
-	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
 	modPointer->unbind();
 	SDL_GL_SwapWindow(window);
 }
@@ -83,16 +78,13 @@ void OpenGLRender::renderColorToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 	viewProj = projection * view*modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
-	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
 	modPointer->unbind();
 	SDL_GL_SwapWindow(window);
 }
 
-
-
 void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPositon, float32 in_rotate, float32 in_x, float32 in_y) {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
-
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glUseProgram(depthShaderProgram);
@@ -105,12 +97,10 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::vec3 camPo
 	translateCam(camPositon, in_rotate, in_x, in_y);
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
-	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
 	modPointer->unbind();
 	SDL_GL_SwapWindow(window);
 }
-
-
 
 void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec) {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
@@ -132,18 +122,17 @@ void OpenGLRender::renderDepthToFrontBuff(uint16 in_modelIndice, glm::mat4 in_ro
 	viewProj = projection * view*modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
-	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
 	modPointer->unbind();
 	SDL_GL_SwapWindow(window);
 }
-
 
 void OpenGLRender::creatModBuffFromFiles(std::string in_modelLocation) {
 	Model tmp;
 	readModelFile(in_modelLocation, tmp);
 	std::vector<glm::vec3> tempVert;
 	tempVert = zipVectors(tmp.vertices, tmp.colors);
-	modBuff.push_back(ModelBuffer(tempVert.data(), tmp.numVertices, tmp.indices.data(), tmp.numIndices, sizeof(tmp.indices[0])));
+	modBuff.emplace_back(tempVert.data(), tmp.numVertices, tmp.indices.data(), tmp.numIndices, sizeof(tmp.indices[0]));
 }
 
 void OpenGLRender::readModelFile(std::string in_file, Model &in_model) {
@@ -151,13 +140,10 @@ void OpenGLRender::readModelFile(std::string in_file, Model &in_model) {
 	modImport.importModel(in_file, in_model);
 }
 
-
-
 void OpenGLRender::calculateMatch3DPosition(ObjectPose &in_objectPos, TemplatePosition &in_templatePosition, cv::linemod::Match &in_match) {
 	glm::vec3 translation;
 	float64 alpha;
 	cv::Vec3f angles;
-
 
 	translation.z = glm::length(in_templatePosition.positionCam);
 	alpha = ((1.0f - (in_match.y + cy - in_templatePosition.boundingBox.y) / (cy)) * fieldOfView / 2.0f);
@@ -168,10 +154,7 @@ void OpenGLRender::calculateMatch3DPosition(ObjectPose &in_objectPos, TemplatePo
 	translateCam(in_templatePosition.positionCam, in_templatePosition.rotation, 0.0f, 0.0f);
 	glm::qua quats = openGL2openCVRotation(view);
 	in_objectPos = { translation, quats };
-
 }
-
-
 
 void OpenGLRender::setupSDLWindow() {
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -199,8 +182,6 @@ void OpenGLRender::setupOpenGL() {
 		std::cout << "OpenGL successfully initiated. Version: " << glGetString(GL_VERSION) << std::endl;
 	}
 	glEnable(GL_DEPTH_TEST);
-
-
 }
 
 void OpenGLRender::setupFramebuffer() {
@@ -210,7 +191,7 @@ void OpenGLRender::setupFramebuffer() {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, 640, 480, 0, GL_RED, GL_UNSIGNED_SHORT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, 640, 480, 0, GL_RED, GL_UNSIGNED_SHORT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -228,13 +209,12 @@ void OpenGLRender::setupFramebuffer() {
 }
 
 void OpenGLRender::setupShader() {
-
 	colorShaderProgram = glCreateProgram();
 
 	GLuint vertShadId = glCreateShader(GL_VERTEX_SHADER);
 	std::string srcString = fileToString("shader/basic.vs");
 	const char* vertShadSrc = srcString.c_str();
-	glShaderSource(vertShadId, 1, &vertShadSrc, 0);
+	glShaderSource(vertShadId, 1, &vertShadSrc, nullptr);
 	glCompileShader(vertShadId);
 
 	int result;
@@ -244,11 +224,10 @@ void OpenGLRender::setupShader() {
 	}
 	srcString.clear();
 
-
 	GLuint fragShadId = glCreateShader(GL_FRAGMENT_SHADER);
 	srcString = fileToString("shader/basic.fs");
 	vertShadSrc = srcString.c_str();
-	glShaderSource(fragShadId, 1, &vertShadSrc, 0);
+	glShaderSource(fragShadId, 1, &vertShadSrc, nullptr);
 	glCompileShader(fragShadId);
 
 	glGetShaderiv(fragShadId, GL_COMPILE_STATUS, &result);
@@ -275,7 +254,7 @@ void OpenGLRender::setupShader() {
 	vertShadId = glCreateShader(GL_VERTEX_SHADER);
 	srcString = fileToString("shader/basic.vs");
 	vertShadSrc = srcString.c_str();
-	glShaderSource(vertShadId, 1, &vertShadSrc, 0);
+	glShaderSource(vertShadId, 1, &vertShadSrc, nullptr);
 	glCompileShader(vertShadId);
 
 	glGetShaderiv(vertShadId, GL_COMPILE_STATUS, &result);
@@ -284,11 +263,10 @@ void OpenGLRender::setupShader() {
 	}
 	srcString.clear();
 
-
 	fragShadId = glCreateShader(GL_FRAGMENT_SHADER);
 	srcString = fileToString("shader/depth.fs");
 	vertShadSrc = srcString.c_str();
-	glShaderSource(fragShadId, 1, &vertShadSrc, 0);
+	glShaderSource(fragShadId, 1, &vertShadSrc, nullptr);
 	glCompileShader(fragShadId);
 
 	glGetShaderiv(fragShadId, GL_COMPILE_STATUS, &result);
@@ -309,9 +287,7 @@ void OpenGLRender::setupShader() {
 	glUseProgram(depthShaderProgram);
 	glDeleteShader(vertShadId);
 	glDeleteShader(fragShadId);
-
 }
-
 
 std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3> & a, const std::vector<glm::vec3> & b) {
 	std::vector <glm::vec3> result;
@@ -338,6 +314,3 @@ void OpenGLRender::translateCam(glm::vec3 in_vec, float32 in_rotate, float32 in_
 	view = glm::lookAt(position + mov + movu, mov + movu, temporaryUp);
 	viewProj = projection * view * modelMat;
 }
-
-
-

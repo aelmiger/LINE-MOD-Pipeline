@@ -38,14 +38,12 @@
 #endif
 
 int main() {
-
 	Template_Generator templateGen = Template_Generator(CameraParameters(), TemplateGenerationSettings());
-	templateGen.run();
+	//templateGen.run();
 	templateGen.~Template_Generator();
 
 	Pose_Detection poseDetect = Pose_Detection(CameraParameters(), TemplateGenerationSettings());
 	poseDetect.run();
-
 
 	std::getchar();
 }

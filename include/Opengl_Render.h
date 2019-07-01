@@ -30,7 +30,6 @@ public:
 	void readModelFile(std::string in_file, Model &in_model);
 	void calculateMatch3DPosition(ObjectPose &in_objectPos, TemplatePosition &in_templatePosition, cv::linemod::Match &in_match);
 
-
 private:
 	SDL_Window* window;
 	std::vector<ModelBuffer> modBuff;
@@ -61,4 +60,3 @@ private:
 	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3> & a, const std::vector<glm::vec3> & b);
 	void translateCam(glm::vec3 in_vec, float32 in_rotate, float32 in_x, float32 in_y);
 };
-

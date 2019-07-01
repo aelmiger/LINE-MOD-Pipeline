@@ -1,6 +1,5 @@
 #include "high_level_linemod_icp.h"
 
-
 HighLevelLinemodIcp::HighLevelLinemodIcp(uint16 in_iteration, float32 in_tolerance, float32 in_rejectionScale, uint16 in_numIterations, uint16 in_sampleStep, std::vector<std::string> in_modelFiles, std::string in_modFolder) :
 	sampleStep(in_sampleStep),
 	modelFiles(in_modelFiles),
@@ -16,9 +15,9 @@ HighLevelLinemodIcp::~HighLevelLinemodIcp()
 }
 
 void HighLevelLinemodIcp::loadModels() {
-	for (size_t i = 0; i < modelFiles.size(); i++)
+	for (const auto & modelFile : modelFiles)
 	{
-		cv::Mat tempModel = cv::ppf_match_3d::loadPLYSimple((modelFolder + modelFiles[i]).c_str(), 1);
+		cv::Mat tempModel = cv::ppf_match_3d::loadPLYSimple((modelFolder + modelFile).c_str(), 1);
 		int numRows = tempModel.rows / sampleStep;
 		cv::Mat sampledPC = cv::Mat(numRows, tempModel.cols, tempModel.type());
 		int c = 0;
@@ -29,7 +28,6 @@ void HighLevelLinemodIcp::loadModels() {
 		modelVertices.push_back(sampledPC);
 	}
 }
-
 
 void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& in_camMatrix, cv::Rect& bb) {
 	cv::Mat blurredDepth;
@@ -49,32 +47,28 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	cv::Vec3d viewpoint(0, 0, 0);
 	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint); //TODO Change what to do if patchedNaNs = 0
 }
-void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses,uint16 in_modelNumber) {
+void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uint16 in_modelNumber) {
 	poses.clear();
-	for (size_t i = 0; i < in_poses.size(); i++)
+	for (auto & in_pose : in_poses)
 	{
 		cv::ppf_match_3d::Pose3DPtr pose(new cv::ppf_match_3d::Pose3D());
 		cv::Matx33d rotM;
 		cv::Vec3d tranV;
-		tranV[0] = in_poses[i].translation.x;
-		tranV[1] = in_poses[i].translation.y;
-		tranV[2] = in_poses[i].translation.z;
+		tranV[0] = in_pose.translation.x;
+		tranV[1] = in_pose.translation.y;
+		tranV[2] = in_pose.translation.z;
 
-		fromGLM2CV(glm::toMat3(in_poses[i].quaternions), &rotM);
+		fromGLM2CV(glm::toMat3(in_pose.quaternions), &rotM);
 
 		pose->updatePose(rotM, tranV);
 		poses.push_back(pose);
-
 	}
 	icp->registerModelToScene(modelVertices[in_modelNumber], sceneVertices, poses);
-
 
 	for (size_t n = 0; n < poses.size(); n++)
 	{
 		updatePosition(poses[n]->pose, in_poses[n]);
 	}
-
-
 }
 
 uint16 HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender* in_openglRend, uint16 in_modelIndice) {
@@ -109,10 +103,7 @@ uint16 HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<O
 		}
 	}
 	return bestPose;
-
 }
-
-
 
 void HighLevelLinemodIcp::remove_if(const cv::Mat &in_mat, cv::Mat &in_res, bool in_removeRows)
 {
@@ -136,8 +127,6 @@ void HighLevelLinemodIcp::remove_if(const cv::Mat &in_mat, cv::Mat &in_res, bool
 		}
 	}
 }
-
-
 
 void HighLevelLinemodIcp::depthToBinary(cv::Mat &in_gray, cv::Mat &in_binary, uint32 in_threshold) {
 	cv::threshold(in_gray, in_binary, in_threshold, 65535, cv::THRESH_BINARY);

@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include <opencv2/core.hpp>
 #include <opencv2/surface_matching.hpp>
 #include <opencv2/surface_matching/ppf_helpers.hpp>
@@ -18,7 +16,7 @@
 class HighLevelLinemodIcp
 {
 public:
-	HighLevelLinemodIcp(uint16 in_iteration, float32 in_tolerance, float32 in_rejectionScale, uint16 in_numIterations, uint16 in_sampleStep,std::vector<std::string> in_modelFiles,std::string in_modFolder);
+	HighLevelLinemodIcp(uint16 in_iteration, float32 in_tolerance, float32 in_rejectionScale, uint16 in_numIterations, uint16 in_sampleStep, std::vector<std::string> in_modelFiles, std::string in_modFolder);
 	~HighLevelLinemodIcp();
 
 	void prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& in_camMatrix, cv::Rect& bb);
@@ -36,4 +34,3 @@ private:
 	void depthToBinary(cv::Mat &in_gray, cv::Mat &in_binary, uint32 in_threshold = 1);
 	void loadModels();
 };
-

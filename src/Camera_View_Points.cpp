@@ -1,7 +1,5 @@
 #include "camera_view_points.h"
 
-
-
 CameraViewPoints::CameraViewPoints(float32 in_radius, uint8 in_subdivions) {
 	radius = in_radius;
 	numSubdivisions = in_subdivions;
@@ -31,50 +29,50 @@ void CameraViewPoints::icosahedronPointsFromRadius() {
 	icosahedronPointB = icosahedronPointA * goldenRatio;
 }
 void CameraViewPoints::createVerticesForRotSym() {
-	for (float32 i = -90; i < 90; i = i + 5)
+	for (float32 i = 0; i < 90; i = i + 10)
 	{
-		vertices.push_back(glm::vec3{ cos(i*M_PI / 180.0f)*radius,sin(i*M_PI / 180.0f)*radius,0.0f });
+		vertices.emplace_back( cos(i*M_PI / 180.0f)*radius,sin(i*M_PI / 180.0f)*radius,0.0f );
 	}
 }
 void CameraViewPoints::createIcosahedron() {
-	vertices.push_back(glm::vec3{ -icosahedronPointA,0.0f,icosahedronPointB });
-	vertices.push_back(glm::vec3{ icosahedronPointA,0.0f,icosahedronPointB });
-	vertices.push_back(glm::vec3{ -icosahedronPointA,0.0f,-icosahedronPointB });
-	vertices.push_back(glm::vec3{ icosahedronPointA,0.0f,-icosahedronPointB });
+	vertices.emplace_back( -icosahedronPointA,0.0f,icosahedronPointB );
+	vertices.emplace_back( icosahedronPointA,0.0f,icosahedronPointB );
+	vertices.emplace_back( -icosahedronPointA,0.0f,-icosahedronPointB );
+	vertices.emplace_back( icosahedronPointA,0.0f,-icosahedronPointB );
 
-	vertices.push_back(glm::vec3{ 0.0f,icosahedronPointB,icosahedronPointA });
-	vertices.push_back(glm::vec3{ 0.0f,icosahedronPointB,-icosahedronPointA });
-	vertices.push_back(glm::vec3{ 0.0f,-icosahedronPointB,icosahedronPointA });
-	vertices.push_back(glm::vec3{ 0.0f,-icosahedronPointB,-icosahedronPointA });
+	vertices.emplace_back( 0.0f,icosahedronPointB,icosahedronPointA );
+	vertices.emplace_back( 0.0f,icosahedronPointB,-icosahedronPointA );
+	vertices.emplace_back( 0.0f,-icosahedronPointB,icosahedronPointA );
+	vertices.emplace_back( 0.0f,-icosahedronPointB,-icosahedronPointA );
 
-	vertices.push_back(glm::vec3{ icosahedronPointB,icosahedronPointA,0.0f });
-	vertices.push_back(glm::vec3{ -icosahedronPointB,icosahedronPointA,0.0f });
-	vertices.push_back(glm::vec3{ icosahedronPointB,-icosahedronPointA,0.0f });
-	vertices.push_back(glm::vec3{ -icosahedronPointB,-icosahedronPointA,0.0f });
+	vertices.emplace_back( icosahedronPointB,icosahedronPointA,0.0f );
+	vertices.emplace_back( -icosahedronPointB,icosahedronPointA,0.0f );
+	vertices.emplace_back( icosahedronPointB,-icosahedronPointA,0.0f );
+	vertices.emplace_back( -icosahedronPointB,-icosahedronPointA,0.0f );
 
-	indices.push_back(Index{ 0, 4, 1 });
-	indices.push_back(Index{ 0,9,4 });
-	indices.push_back(Index{ 9,5,4 });
-	indices.push_back(Index{ 4,5,8 });
-	indices.push_back(Index{ 4,8,1 });
+	indices.emplace_back(0, 4, 1 );
+	indices.emplace_back( 0,9,4 );
+	indices.emplace_back( 9,5,4 );
+	indices.emplace_back( 4,5,8 );
+	indices.emplace_back( 4,8,1 );
 
-	indices.push_back(Index{ 8,10,1 });
-	indices.push_back(Index{ 8,3,10 });
-	indices.push_back(Index{ 5,3,8 });
-	indices.push_back(Index{ 5,2,3 });
-	indices.push_back(Index{ 2,7,3 });
+	indices.emplace_back( 8,10,1);
+	indices.emplace_back( 8,3,10);
+	indices.emplace_back( 5,3,8 );
+	indices.emplace_back( 5,2,3 );
+	indices.emplace_back( 2,7,3 );
 
-	indices.push_back(Index{ 7,10,3 });
-	indices.push_back(Index{ 7,6,10 });
-	indices.push_back(Index{ 7,11,6 });
-	indices.push_back(Index{ 11,0,6 });
-	indices.push_back(Index{ 0,1,6 });
+	indices.emplace_back( 7,10,3);
+	indices.emplace_back( 7,6,10);
+	indices.emplace_back( 7,11,6);
+	indices.emplace_back( 11,0,6);
+	indices.emplace_back( 0,1,6 );
 
-	indices.push_back(Index{ 6,1,10 });
-	indices.push_back(Index{ 9,0,11 });
-	indices.push_back(Index{ 9,11,2 });
-	indices.push_back(Index{ 9,2,5 });
-	indices.push_back(Index{ 7,2,11 });
+	indices.emplace_back( 6,1,10);
+	indices.emplace_back( 9,0,11);
+	indices.emplace_back( 9,11,2);
+	indices.emplace_back( 9,2,5 );
+	indices.emplace_back( 7,2,11);
 }
 
 int32 CameraViewPoints::checkForDuplicate(uint32 vertSize) {
@@ -85,7 +83,6 @@ int32 CameraViewPoints::checkForDuplicate(uint32 vertSize) {
 		}
 	});
 	return index;
-
 }
 
 void CameraViewPoints::subdivide() {
@@ -94,12 +91,10 @@ void CameraViewPoints::subdivide() {
 		uint32 duplicateIndex = 0;
 		uint32 currentVertSize = vertices.size();
 		for (uint32 i = 0; i < numFaces; i++) {
-
-
-			vertices.push_back(glm::vec3{
+			vertices.emplace_back(
 				(vertices[indices[i].a].x + vertices[indices[i].b].x) / 2,
 				(vertices[indices[i].a].y + vertices[indices[i].b].y) / 2,
-				(vertices[indices[i].a].z + vertices[indices[i].b].z) / 2 });
+				(vertices[indices[i].a].z + vertices[indices[i].b].z) / 2 );
 			adjustVecToRadius(currentVertSize);
 
 			duplicateIndex = checkForDuplicate(currentVertSize);
@@ -113,10 +108,10 @@ void CameraViewPoints::subdivide() {
 				currentVertSize++;
 			}
 
-			vertices.push_back(glm::vec3{
+			vertices.emplace_back(
 				(vertices[indices[i].c].x + vertices[indices[i].b].x) / 2,
 				(vertices[indices[i].c].y + vertices[indices[i].b].y) / 2,
-				(vertices[indices[i].c].z + vertices[indices[i].b].z) / 2 });
+				(vertices[indices[i].c].z + vertices[indices[i].b].z) / 2 );
 			adjustVecToRadius(currentVertSize);
 
 			uint32 bcIndex = 0;
@@ -130,10 +125,10 @@ void CameraViewPoints::subdivide() {
 				currentVertSize++;
 			}
 
-			vertices.push_back(glm::vec3{
+			vertices.emplace_back(
 				(vertices[indices[i].a].x + vertices[indices[i].c].x) / 2,
 				(vertices[indices[i].a].y + vertices[indices[i].c].y) / 2,
-				(vertices[indices[i].a].z + vertices[indices[i].c].z) / 2 });
+				(vertices[indices[i].a].z + vertices[indices[i].c].z) / 2 );
 			adjustVecToRadius(currentVertSize);
 
 			uint32 acIndex = 0;
@@ -147,13 +142,10 @@ void CameraViewPoints::subdivide() {
 				currentVertSize++;
 			}
 
-
-			indices.push_back(Index{ indices[i].a,abIndex,acIndex });
-			indices.push_back(Index{ indices[i].b,abIndex,bcIndex });
-			indices.push_back(Index{ indices[i].c,bcIndex,acIndex });
+			indices.emplace_back(indices[i].a,abIndex,acIndex );
+			indices.emplace_back( indices[i].b,abIndex,bcIndex );
+			indices.emplace_back( indices[i].c,bcIndex,acIndex );
 			indices[i] = { abIndex, bcIndex, acIndex };
-
-
 		}
 	}
 }

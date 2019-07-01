@@ -27,6 +27,4 @@ private:
 	libfreenect2::FrameMap frames;
 	cv::Mat rgbmat, depthmat, depthmatUndistorted, rgbd, rgbd2, croppedBgr, croppedDepth;
 	libfreenect2::SyncMultiFrameListener* listener;
-
 };
-

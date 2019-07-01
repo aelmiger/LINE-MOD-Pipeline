@@ -1,7 +1,5 @@
 #include "Template_Generator.h"
 
-
-
 Template_Generator::Template_Generator(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
 	startDistance(in_templateSettings.startDistance),
 	endDistance(in_templateSettings.endDistance),
@@ -12,16 +10,13 @@ Template_Generator::Template_Generator(CameraParameters const& in_camParams, Tem
 	opengl = new OpenGLRender(in_camParams);
 	line = new HighLevelLinemod(in_camParams, in_templateSettings);
 	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
-
 }
-
 
 Template_Generator::~Template_Generator()
 {
 	delete opengl;
 	delete line;
 }
-
 
 void Template_Generator::run()
 {
@@ -42,18 +37,15 @@ void Template_Generator::run()
 				renderImages(images, i, j);
 				line->addTemplate(images, modelFiles[i], camVertices[j]);
 			}
-
 		}
 		line->pushBackTemplates();
 	}
 	line->writeLinemod();
-
 }
 
-
 void Template_Generator::createCamViewPoints(float32 in_radiusToModel) {
-	CameraViewPoints camPoints(in_radiusToModel);
-	//CameraViewPoints camPoints(in_radiusToModel, subdivisions);
+	//CameraViewPoints camPoints(in_radiusToModel);
+	CameraViewPoints camPoints(in_radiusToModel, subdivisions);
 	camVertices = camPoints.getVertices();
 	numCameraVertices = camVertices.size();
 }
@@ -89,11 +81,9 @@ void Template_Generator::printProgBar(uint16 in_percent, std::string in_mfile) {
 	if (in_percent == 100) {
 		std::cout << std::endl;
 	}
-
 }
 
 uint16 Template_Generator::calculateCurrentPercent(uint16 const& in_spehreRadius, uint16 const& in_currentIteration) {
 	uint16 numberOfDiffRadius = std::floor((endDistance - startDistance + stepSize) / stepSize);
 	return((((in_currentIteration + 1) * 100) / numCameraVertices) / numberOfDiffRadius + (in_spehreRadius - startDistance) / stepSize * 100 / numberOfDiffRadius);
 }
-

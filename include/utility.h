@@ -19,7 +19,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-
 #include "defines.h"
 /*
 #################### CONVERSION UTILITY ####################
@@ -32,17 +31,13 @@ bool fromGLM2CV(const glm::mat4& glmmat, cv::Mat* cvmat);
 bool fromGLM2CV(const glm::mat3& glmmat, cv::Mat* cvmat);
 bool fromGLM2CV(const glm::mat3& glmmat, cv::Matx33d* in_mat);
 
-
 /*
 #################### FILE UTILITY ####################
 */
 
-
 void filesInDirectory(std::vector<std::string>& in_filePathVector, std::string in_path, std::string in_extension);
 std::string fileToString(const char* filename);
 cv::Mat loadDepth(std::string a_name);
-
-
 
 /*
 #################### CALC UTILITY ####################

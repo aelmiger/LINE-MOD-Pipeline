@@ -22,4 +22,3 @@ private:
 	void processNode(aiNode* in_node, const aiScene* in_scene, Model& in_model);
 	void processMesh(aiMesh* mesh, const aiScene* scene, Model& in_model);
 };
-

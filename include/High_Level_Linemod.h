@@ -14,13 +14,8 @@
 #include "defines.h"
 #include "utility.h"
 
-
-
-
-
 class HighLevelLinemod
 {
-
 public:
 	HighLevelLinemod(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings);
 	~HighLevelLinemod();
@@ -30,18 +25,15 @@ public:
 	uint32 getNumTemplates();
 
 	bool addTemplate(std::vector<cv::Mat> in_images, std::string in_modelName, glm::vec3 in_cameraPosition);
-	bool detectTemplate(std::vector<cv::Mat>& in_imgs,uint16 in_classNumber);
+	bool detectTemplate(std::vector<cv::Mat>& in_imgs, uint16 in_classNumber);
 	void writeLinemod();
 	void readLinemod();
 	void pushBackTemplates();
 
 	std::vector<std::vector<ObjectPose>> getObjectPoses();
 
-
-
-
 private:
-	const uint16 percentToPassCheck = 70;
+	const uint16 percentToPassCheck = 60;
 	const uint16 numberWantedPoses = 3;
 
 	cv::Ptr<cv::linemod::Detector> detector;
@@ -66,7 +58,7 @@ private:
 	int32 tempDepth;
 
 	struct ColorRangeOfObject {
-		ColorRangeOfObject(){}
+		ColorRangeOfObject() {}
 		ColorRangeOfObject(cv::Scalar s1, cv::Scalar s2) :
 			lowerBoundary(s1),
 			upperBoundary(s2) {
@@ -94,11 +86,11 @@ private:
 		PotentialMatch(cv::Point in_point, size_t in_indices) :
 			position(in_point) {
 			matchIndices.push_back(in_indices);
-	}
+		}
 		cv::Point position;
 		std::vector<size_t> matchIndices;
 	};
-
+	cv::Mat colorImgHue;
 	std::vector<Template> templates;
 	ColorRangeOfObject currentColorRange;
 	std::vector<std::vector<Template>> modelTemplates;
@@ -130,6 +122,4 @@ private:
 	void discardSmallMatchGroups();
 	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches, std::vector<size_t> in_indices);
 	void readColorRanges();
-
 };
-

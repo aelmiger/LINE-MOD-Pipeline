@@ -9,7 +9,6 @@ TemplatePosition::TemplatePosition(std::string in_s, glm::vec3 in_v, float32 in_
 	depthAtCenter = in_depthAtCenter;
 }
 
-
 ObjectPose::ObjectPose() {}
 ObjectPose::ObjectPose(glm::vec3 tra, glm::qua<float32> qua) :
 	translation(tra),

@@ -8,10 +8,7 @@
 
 const float32 goldenRatio = 1.61803398875;
 
-
-
 class CameraViewPoints {
-
 	float32 radius;
 	float32 icosahedronPointA;
 	float32 icosahedronPointB;
@@ -34,5 +31,4 @@ private:
 	int32 checkForDuplicate(uint32 vertSize);
 	void subdivide();
 	void adjustVecToRadius(uint32 index);
-
 };
