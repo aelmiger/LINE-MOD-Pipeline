@@ -5,8 +5,8 @@
 #include <string>
 
 #define SDL_MAIN_HANDLED
-#include <SDL/SDL.h>
-#define GLEW_STATIC
+#include <SDL2/SDL.h>
+//#define GLEW_STATIC
 #include <GL/glew.h>
 #include <opencv2/core.hpp>
 
