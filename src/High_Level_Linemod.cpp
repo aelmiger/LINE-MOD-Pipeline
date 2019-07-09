@@ -1,7 +1,7 @@
 #include "High_Level_Linemod.h"
 
 HighLevelLinemod::HighLevelLinemod(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
-	onlyColor(in_templateSettings.onlyUseColorModality),
+	onlyColorModality(in_templateSettings.onlyUseColorModality),
 	videoWidth(in_camParams.videoWidth),
 	videoHeight(in_camParams.videoHeight),
 	cx(in_camParams.cx),
@@ -15,7 +15,7 @@ HighLevelLinemod::HighLevelLinemod(CameraParameters const& in_camParams, Templat
 	stepSize(in_templateSettings.stepSize),
 	modelFolder(in_templateSettings.modelFolder)
 {
-	if (!onlyColor)
+	if (!onlyColorModality)
 	{
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
 		modality.emplace_back(cv::makePtr<cv::linemod::ColorGradient>());
@@ -74,7 +74,7 @@ bool HighLevelLinemod::addTemplate(std::vector<cv::Mat> in_images, const std::st
 		cv::warpAffine(in_images[0], colorRotated, inPlaneRotationMat[q], in_images[0].size());
 		cv::warpAffine(in_images[1], depthRotated, inPlaneRotationMat[q], in_images[1].size());
 		templateImgs.push_back(colorRotated);
-		if (!onlyColor)
+		if (!onlyColorModality)
 		{
 			templateImgs.push_back(depthRotated);
 		}
@@ -132,7 +132,7 @@ bool HighLevelLinemod::detectTemplate(std::vector<cv::Mat>& in_imgs, uint16 in_c
 	bool depthCheckForColorDetector = false;
 
 	const std::vector<std::string> currentClass(1, detector->classIds()[in_classNumber]);
-	if (onlyColor && in_imgs.size() == 2)
+	if (onlyColorModality && in_imgs.size() == 2)
 	{
 		tmpDepth = in_imgs[1];
 		in_imgs.pop_back();
@@ -366,14 +366,14 @@ bool HighLevelLinemod::applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::v
 {
 	for (uint32 i = 0; i < groupedMatches.size(); i++)
 	{
-		if (!onlyColor)
+		if (!onlyColorModality)
 		{
 			if (colorCheck(colorImgHue, i, percentToPassCheck) && depthCheck(in_imgs[1], i))
 			{
 				updateTranslationAndCreateObjectPose(i, in_objPoses);
 			}
 		}
-		else if (onlyColor && in_imgs.size() == 2)
+		else if (onlyColorModality && in_imgs.size() == 2)
 		{
 			if (colorCheck(colorImgHue, i, percentToPassCheck) && depthCheck(in_imgs[1], i))
 			{

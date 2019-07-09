@@ -39,7 +39,7 @@ private:
 
 	cv::Ptr<cv::linemod::Detector> detector;
 
-	bool onlyColor;
+	bool onlyColorModality;
 
 	uint16 videoWidth;
 	uint16 videoHeight;
