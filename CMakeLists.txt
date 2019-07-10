@@ -5,6 +5,9 @@ project(LINE-MOD)
 include_directories(include)
 
 file(GLOB SOURCES "src/*.cpp")
+# sources ohne die exe
+# daraus eine libraries
+# 
 
 #TEMPORARY ADJUSTMENT TODO
 list(APPEND CMAKE_PREFIX_PATH "C:/Users/Anton/Documents/libraries")
@@ -77,10 +80,12 @@ if(NOT OpenCV_FOUND)
     message(ERROR "OpenCV not found!")
 endif(NOT OpenCV_FOUND)
 
-add_executable(LINE-MOD ${SOURCES})
-
+add_library(LINE-MOD ${SOURCES})
+add_executable(MAIN "src/main.cpp")
 set_property(TARGET LINE-MOD PROPERTY CXX_STANDARD 17)
 set_property(TARGET LINE-MOD PROPERTY CXX_STANDARD_REQUIRED ON)
+
+#target_link_libraries(MAIN ${OPENGL_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${GLM_LIBRARIES})

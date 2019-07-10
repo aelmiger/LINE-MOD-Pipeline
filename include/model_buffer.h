@@ -6,7 +6,7 @@
 
 struct ModelBuffer
 {
-	ModelBuffer(void* in_vertData, uint32 in_numVertices, void* in_indData, uint32 in_numIndices, uint8 in_elementSize)
+	ModelBuffer(void* in_vertData, uint32_t in_numVertices, void* in_indData, uint32_t in_numIndices, uint8_t in_elementSize)
 	{
 		glGenBuffers(1, &indBufferId);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indBufferId);

@@ -5,7 +5,7 @@
 #################### CONVERSION UTILITY ####################
 */
 
-glm::qua<float32> openGL2openCVRotation(glm::mat4& in_viewMat)
+glm::qua<float> openGL2openCVRotation(glm::mat4& in_viewMat)
 {
 	glm::qua tempQuat = toQuat(in_viewMat);
 	glm::vec3 eul = eulerAngles(tempQuat);
@@ -21,7 +21,7 @@ bool fromCV2GLM(const cv::Mat& cvmat, glm::mat4* glmmat)
 		std::cout << "CV to GLM Matrix conversion Error" << std::endl;
 		return false;
 	}
-	memcpy(value_ptr(*glmmat), tempMat.data, 16 * sizeof(float32));
+	memcpy(value_ptr(*glmmat), tempMat.data, 16 * sizeof(float));
 	*glmmat = transpose(*glmmat);
 	return true;
 }
@@ -35,7 +35,7 @@ bool fromCV2GLM(const cv::Mat& cvmat, glm::mat3* glmmat)
 		std::cout << "CV to GLM Matrix conversion Error" << std::endl;
 		return false;
 	}
-	memcpy(value_ptr(*glmmat), tempMat.data, 9 * sizeof(float32));
+	memcpy(value_ptr(*glmmat), tempMat.data, 9 * sizeof(float));
 	*glmmat = transpose(*glmmat);
 	return true;
 }
@@ -131,9 +131,9 @@ cv::Mat loadDepth(const std::string& a_name)
 	{
 		for (int l_c = 0; l_c < l_col; ++l_c)
 		{
-			uint16 depthVal;
-			l_file.read((char*)&depthVal, sizeof(uint16));
-			lp_image.at<uint16>(l_r, l_c) = depthVal;
+			uint16_t depthVal;
+			l_file.read((char*)&depthVal, sizeof(uint16_t));
+			lp_image.at<uint16_t>(l_r, l_c) = depthVal;
 		}
 	}
 	l_file.close();
@@ -145,16 +145,16 @@ cv::Mat loadDepth(const std::string& a_name)
 #################### CALC UTILITY ####################
 */
 
-float32 length(cv::Vec3f& in_vecA)
+float length(cv::Vec3f& in_vecA)
 {
 	return sqrt(in_vecA[0] * in_vecA[0] + in_vecA[1] * in_vecA[1] + in_vecA[2] * in_vecA[2]);
 }
 
-void readGroundTruthLinemodDataset(uint32 in_fileNumber, ObjectPose& in_objectPos)
+void readGroundTruthLinemodDataset(uint32_t in_fileNumber, ObjectPose& in_objectPos)
 {
 	glm::vec3 translation;
 	cv::Vec3f angles;
-	float64 tempNumber;
+	double tempNumber;
 
 	std::ifstream fileStreamTranslation("data/tra" + std::to_string(in_fileNumber) + ".tra");
 	if (!fileStreamTranslation.is_open())
@@ -192,12 +192,12 @@ void readGroundTruthLinemodDataset(uint32 in_fileNumber, ObjectPose& in_objectPo
 	fileStreamRotation.close();
 	glm::mat3 rotMatGlm;
 	fromCV2GLM(rotMat, &rotMatGlm);
-	glm::qua<float32> quaternions = quat_cast(rotMatGlm);
+	glm::qua<float> quaternions = quat_cast(rotMatGlm);
 	translation *= 10;
 	in_objectPos = {translation, quaternions};
 }
 
-float32 matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, ObjectPose& in_estimate)
+float matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, ObjectPose& in_estimate)
 {
 	cv::Mat rotMatGroundTruth;
 	cv::Mat rotMatEstimate;
@@ -206,7 +206,7 @@ float32 matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, Objec
 
 	cv::Mat difference(in_model.numVertices, 1, CV_32F);
 
-	concurrency::parallel_for(uint32(0), (uint32)in_model.numVertices, [&](uint32 i)
+	concurrency::parallel_for(uint32_t(0), (uint32_t)in_model.numVertices, [&](uint32_t i)
 	{
 		cv::Matx31f vertModel(in_model.vertices[i].x, in_model.vertices[i].y, in_model.vertices[i].z);
 
@@ -217,11 +217,11 @@ float32 matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, Objec
 			in_estimate.translation.x, in_estimate.translation.y, in_estimate.translation.z);
 
 		cv::Mat differenceBetweenMat = groundTruthRotatedTranslated - estimateTruthRotatedTranslated;
-		cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float32>(0, 0), differenceBetweenMat.at<float32>(1, 0),
-		                               differenceBetweenMat.at<float32>(2, 0));
-		difference.at<float32>(i, 0) = length(differenceBetweenVec);
+		cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float>(0, 0), differenceBetweenMat.at<float>(1, 0),
+		                               differenceBetweenMat.at<float>(2, 0));
+		difference.at<float>(i, 0) = length(differenceBetweenVec);
 	});
-	float32 mean = sum(difference)[0] / in_model.numVertices;
+	float mean = sum(difference)[0] / in_model.numVertices;
 	return mean;
 }
 
@@ -256,7 +256,7 @@ void drawResponse(const std::vector<cv::linemod::Template>& templates,
 	}
 }
 
-void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float32 in_coordinateSystemLength,
+void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
                           ObjectPose& in_objPos)
 {
 	cv::Mat rotMat;

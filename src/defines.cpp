@@ -5,8 +5,8 @@ TemplatePosition::TemplatePosition()
 {
 }
 
-TemplatePosition::TemplatePosition(std::string in_s, glm::vec3 in_v, float32 in_rotation, cv::Rect in_boundingBox,
-                                   uint16 in_depthAtCenter)
+TemplatePosition::TemplatePosition(std::string in_s, glm::vec3 in_v, float in_rotation, cv::Rect in_boundingBox,
+                                   uint16_t in_depthAtCenter)
 {
 	modelName = std::move(in_s);
 	positionCam = in_v;
@@ -19,13 +19,13 @@ ObjectPose::ObjectPose()
 {
 }
 
-ObjectPose::ObjectPose(glm::vec3 tra, glm::qua<float32> qua) :
+ObjectPose::ObjectPose(glm::vec3 tra, glm::qua<float> qua) :
 	translation(tra),
 	quaternions(qua)
 {
 }
 
-ObjectPose::ObjectPose(glm::vec3 tra, glm::qua<float32> qua, cv::Rect bb) :
+ObjectPose::ObjectPose(glm::vec3 tra, glm::qua<float> qua, cv::Rect bb) :
 	translation(tra),
 	quaternions(qua),
 	boundingBox(std::move(bb))
