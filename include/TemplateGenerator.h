@@ -14,6 +14,7 @@ class TemplateGenerator
 public:
 	TemplateGenerator();
 	~TemplateGenerator();
+	void cleanup();
 	void run();
 
 private:
