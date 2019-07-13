@@ -1,4 +1,4 @@
-#include "Camera_View_Points.h"
+#include "CameraViewPoints.h"
 
 CameraViewPoints::CameraViewPoints(float in_radius, uint8_t in_subdivions)
 {
@@ -89,14 +89,16 @@ void CameraViewPoints::createIcosahedron()
 int32_t CameraViewPoints::checkForDuplicate(uint32_t vertSize)
 {
 	uint32_t index = -1;
-	concurrency::parallel_for(uint32_t(0), (uint32_t)vertSize, [&](uint32_t i)
+
+	#pragma omp parallel for
+	for(int32_t i = 0; i < vertSize; i++)
 	{
 		if (vertices[vertSize].x == vertices[i].x && vertices[vertSize].y == vertices[i].y && vertices[vertSize].z ==
 			vertices[i].z)
 		{
 			index = i;
 		}
-	});
+	}
 	return index;
 }
 

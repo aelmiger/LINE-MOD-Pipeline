@@ -72,11 +72,11 @@ struct TemplateGenerationSettings
 
 	const bool onlyUseColorModality = false;
 
-	const uint16_t startDistance = 600;
+	const uint16_t startDistance = 1100;
 	const uint16_t endDistance = 1200;
 	const uint16_t stepSize = 50;
 	const uint8_t subdivisions = 2;
-	const uint16_t angleStart = -45;
-	const uint16_t angleStop = 45;
-	const uint16_t angleStep = 10;
+	const int16_t angleStart = -45;
+	const int16_t angleStop = 45;
+	const int16_t angleStep = 15;
 };

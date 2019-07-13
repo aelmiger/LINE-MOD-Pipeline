@@ -7,8 +7,8 @@
 //#include <glm/gtx/string_cast.hpp>
 
 #include "OpenglRender.h"
-#include "High_Level_Linemod.h"
-#include "HighLevelLinemod_Icp.h"
+#include "HighLevelLinemod.h"
+#include "HighLevelLinemodIcp.h"
 #include "Kinect2.h"
 
 class PoseDetection

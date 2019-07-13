@@ -1,4 +1,4 @@
-#include "High_Level_Linemod.h"
+#include "HighLevelLinemod.h"
 
 HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
 	onlyColorModality(in_templateSettings.onlyUseColorModality),
@@ -91,7 +91,7 @@ bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat> in_images, const std::st
 		glm::vec3 translation;
 		glm::qua<float> quaternions;
 		uint16_t medianDepth = medianMat(depthRotated, boundingBox, 4);
-		float currentInplaneAngle = -(lowerAngleStop + q * angleStep);
+		int16_t currentInplaneAngle = -(lowerAngleStop + q * angleStep);
 		calculateTemplatePose(translation, quaternions, in_cameraPosition, currentInplaneAngle);
 		templates.emplace_back(translation, quaternions, boundingBox, medianDepth);
 	}
@@ -243,7 +243,7 @@ void HighLevelLineMOD::discardSmallMatchGroups()
 
 void HighLevelLineMOD::writeLinemod()
 {
-	std::string filename = "linemod_templates.yml";
+	std::string filename = "linemod_templates.yml.gz";
 	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
 	detector->write(fs);
 
@@ -317,7 +317,7 @@ std::vector<std::vector<ObjectPose>> HighLevelLineMOD::getObjectPoses()
 
 void HighLevelLineMOD::generateRotMatForInplaneRotation()
 {
-	for (uint16_t angle = lowerAngleStop; angle <= upperAngleStop; angle = angle + angleStep)
+	for (int16_t angle = lowerAngleStop; angle <= upperAngleStop; angle = angle + angleStep)
 	{
 		cv::Point2f srcCenter(videoWidth / 2, videoHeight / 2);
 		inPlaneRotationMat.push_back(getRotationMatrix2D(srcCenter, angle, 1.0f));
@@ -338,7 +338,7 @@ uint16_t HighLevelLineMOD::medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uin
 }
 
 void HighLevelLineMOD::calculateTemplatePose(glm::vec3& in_translation, glm::qua<float>& in_quats,
-                                             glm::vec3& in_cameraPosition, float& in_inplaneRot)
+                                             glm::vec3& in_cameraPosition, int16_t& in_inplaneRot)
 {
 	in_translation.x = 0.0f;
 	in_translation.y = 0.0f;
@@ -350,7 +350,7 @@ void HighLevelLineMOD::calculateTemplatePose(glm::vec3& in_translation, glm::qua
 		in_cameraPosition[0] = 0.00000000001;
 	}
 	glm::vec3 camUp = normalize(cross(in_cameraPosition, cross(in_cameraPosition, up)));
-	glm::vec3 rotatedUp = rotate(-camUp, glm::radians(in_inplaneRot), normalize(in_cameraPosition));
+	glm::vec3 rotatedUp = rotate(-camUp, glm::radians((float)in_inplaneRot), normalize(in_cameraPosition));
 	glm::mat4 view = lookAt(in_cameraPosition, glm::vec3(0.f), rotatedUp);
 	in_quats = openglCoordinatesystem2opencv(view);
 }

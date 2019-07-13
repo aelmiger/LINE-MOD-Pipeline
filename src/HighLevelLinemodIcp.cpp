@@ -1,4 +1,4 @@
-#include "HighLevelLinemod_Icp.h"
+#include "HighLevelLinemodIcp.h"
 
 HighLevelLinemodIcp::HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance, float in_rejectionScale,
                                          uint16_t in_numIterations, uint16_t in_sampleStep,

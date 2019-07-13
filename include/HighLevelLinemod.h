@@ -51,8 +51,8 @@ private:
 	float fieldOfViewHeight;
 
 	std::vector<cv::Mat> inPlaneRotationMat;
-	uint16_t lowerAngleStop;
-	uint16_t upperAngleStop;
+	int16_t lowerAngleStop;
+	int16_t upperAngleStop;
 	uint16_t angleStep;
 	uint16_t stepSize;
 
@@ -123,8 +123,7 @@ private:
 	//Utility Functions
 	void generateRotMatForInplaneRotation();
 	uint16_t medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uint8_t in_medianPosition);
-	void calculateTemplatePose(glm::vec3& in_translation, glm::qua<float>& in_quats, glm::vec3& in_cameraPosition,
-	                           float& in_inplaneRot);
+	void calculateTemplatePose(glm::vec3 & in_translation, glm::qua<float>& in_quats, glm::vec3 & in_cameraPosition, int16_t & in_inplaneRot);
 	glm::qua<float> openglCoordinatesystem2opencv(glm::mat4& in_viewMat);
 	bool applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::vector<ObjectPose>& in_objPoses);
 	bool colorCheck(cv::Mat& in_hueImg, uint32_t& in_numMatch, float in_percentCorrectColor);

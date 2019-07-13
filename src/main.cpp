@@ -35,19 +35,16 @@
 
 #endif
 
-
-//TODO Ohne underscore in den Klassen
-
 int main()
 {
 	TemplateGenerator templateGen = TemplateGenerator(CameraParameters(), TemplateGenerationSettings()); //TODO 
-	//templateGen.run();
+	templateGen.run();
 	//TODO 2 exe in cmake!
 	//TODO cleanup()
 	//templateGen.~Template_Generator();
 
-	PoseDetection poseDetect = PoseDetection(CameraParameters(), TemplateGenerationSettings()); //TODO YML als settings datei
-	poseDetect.run(); //TODO cleanup Funktion und nullptr abfrage
+	//PoseDetection poseDetect = PoseDetection(CameraParameters(), TemplateGenerationSettings()); //TODO YML als settings datei
+	//poseDetect.run(); //TODO cleanup Funktion und nullptr abfrage
 
 	//TODO implement nach welcher klasse suchen und wieviele Objekte
 	//TODO run mit funktionen austauschen!
