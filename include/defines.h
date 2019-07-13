@@ -55,8 +55,7 @@ struct CameraParameters
 	cv::Mat cameraMatrix;
 	uint16_t videoWidth;
 	uint16_t videoHeight;
-	cv::Mat distortionCoefficients = (cv::Mat1d(1, 5) << -2.7167827743927644e-03, 2.0942424424199252e-01,
-		1.1120545920170163e-03, -6.6420567497010334e-03, 0.);
+	cv::Mat distortionCoefficients;
 };
 
 struct TemplateGenerationSettings

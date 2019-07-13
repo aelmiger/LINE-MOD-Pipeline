@@ -18,7 +18,12 @@ TemplateGenerator::TemplateGenerator()
 
 TemplateGenerator::~TemplateGenerator()
 {
-	if(opengl) { //TODO das in eine cleanup funktion
+	cleanup();
+}
+
+
+void TemplateGenerator::cleanup() {
+	if (opengl) {
 		delete opengl;
 	}
 	if (line) {
@@ -122,6 +127,8 @@ void TemplateGenerator::writeSettings() {
 	fs << "camera fy" << camParam.fy;
 	fs << "camera cx" << camParam.cx;
 	fs << "camera cy" << camParam.cy;
+	fs << "distortion parameters" << camParam.distortionCoefficients;
+	fs << "color" << cv::Scalar(0, 20, 100);
 	fs.writeComment("###### TEMPLATE GENERATION SETTINGS ######");
 	fs << "model folder" << temp.modelFolder;
 	fs << "model file ending" << temp.modelFileEnding;

@@ -7,6 +7,12 @@ camera fx: 5.7241137695312500e+02
 camera fy: 5.7357043457031250e+02
 camera cx: 3.2526110839843750e+02
 camera cy: 2.4204899597167969e+02
+distortion parameters: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ -2.7167827743927644e-03, 2.0942424424199252e-01,
+       1.1120545920170163e-03, -6.6420567497010334e-03, 0. ]
 # ###### TEMPLATE GENERATION SETTINGS ######
 model folder: models/
 model file ending: ".ply"

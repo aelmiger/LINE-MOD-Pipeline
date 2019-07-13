@@ -302,6 +302,7 @@ void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in
 	in_camParams.cx = fs["camera cx"];
 	in_camParams.cy = fs["camera cy"];
 	in_camParams.cameraMatrix = (cv::Mat1d(3, 3) << in_camParams.fx, 0, in_camParams.cx, 0, in_camParams.fy, in_camParams.cy, 0, 0, 1);
+	fs["distortion parameters"] >> in_camParams.distortionCoefficients;
 
 	in_tempGenSettings.modelFolder = fs["model folder"];
 	in_tempGenSettings.modelFileEnding = fs["model file ending"];
