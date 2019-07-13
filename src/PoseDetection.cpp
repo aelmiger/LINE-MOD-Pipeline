@@ -1,13 +1,16 @@
 #include "PoseDetection.h"
 
-PoseDetection::PoseDetection(CameraParameters const& in_camParams,
-                               TemplateGenerationSettings const& in_templateSettings) :
-	modelFolder(in_templateSettings.modelFolder),
-	cameraMatrix(in_camParams.cameraMatrix)
+PoseDetection::PoseDetection()
 {
-	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
-	opengl = new OpenGLRender(in_camParams); //TODO unique_ptr shared_ptr
-	line = new HighLevelLineMOD(in_camParams, in_templateSettings);
+	CameraParameters camParams;
+	TemplateGenerationSettings templateSettings;
+	readSettings(camParams, templateSettings);
+	modelFolder= templateSettings.modelFolder;
+	cameraMatrix = camParams.cameraMatrix;
+
+	filesInDirectory(modelFiles, modelFolder, templateSettings.modelFileEnding);
+	opengl = new OpenGLRender(camParams); //TODO unique_ptr shared_ptr
+	line = new HighLevelLineMOD(camParams, templateSettings);
 	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 2, modelFiles, modelFolder);
 }
 

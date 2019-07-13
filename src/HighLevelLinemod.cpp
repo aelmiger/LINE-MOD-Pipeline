@@ -260,13 +260,13 @@ void HighLevelLineMOD::writeLinemod()
 	std::ofstream templatePositionFile("linemod_tempPosFile.bin", std::ios::binary | std::ios::out);
 	uint32_t numTempVecs = modelTemplates.size();
 	templatePositionFile.write((char*)&numTempVecs, sizeof(uint32_t));
-	for (uint32_t numTemplateVec = 0; numTemplateVec < numTempVecs; numTemplateVec++)
+	for (const auto& modelTemplate:modelTemplates)
 	{
-		uint64_t numTemp = modelTemplates[numTemplateVec].size();
+		uint64_t numTemp = modelTemplate.size();
 		templatePositionFile.write((char*)&numTemp, sizeof(uint64_t));
 		for (uint64_t i = 0; i < numTemp; i++)
 		{
-			templatePositionFile.write((char *)&modelTemplates[numTemplateVec][i], sizeof(Template));
+			templatePositionFile.write((char *)&modelTemplate[i], sizeof(Template));
 		}
 	}
 	templatePositionFile.close();
@@ -276,7 +276,7 @@ void HighLevelLineMOD::readLinemod()
 {
 	templates.clear();
 	modelTemplates.clear();
-	std::string filename = "linemod_templates.yml";
+	std::string filename = "linemod_templates.yml.gz";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	detector->read(fs.root());
 

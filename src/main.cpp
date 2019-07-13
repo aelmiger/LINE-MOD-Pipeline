@@ -37,7 +37,7 @@
 
 int main()
 {
-	TemplateGenerator templateGen = TemplateGenerator(CameraParameters(), TemplateGenerationSettings()); //TODO 
+	TemplateGenerator templateGen = TemplateGenerator(); //TODO 
 	templateGen.run();
 	//TODO 2 exe in cmake!
 	//TODO cleanup()

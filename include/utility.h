@@ -38,7 +38,7 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::st
                       in_extension);
 std::string fileToString(const char* filename);
 cv::Mat loadDepth(const std::string& a_name);
-
+void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings);
 /*
 #################### CALC UTILITY ####################
 */

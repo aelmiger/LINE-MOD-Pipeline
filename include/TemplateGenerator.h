@@ -12,7 +12,7 @@
 class TemplateGenerator
 {
 public:
-	TemplateGenerator(CameraParameters const& in_camParameters, TemplateGenerationSettings const& in_templateSettings);
+	TemplateGenerator();
 	~TemplateGenerator();
 	void run();
 
@@ -35,4 +35,5 @@ private:
 
 	void printProgBar(uint16_t in_percent, std::string const& in_mfile);
 	uint16_t calculateCurrentPercent(uint16_t const& in_spehreRadius, uint16_t const& in_currentIteration);
+	void writeSettings();
 };

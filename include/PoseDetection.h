@@ -10,11 +10,12 @@
 #include "HighLevelLinemod.h"
 #include "HighLevelLinemodIcp.h"
 #include "Kinect2.h"
+#include "utility.h"
 
 class PoseDetection
 {
 public:
-	PoseDetection(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings);
+	PoseDetection();
 	~PoseDetection();
 	void run();
 private:

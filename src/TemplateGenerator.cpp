@@ -1,16 +1,19 @@
 #include "TemplateGenerator.h"
 
-TemplateGenerator::TemplateGenerator(CameraParameters const& in_camParameters,
-                                       TemplateGenerationSettings const& in_templateSettings) :
-	modelFolder(in_templateSettings.modelFolder),
-	startDistance(in_templateSettings.startDistance),
-	endDistance(in_templateSettings.endDistance),
-	stepSize(in_templateSettings.stepSize),
-	subdivisions(in_templateSettings.subdivisions)
+TemplateGenerator::TemplateGenerator()
 {
-	opengl = new OpenGLRender(in_camParameters);
-	line = new HighLevelLineMOD(in_camParameters, in_templateSettings);
-	filesInDirectory(modelFiles, modelFolder, in_templateSettings.modelFileEnding);
+	CameraParameters camParams;
+	TemplateGenerationSettings templateSettings;
+	readSettings(camParams, templateSettings);
+	modelFolder = templateSettings.modelFolder;
+	startDistance=templateSettings.startDistance;
+	endDistance=templateSettings.endDistance;
+	stepSize=templateSettings.stepSize;
+	subdivisions = templateSettings.subdivisions;
+
+	opengl = new OpenGLRender(camParams);
+	line = new HighLevelLineMOD(camParams, templateSettings);
+	filesInDirectory(modelFiles, modelFolder, templateSettings.modelFileEnding);
 }
 
 TemplateGenerator::~TemplateGenerator()
@@ -104,4 +107,30 @@ uint16_t TemplateGenerator::calculateCurrentPercent(uint16_t const& in_spehreRad
 	return std::round(
 		(float)(in_currentIteration + 1) * 100.0f / (float)numCameraVertices / (float)numberOfDiffRadius + (float)(
 			in_spehreRadius - startDistance) / (float)stepSize * 100 / (float)numberOfDiffRadius);
+}
+
+
+void TemplateGenerator::writeSettings() {
+	CameraParameters camParam = CameraParameters();
+	TemplateGenerationSettings temp = TemplateGenerationSettings();
+	std::string filename = "linemod_settings.yml";
+	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+	fs.writeComment("###### CAMERA PARAMETERS ######");
+	fs << "video width" << camParam.videoWidth;
+	fs << "video height" << camParam.videoHeight;
+	fs << "camera fx" << camParam.fx;
+	fs << "camera fy" << camParam.fy;
+	fs << "camera cx" << camParam.cx;
+	fs << "camera cy" << camParam.cy;
+	fs.writeComment("###### TEMPLATE GENERATION SETTINGS ######");
+	fs << "model folder" << temp.modelFolder;
+	fs << "model file ending" << temp.modelFileEnding;
+	fs << "only use color modality" << temp.onlyUseColorModality;
+	fs << "in plane rotation starting angle" << temp.angleStart;
+	fs << "in plane rotation stopping angle" << temp.angleStop;
+	fs << "in plane rotation angle step" << temp.angleStep;
+	fs << "distance start" << temp.startDistance;
+	fs << "distance stop" << temp.endDistance;
+	fs << "distance step" << temp.stepSize;
+	fs << "icosahedron subdivisions" << temp.subdivisions;
 }

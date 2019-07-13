@@ -291,3 +291,26 @@ void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose)
 	in_objPose.quaternions = toQuat(transMat);
 	in_objPose.translation = glm::vec3(in_mat(0, 3), in_mat(1, 3), in_mat(2, 3));
 }
+
+void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings) {
+	std::string filename = "linemod_settings.yml";
+	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	in_camParams.videoWidth = (int)fs["video width"];
+	in_camParams.videoHeight = (int)fs["video height"];
+	in_camParams.fx = fs["camera fx"];
+	in_camParams.fy = fs["camera fy"];
+	in_camParams.cx = fs["camera cx"];
+	in_camParams.cy = fs["camera cy"];
+	in_camParams.cameraMatrix = (cv::Mat1d(3, 3) << in_camParams.fx, 0, in_camParams.cx, 0, in_camParams.fy, in_camParams.cy, 0, 0, 1);
+
+	in_tempGenSettings.modelFolder = fs["model folder"];
+	in_tempGenSettings.modelFileEnding = fs["model file ending"];
+	in_tempGenSettings.onlyUseColorModality = (bool)(int)fs["only use color modality"];
+	in_tempGenSettings.angleStart = (int)fs["in plane rotation starting angle"];
+	in_tempGenSettings.angleStop = (int)fs["in plane rotation stopping angle"];
+	in_tempGenSettings.angleStep = (int)fs["in plane rotation angle step"];
+	in_tempGenSettings.startDistance = (int)fs["distance start"];
+	in_tempGenSettings.endDistance = (int)fs["distance stop"];
+	in_tempGenSettings.stepSize = (int)fs["distance step"];
+	in_tempGenSettings.subdivisions = (int)fs["icosahedron subdivisions"];
+}
