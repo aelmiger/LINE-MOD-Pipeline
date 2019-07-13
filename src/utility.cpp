@@ -1,5 +1,4 @@
 #include "utility.h"
-#include <opencv2/imgproc.hpp>
 
 /*
 #################### CONVERSION UTILITY ####################
@@ -206,7 +205,8 @@ float matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, ObjectP
 
 	cv::Mat difference(in_model.numVertices, 1, CV_32F);
 
-	concurrency::parallel_for(uint32_t(0), (uint32_t)in_model.numVertices, [&](uint32_t i)
+	#pragma omp parallel for
+	for (int32_t i = 0; i < in_model.numVertices;i++)
 	{
 		cv::Matx31f vertModel(in_model.vertices[i].x, in_model.vertices[i].y, in_model.vertices[i].z);
 
@@ -220,7 +220,7 @@ float matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, ObjectP
 		cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float>(0, 0), differenceBetweenMat.at<float>(1, 0),
 		                               differenceBetweenMat.at<float>(2, 0));
 		difference.at<float>(i, 0) = length(differenceBetweenVec);
-	});
+	}
 	float mean = sum(difference)[0] / in_model.numVertices;
 	return mean;
 }
