@@ -26,10 +26,10 @@ private:
 	cv::Mat colorImg;
 	cv::Mat depthImg;
 
+	CameraParameters camParams;
+	TemplateGenerationSettings templateSettings;
 	std::vector<std::string> modelFiles;
-	std::string modelFolder;
 	std::vector<cv::String> ids;
-	cv::Mat cameraMatrix;
 
 	void readLinemodFromFile();
 };

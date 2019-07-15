@@ -106,6 +106,7 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 		absdiff(maskedDepthImg, maskedDepth, diffImg);
 
 		cv::Scalar mean = cv::mean(diffImg, binary);
+		std::cout << "mean: " << mean << " it: " << i << std::endl;
 
 		if ((mean[0] < bestMean && mean[0] != 0) || i == 0)
 		{

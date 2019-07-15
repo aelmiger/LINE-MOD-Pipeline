@@ -57,3 +57,4 @@ void drawResponse(const std::vector<cv::linemod::Template>& templates,
 void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
                           ObjectPose& in_objPos);
 void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose);
+cv::Mat translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety);

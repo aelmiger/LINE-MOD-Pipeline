@@ -2,16 +2,12 @@
 
 PoseDetection::PoseDetection()
 {
-	CameraParameters camParams;
-	TemplateGenerationSettings templateSettings;
 	readSettings(camParams, templateSettings);
-	modelFolder= templateSettings.modelFolder;
-	cameraMatrix = camParams.cameraMatrix;
 
-	filesInDirectory(modelFiles, modelFolder, templateSettings.modelFileEnding);
+	filesInDirectory(modelFiles, templateSettings.modelFolder, templateSettings.modelFileEnding);
 	opengl = new OpenGLRender(camParams); //TODO unique_ptr shared_ptr
 	line = new HighLevelLineMOD(camParams, templateSettings);
-	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 2, modelFiles, modelFolder);
+	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 2, modelFiles, templateSettings.modelFolder);
 }
 
 PoseDetection::~PoseDetection()
@@ -25,7 +21,7 @@ void PoseDetection::run()
 {
 	for (const auto& modelFile : modelFiles)
 	{
-		opengl->creatModBuffFromFiles(modelFolder + modelFile);
+		opengl->creatModBuffFromFiles(templateSettings.modelFolder + modelFile);
 	}
 	readLinemodFromFile();
 	
@@ -36,7 +32,7 @@ void PoseDetection::run()
 	int counter = 0;
 	double accumDiff = 0;
 	ObjectPose groundTruth;
-	opengl->readModelFile(modelFolder + modelFiles[0], tmp); //TODO welches file
+	opengl->readModelFile(templateSettings.modelFolder + modelFiles[0], tmp); //TODO welches file
 	///////////////
 	std::vector<float> score;
 
@@ -57,10 +53,14 @@ void PoseDetection::run()
 			break;
 		}
 		depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
+		cv::Mat correctedTranslationColor = colorImg.clone();
+		cv::Mat correctedTranslationDepth = depthImg.clone();
+		translateImg(correctedTranslationColor, -camParams.cx+camParams.videoWidth/2, -camParams.cy+camParams.videoHeight/2);
+		translateImg(correctedTranslationDepth, -camParams.cx + camParams.videoWidth / 2, -camParams.cy + camParams.videoHeight / 2);
 
 		//float scoreNew = 100;
-		inputImg.push_back(colorImg);
-		inputImg.push_back(depthImg);
+		inputImg.push_back(correctedTranslationColor);
+		inputImg.push_back(correctedTranslationDepth);
 		for (size_t numClass = 0; numClass < line->getNumClasses(); numClass++)
 		{
 			finalObjectPoses.clear();
@@ -69,15 +69,17 @@ void PoseDetection::run()
 			uint16_t bestPose = 0;
 			if (!detectedPoses.empty())
 			{
-				bench.calculateError(depthImg, opengl, groundTruth, detectedPoses[0][0], numClass);
+				bench.calculateError(correctedTranslationDepth, opengl, groundTruth, detectedPoses[0][0], numClass);
 				for (auto& detectedPose : detectedPoses)
 				{
-				//	icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPose[0].boundingBox);
-				//	icp->registerToScene(detectedPose, numClass);
-				//	bestPose = icp->estimateBestMatch(depthImg, detectedPose, opengl, numClass);
-					drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPose[bestPose]);
+					icp->prepareDepthForIcp(depthImg, camParams.cameraMatrix, detectedPose[0].boundingBox);
+					icp->registerToScene(detectedPose, numClass);
+					bestPose = icp->estimateBestMatch(correctedTranslationDepth, detectedPose, opengl, numClass);
+					drawCoordinateSystem(colorImg, camParams.cameraMatrix, 75.0f, detectedPose[bestPose]);
 					finalObjectPoses.push_back(detectedPose[bestPose]);
 				}
+				//bench.calculateError(correctedTranslationDepth, opengl, groundTruth, detectedPoses[0][bestPose], numClass);
+
 				//scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[0][bestPose]);
 				//std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
 

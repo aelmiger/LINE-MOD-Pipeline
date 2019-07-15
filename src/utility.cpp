@@ -294,6 +294,13 @@ void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose)
 	in_objPose.translation = glm::vec3(in_mat(0, 3), in_mat(1, 3), in_mat(2, 3));
 }
 
+cv::Mat translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety)
+{
+	cv::Mat trans_mat = (cv::Mat_<double>(2, 3) << 1, 0, in_offsetx, 0, 1, in_offsety);
+	cv::warpAffine(in_img, in_img, trans_mat, in_img.size());
+	return in_img;
+}
+
 void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings) {
 	std::string filename = "linemod_settings.yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);

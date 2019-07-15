@@ -23,7 +23,7 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 		modality.emplace_back(cv::makePtr<cv::linemod::DepthNormal>());
 		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
-		static const int T_DEFAULTS[] = {4, 8};
+		static const int T_DEFAULTS[] = {5, 8};
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else
@@ -138,7 +138,7 @@ bool HighLevelLineMOD::detectTemplate(std::vector<cv::Mat>& in_imgs, uint16_t in
 		in_imgs.pop_back();
 		depthCheckForColorDetector = true;
 	}
-	detector->match(in_imgs, 86.0f, matches, currentClass);
+	detector->match(in_imgs, 85.0f, matches, currentClass);
 	if (depthCheckForColorDetector)
 	{
 		in_imgs.push_back(tmpDepth);
@@ -450,8 +450,8 @@ void HighLevelLineMOD::calcPosition(uint32_t const& in_numMatch, glm::vec3& in_p
 	in_position.z = calcTrueZ(in_directDepth, angleFromCenter);
 
 	float mmOffsetFromCenter = in_position.z * (offsetFromCenter / fy);
-	in_position.x = (pixelX - cx) / offsetFromCenter * mmOffsetFromCenter;
-	in_position.y = (pixelY - cy) / offsetFromCenter * mmOffsetFromCenter;
+	in_position.x = (pixelX - videoWidth/2) / offsetFromCenter * mmOffsetFromCenter;
+	in_position.y = (pixelY - videoHeight/2) / offsetFromCenter * mmOffsetFromCenter;
 }
 
 void HighLevelLineMOD::calcRotation(uint32_t const& in_numMatch, glm::vec3 const& in_position,
@@ -463,14 +463,14 @@ void HighLevelLineMOD::calcRotation(uint32_t const& in_numMatch, glm::vec3 const
 
 void HighLevelLineMOD::matchToPixelCoord(uint32_t const& in_numMatch, float& in_x, float& in_y)
 {
-	in_x = (groupedMatches[in_numMatch].x + cx - templates[groupedMatches[in_numMatch].template_id].boundingBox.x);
-	in_y = (groupedMatches[in_numMatch].y + cy - templates[groupedMatches[in_numMatch].template_id].boundingBox.y);
+	in_x = (groupedMatches[in_numMatch].x + videoWidth/2 - templates[groupedMatches[in_numMatch].template_id].boundingBox.x);
+	in_y = (groupedMatches[in_numMatch].y + videoHeight/2 - templates[groupedMatches[in_numMatch].template_id].boundingBox.y);
 }
 
 float HighLevelLineMOD::pixelDistToCenter(float in_x, float in_y)
 {
-	in_x -= cx;
-	in_y -= cy;
+	in_x -= videoWidth/2;
+	in_y -= videoHeight/2;
 	return sqrt(in_x * in_x + in_y * in_y);
 }
 
