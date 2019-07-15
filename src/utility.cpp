@@ -192,8 +192,10 @@ void readGroundTruthLinemodDataset(uint32_t in_fileNumber, ObjectPose& in_object
 	glm::mat3 rotMatGlm;
 	fromCV2GLM(rotMat, &rotMatGlm);
 	glm::qua<float> quaternions = quat_cast(rotMatGlm);
+	glm::vec3 eul = eulerAngles(quaternions);
+	glm::qua adjustedQuats(glm::vec3(eul.x - M_PI/2, eul.y, eul.z)); //TODO IMPORTANT adjust to benchmark
 	translation *= 10;
-	in_objectPos = {translation, quaternions};
+	in_objectPos = {translation, adjustedQuats };
 }
 
 float matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, ObjectPose& in_estimate)

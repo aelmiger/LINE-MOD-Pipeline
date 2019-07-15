@@ -1,9 +1,6 @@
 #pragma once
 #include "defines.h"
 #include <vector>
-//#include <cmath>
-#include <ppl.h>
-
 #include <glm/glm.hpp>
 
 const float goldenRatio = 1.61803398875;
@@ -19,6 +16,7 @@ class CameraViewPoints
 	std::vector<Index> indices;
 public:
 	CameraViewPoints(float in_radius, uint8_t in_subdivions);
+	void removeSuperfluousVertices(ModelProperties const & in_modProp);
 	CameraViewPoints(float in_radius);
 	uint32_t getNumVertices();
 	uint32_t getNumIndices();

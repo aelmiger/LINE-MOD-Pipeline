@@ -9,12 +9,32 @@ CameraViewPoints::CameraViewPoints(float in_radius, uint8_t in_subdivions)
 	vertices.reserve((20 * pow(4, (uint32_t)numSubdivisions)) / 2 + 2);
 	indices.reserve(20 * pow(4, (uint32_t)numSubdivisions));
 	subdivide();
+	ModelProperties modProps;
+	removeSuperfluousVertices(modProps);
+}
+void CameraViewPoints::removeSuperfluousVertices(ModelProperties const& in_modProp) {
+	std::vector<glm::vec3> tmpVertices;
+	for (const auto& vertice : vertices)
+	{
+		glm::vec3 tmpVertice = vertice * in_modProp.symmetryProperties;
+		bool allElementsPositive = true;
+		if (tmpVertice.x < 0 || tmpVertice.y < 0 || tmpVertice.z < 0) {
+			allElementsPositive = false;
+		}
+		if (allElementsPositive) {
+			tmpVertices.push_back(vertice);
+		}
+	}
+	vertices.clear();
+	vertices = tmpVertices;
 }
 
 CameraViewPoints::CameraViewPoints(float in_radius)
 {
 	radius = in_radius;
 	createVerticesForRotSym();
+	ModelProperties modProps;
+	removeSuperfluousVertices(modProps);
 }
 
 uint32_t CameraViewPoints::getNumVertices()
@@ -38,9 +58,9 @@ void CameraViewPoints::icosahedronPointsFromRadius()
 
 void CameraViewPoints::createVerticesForRotSym()
 {
-	for (uint16_t i = 0; i < 90; i = i + 10)
+	for (uint16_t i = 0; i < 360; i = i + 5)
 	{
-		vertices.emplace_back(cos(i * M_PI / 180.0f) * radius, sin(i * M_PI / 180.0f) * radius, 0.0f);
+		vertices.emplace_back(0.0f, sin(i * M_PI / 180.0f) * radius, cos(i * M_PI / 180.0f) * radius);
 	}
 }
 

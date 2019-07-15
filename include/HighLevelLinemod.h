@@ -26,7 +26,7 @@ public:
 	uint16_t getNumClasses();
 	uint32_t getNumTemplates();
 
-	bool addTemplate(std::vector<cv::Mat> in_images, const std::string& in_modelName, glm::vec3 in_cameraPosition);
+	bool addTemplate(std::vector<cv::Mat>& in_images, const std::string& in_modelName, glm::vec3 in_cameraPosition);
 	bool detectTemplate(std::vector<cv::Mat>& in_imgs, uint16_t in_classNumber);
 	void writeLinemod();
 	void readLinemod();

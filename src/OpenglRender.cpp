@@ -84,7 +84,7 @@ void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_
 	view[3][2] = -in_traVec[2];
 	view[3][3] = 1.0f;
 	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	viewProj = projection * view * modelMat;
+	viewProj = projection * view; //* modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -131,7 +131,7 @@ void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_
 	view[3][2] = -in_traVec[2];
 	view[3][3] = 1.0f;
 	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	viewProj = projection * view * modelMat;
+	viewProj = projection * view;// *modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -346,5 +346,5 @@ void OpenGLRender::translateCam(glm::vec3 in_vec, float in_rotate, float in_x, f
 
 	glm::vec3 temporaryUp = rotate(-fakeup, glm::radians(in_rotate), normalize(position));
 	view = lookAt(position + mov + movu, mov + movu, temporaryUp);
-	viewProj = projection * view * modelMat;
+	viewProj = projection * view;
 }

@@ -87,7 +87,7 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 	for (size_t i = 0; i < poses.size(); i++)
 	{
 		glm::vec3 eul = eulerAngles(in_poses[i].quaternions);
-		glm::qua quats(glm::vec3(eul.x + M_PI / 2.0f, -eul.y, -eul.z));
+		glm::qua quats(glm::vec3(eul.x + M_PI, -eul.y, -eul.z)); //TODO IMPORTANT adjust to benchmark
 		glm::mat4 newViewMat = toMat4(quats);
 		in_openglRend->renderDepthToFrontBuff(in_modelIndice, newViewMat, in_poses[i].translation);
 		cv::Mat depth = in_openglRend->getDepthImgFromBuff();

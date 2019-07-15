@@ -42,12 +42,6 @@ void TemplateGenerator::run()
 			for (size_t j = 0; j < numCameraVertices; j++)
 			{
 				printProgBar(calculateCurrentPercent(radiusToModel, j), modelFiles[i]);
-
-				if (!(camVertices[j].y >= 0))
-				{
-					//TODO NON HARDCODE
-					continue;
-				}
 				std::vector<cv::Mat> images;
 				renderImages(images, i, j);
 				line->addTemplate(images, modelFiles[i], camVertices[j]);
@@ -60,7 +54,7 @@ void TemplateGenerator::run()
 
 void TemplateGenerator::createCamViewPoints(float in_radiusToModel)
 {
-	//CameraViewPoints camPoints(in_radiusToModel);
+	//CameraViewPoints camPoints(in_radiusToModel); //TODO NON HARDCODE
 	CameraViewPoints camPoints(in_radiusToModel, subdivisions);
 	camVertices = camPoints.getVertices();
 	numCameraVertices = camVertices.size();

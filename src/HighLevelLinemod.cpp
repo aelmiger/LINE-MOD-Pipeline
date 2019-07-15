@@ -23,7 +23,7 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 		modality.emplace_back(cv::makePtr<cv::linemod::DepthNormal>());
 		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
-		static const int T_DEFAULTS[] = {5, 8};
+		static const int T_DEFAULTS[] = {4, 8};
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else
@@ -57,7 +57,7 @@ uint32_t HighLevelLineMOD::getNumTemplates()
 	return detector->numTemplates();
 }
 
-bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat> in_images, const std::string& in_modelName,
+bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat>& in_images, const std::string& in_modelName,
                                    glm::vec3 in_cameraPosition)
 {
 	cv::Mat mask;
@@ -138,7 +138,7 @@ bool HighLevelLineMOD::detectTemplate(std::vector<cv::Mat>& in_imgs, uint16_t in
 		in_imgs.pop_back();
 		depthCheckForColorDetector = true;
 	}
-	detector->match(in_imgs, 85.0f, matches, currentClass);
+	detector->match(in_imgs, 86.0f, matches, currentClass);
 	if (depthCheckForColorDetector)
 	{
 		in_imgs.push_back(tmpDepth);
@@ -351,15 +351,15 @@ void HighLevelLineMOD::calculateTemplatePose(glm::vec3& in_translation, glm::qua
 	}
 	glm::vec3 camUp = normalize(cross(in_cameraPosition, cross(in_cameraPosition, up)));
 	glm::vec3 rotatedUp = rotate(-camUp, glm::radians((float)in_inplaneRot), normalize(in_cameraPosition));
-	glm::mat4 view = lookAt(in_cameraPosition, glm::vec3(0.f), rotatedUp);
+	glm::mat4 view = lookAt(in_cameraPosition, glm::vec3(0.0f), rotatedUp);
 	in_quats = openglCoordinatesystem2opencv(view);
 }
 
 glm::qua<float> HighLevelLineMOD::openglCoordinatesystem2opencv(glm::mat4& in_viewMat)
 {
 	glm::qua<float> tempQuat = toQuat(in_viewMat);
-	glm::vec3 eul = eulerAngles(tempQuat);
-	return glm::qua(glm::vec3(eul.x - M_PI / 2.0f, -eul.y, -eul.z));
+	glm::vec3 eul =eulerAngles(tempQuat);
+	return glm::qua(glm::vec3(eul.x+M_PI, -eul.y, -eul.z));
 }
 
 bool HighLevelLineMOD::applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::vector<ObjectPose>& in_objPoses)

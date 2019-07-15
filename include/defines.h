@@ -73,3 +73,11 @@ struct TemplateGenerationSettings
 	int16_t angleStop;
 	int16_t angleStep;
 };
+
+struct ModelProperties
+{
+	cv::Scalar lowerColorRange;
+	cv::Scalar upperColorRange;
+	bool rotationallySymmetrical;
+	glm::vec3 symmetryProperties = glm::vec3(0,1,0);
+};

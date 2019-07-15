@@ -20,7 +20,7 @@ only use color modality: 0
 in plane rotation starting angle: -45
 in plane rotation stopping angle: 45
 in plane rotation angle step: 15
-distance start: 1100
-distance stop: 1200
+distance start: 750
+distance stop: 1000
 distance step: 50
 icosahedron subdivisions: 2

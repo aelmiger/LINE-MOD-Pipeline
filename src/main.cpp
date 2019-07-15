@@ -1,5 +1,6 @@
 #include "TemplateGenerator.h"
 #include "PoseDetection.h"
+#include "Aruco.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "SDL2.lib")
@@ -37,18 +38,19 @@
 
 int main()
 {
-	TemplateGenerator templateGen = TemplateGenerator(); //TODO 
-	templateGen.run();
+	//Aruco ar;
+	//ar.detectBoard();
+	//TemplateGenerator templateGen;
+	//templateGen.run();
 	//TODO 2 exe in cmake!
-	//TODO cleanup()
 	//templateGen.~Template_Generator();
 
-	//PoseDetection poseDetect = PoseDetection(CameraParameters(), TemplateGenerationSettings()); //TODO YML als settings datei
-	//poseDetect.run(); //TODO cleanup Funktion und nullptr abfrage
+	PoseDetection poseDetect; //TODO YML als settings datei
+	poseDetect.run(); //TODO cleanup Funktion und nullptr abfrage
 
 	//TODO implement nach welcher klasse suchen und wieviele Objekte
 	//TODO run mit funktionen austauschen!
-	//TODO vector NICHT BEI VALUE
+	//TODO vector nicht per value übergeben
 	//TODO doxygen
 	//TODO Docker
 	std::getchar();

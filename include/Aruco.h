@@ -5,6 +5,7 @@
 
 #include "defines.h"
 #include "Kinect2.h"
+#include "utility.h"
 
 class Aruco
 {

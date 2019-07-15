@@ -1,16 +1,13 @@
 #pragma once
 
 #include <opencv2/core.hpp>
-//#include <opencv2/highgui.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/videoio.hpp>
-//#include <glm/gtx/string_cast.hpp>
 
 #include "OpenglRender.h"
 #include "HighLevelLinemod.h"
 #include "HighLevelLinemodIcp.h"
 #include "Kinect2.h"
 #include "utility.h"
+#include "Benchmark.h"
 
 class PoseDetection
 {

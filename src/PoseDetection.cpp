@@ -28,9 +28,10 @@ void PoseDetection::run()
 		opengl->creatModBuffFromFiles(modelFolder + modelFile);
 	}
 	readLinemodFromFile();
-
+	
 	//TODO eventuell noch eine exe für Benchmarks
 	////////////////ONLY RELEVANT FOR BENCHMARK
+	Benchmark bench;
 	Model tmp;
 	int counter = 0;
 	double accumDiff = 0;
@@ -40,17 +41,15 @@ void PoseDetection::run()
 	std::vector<float> score;
 
 	//Kinect2 kin2;
-	//cv::VideoCapture cap(0);
 	cv::VideoCapture sequence("data/color%0d.jpg");
 
 	while (true)
 	{
 		std::string numb;
-		//cap.read(A);
 		sequence >> colorImg;
 		//kin2.getKinectFrames(colorImg, depthImg);
 		readGroundTruthLinemodDataset(counter, groundTruth);
-
+		
 		if (colorImg.empty())
 		{
 			std::cout << "End of Sequence" << std::endl;
@@ -59,7 +58,7 @@ void PoseDetection::run()
 		}
 		depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
 
-		float scoreNew = 100;
+		//float scoreNew = 100;
 		inputImg.push_back(colorImg);
 		inputImg.push_back(depthImg);
 		for (size_t numClass = 0; numClass < line->getNumClasses(); numClass++)
@@ -70,27 +69,28 @@ void PoseDetection::run()
 			uint16_t bestPose = 0;
 			if (!detectedPoses.empty())
 			{
+				bench.calculateError(depthImg, opengl, groundTruth, detectedPoses[0][0], numClass);
 				for (auto& detectedPose : detectedPoses)
 				{
-					icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPose[0].boundingBox);
-					icp->registerToScene(detectedPose, numClass);
-					bestPose = icp->estimateBestMatch(depthImg, detectedPose, opengl, numClass);
+				//	icp->prepareDepthForIcp(depthImg, cameraMatrix, detectedPose[0].boundingBox);
+				//	icp->registerToScene(detectedPose, numClass);
+				//	bestPose = icp->estimateBestMatch(depthImg, detectedPose, opengl, numClass);
 					drawCoordinateSystem(colorImg, cameraMatrix, 75.0f, detectedPose[bestPose]);
 					finalObjectPoses.push_back(detectedPose[bestPose]);
 				}
-				scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[0][bestPose]);
-				std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
+				//scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[0][bestPose]);
+				//std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
 
-				if (scoreNew <= 11)
-				{
+				//if (scoreNew <= 11)
+				//{
 					//TODO MAGIC NUMBER
-					accumDiff++;
-				}
+				//	accumDiff++;
+				//}
 				//cv::putText(colorImg, glm::to_string(detectedPoses[bestPose].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
 				//cv::putText(colorImg, glm::to_string(glm::degrees(glm::eulerAngles(detectedPoses[bestPose].quaternions))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
 			}
 		}
-		score.push_back(scoreNew);
+		//score.push_back(scoreNew);
 
 		counter++;
 		imshow("color", colorImg);
