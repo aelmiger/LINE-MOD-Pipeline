@@ -154,24 +154,6 @@ void OpenGLRender::readModelFile(std::string const& in_file, Model& in_model)
 	modImport.importModel(in_file, in_model);
 }
 
-void OpenGLRender::calculateMatch3DPosition(ObjectPose& in_objectPos, TemplatePosition& in_templatePosition,
-                                            cv::linemod::Match& in_match)
-{
-	glm::vec3 translation;
-	cv::Vec3f angles;
-
-	translation.z = glm::length(in_templatePosition.positionCam);
-	double alpha = ((1.0f - (in_match.y + cy - in_templatePosition.boundingBox.y) / (cy)) * fieldOfView / 2.0f);
-	translation.y = -tan(alpha * M_PI / 180) * translation.z;
-	alpha = ((1.0f - (in_match.x + cx - in_templatePosition.boundingBox.x) / (cx)) * fieldOfView * ((double)width / (
-		double)height) / 2.0f);
-	translation.x = -tan(alpha * M_PI / 180) * translation.z;
-
-	translateCam(in_templatePosition.positionCam, in_templatePosition.rotation, 0.0f, 0.0f);
-	glm::qua quats = openGL2openCVRotation(view);
-	in_objectPos = {translation, quats};
-}
-
 void OpenGLRender::setupSDLWindow()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);

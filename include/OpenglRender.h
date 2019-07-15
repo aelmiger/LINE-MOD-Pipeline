@@ -34,8 +34,6 @@ public:
 	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec);
 	void creatModBuffFromFiles(std::string const& in_modelLocation);
 	void readModelFile(std::string const& in_file, Model& in_model);
-	void calculateMatch3DPosition(ObjectPose& in_objectPos, TemplatePosition& in_templatePosition,
-	                              cv::linemod::Match& in_match);
 
 private:
 	SDL_Window* window;
