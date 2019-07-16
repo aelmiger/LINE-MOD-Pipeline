@@ -7,7 +7,7 @@ PoseDetection::PoseDetection()
 	filesInDirectory(modelFiles, templateSettings.modelFolder, templateSettings.modelFileEnding);
 	opengl = new OpenGLRender(camParams); //TODO unique_ptr shared_ptr
 	line = new HighLevelLineMOD(camParams, templateSettings);
-	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 2, modelFiles, templateSettings.modelFolder);
+	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8,5, modelFiles, templateSettings.modelFolder);
 }
 
 PoseDetection::~PoseDetection()
@@ -26,16 +26,9 @@ void PoseDetection::run()
 	readLinemodFromFile();
 	
 	//TODO eventuell noch eine exe für Benchmarks
-	////////////////ONLY RELEVANT FOR BENCHMARK
 	Benchmark bench;
-	Model tmp;
-	int counter = 0;
-	double accumDiff = 0;
-	ObjectPose groundTruth;
-	opengl->readModelFile(templateSettings.modelFolder + modelFiles[0], tmp); //TODO welches file
-	///////////////
-	std::vector<float> score;
-
+	bench.loadModel(opengl, templateSettings.modelFolder + modelFiles[0]);
+	int counter=0;
 	//Kinect2 kin2;
 	cv::VideoCapture sequence("data/color%0d.jpg");
 
@@ -44,12 +37,10 @@ void PoseDetection::run()
 		std::string numb;
 		sequence >> colorImg;
 		//kin2.getKinectFrames(colorImg, depthImg);
-		readGroundTruthLinemodDataset(counter, groundTruth);
 		
 		if (colorImg.empty())
 		{
 			std::cout << "End of Sequence" << std::endl;
-			std::cout << "Mean Diff: " << accumDiff / counter << std::endl;
 			break;
 		}
 		depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
@@ -58,7 +49,8 @@ void PoseDetection::run()
 		translateImg(correctedTranslationColor, -camParams.cx+camParams.videoWidth/2, -camParams.cy+camParams.videoHeight/2);
 		translateImg(correctedTranslationDepth, -camParams.cx + camParams.videoWidth / 2, -camParams.cy + camParams.videoHeight / 2);
 
-		//float scoreNew = 100;
+		float scoreNew = 100;
+		float error = 1;
 		inputImg.push_back(correctedTranslationColor);
 		inputImg.push_back(correctedTranslationDepth);
 		for (size_t numClass = 0; numClass < line->getNumClasses(); numClass++)
@@ -69,7 +61,6 @@ void PoseDetection::run()
 			uint16_t bestPose = 0;
 			if (!detectedPoses.empty())
 			{
-				bench.calculateError(correctedTranslationDepth, opengl, groundTruth, detectedPoses[0][0], numClass);
 				for (auto& detectedPose : detectedPoses)
 				{
 					icp->prepareDepthForIcp(depthImg, camParams.cameraMatrix, detectedPose[0].boundingBox);
@@ -78,22 +69,12 @@ void PoseDetection::run()
 					drawCoordinateSystem(colorImg, camParams.cameraMatrix, 75.0f, detectedPose[bestPose]);
 					finalObjectPoses.push_back(detectedPose[bestPose]);
 				}
-				//bench.calculateError(correctedTranslationDepth, opengl, groundTruth, detectedPoses[0][bestPose], numClass);
-
-				//scoreNew = matchingScoreParallel(tmp, groundTruth, detectedPoses[0][bestPose]);
-				//std::cout << "final " << bestPose << ": " << scoreNew << std::endl;
-
-				//if (scoreNew <= 11)
-				//{
-					//TODO MAGIC NUMBER
-				//	accumDiff++;
-				//}
-				//cv::putText(colorImg, glm::to_string(detectedPoses[bestPose].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
-				//cv::putText(colorImg, glm::to_string(glm::degrees(glm::eulerAngles(detectedPoses[bestPose].quaternions))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
+				error = bench.calculateErrorHodan(correctedTranslationDepth, opengl, detectedPoses[0][bestPose], numClass);
+				scoreNew = bench.calculateErrorLM(detectedPoses[0][bestPose]);
+				//std::cout << "final " << bestPose << ": " << scoreNew << "  newBench: "<<error<<std::endl;
 			}
 		}
-		//score.push_back(scoreNew);
-
+		bench.increaseImgCounter();
 		counter++;
 		imshow("color", colorImg);
 		if (cv::waitKey(1) == 27)

@@ -40,8 +40,8 @@ int main()
 {
 	//Aruco ar;
 	//ar.detectBoard();
-	//TemplateGenerator templateGen;
-	//templateGen.run();
+	TemplateGenerator templateGen;
+	templateGen.run();
 	//TODO 2 exe in cmake!
 	//templateGen.~Template_Generator();
 

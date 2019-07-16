@@ -44,8 +44,6 @@ void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in
 */
 
 float length(cv::Vec3f& in_vecA);
-void readGroundTruthLinemodDataset(uint32_t in_fileNumber, ObjectPose& in_objectPos);
-float matchingScoreParallel(Model& in_model, ObjectPose& in_groundTruth, ObjectPose& in_estimate);
 
 /*
 #################### IMAGE UTILITY ####################

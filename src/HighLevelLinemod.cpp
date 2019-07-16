@@ -23,7 +23,7 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 		modality.emplace_back(cv::makePtr<cv::linemod::DepthNormal>());
 		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
-		static const int T_DEFAULTS[] = {5, 8};
+		static const int T_DEFAULTS[] = {4, 8};
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else
@@ -136,6 +136,7 @@ bool HighLevelLineMOD::detectTemplate(std::vector<cv::Mat>& in_imgs, uint16_t in
 	{
 		tmpDepth = in_imgs[1];
 		in_imgs.pop_back();
+
 		depthCheckForColorDetector = true;
 	}
 	detector->match(in_imgs, 85.0f, matches, currentClass);
@@ -232,7 +233,7 @@ void HighLevelLineMOD::discardSmallMatchGroups()
 	for (size_t j = 0; j < numMatchGroups; j++)
 	{
 		float ratioToBiggestGroup = potentialMatches[j].matchIndices.size() * 100 / biggestGroup;
-		if (ratioToBiggestGroup > 25)
+		if (ratioToBiggestGroup > 30)
 		{
 			//TODO Non magic number
 			tmp.push_back(potentialMatches[j]);
