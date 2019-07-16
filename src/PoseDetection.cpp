@@ -50,6 +50,7 @@ void PoseDetection::run()
 		translateImg(correctedTranslationDepth, -camParams.cx + camParams.videoWidth / 2, -camParams.cy + camParams.videoHeight / 2);
 
 		float scoreNew = 100;
+		float scoreAmbig = 100;
 		float error = 1;
 		inputImg.push_back(correctedTranslationColor);
 		inputImg.push_back(correctedTranslationDepth);
@@ -71,6 +72,7 @@ void PoseDetection::run()
 				}
 				error = bench.calculateErrorHodan(correctedTranslationDepth, opengl, detectedPoses[0][bestPose], numClass);
 				scoreNew = bench.calculateErrorLM(detectedPoses[0][bestPose]);
+				scoreAmbig = bench.calculateErrorLMAmbigous(detectedPoses[0][bestPose]);
 				//std::cout << "final " << bestPose << ": " << scoreNew << "  newBench: "<<error<<std::endl;
 			}
 		}
