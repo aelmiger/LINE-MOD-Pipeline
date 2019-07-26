@@ -2,6 +2,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "defines.h"
 #include "Kinect2.h"

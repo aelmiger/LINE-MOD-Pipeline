@@ -27,10 +27,10 @@ public:
 	cv::Mat getColorImgFromBuff();
 	cv::Mat getDepthImgFromBuff();
 	void renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate = 0.0f,
-	                            float in_x = 0.0f, float in_y = 0.0f);
+		float in_x = 0.0f, float in_y = 0.0f);
 	void renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec);
 	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate = 0.0f,
-	                            float in_x = 0.0f, float in_y = 0.0f);
+		float in_x = 0.0f, float in_y = 0.0f);
 	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec);
 	void creatModBuffFromFiles(std::string const& in_modelLocation);
 	void readModelFile(std::string const& in_file, Model& in_model);

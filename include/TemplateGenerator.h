@@ -20,6 +20,7 @@ public:
 private:
 	OpenGLRender* opengl;
 	HighLevelLineMOD* line;
+	CameraViewPoints* camPoints;
 	std::vector<glm::vec3> camVertices;
 
 	std::vector<std::string> modelFiles;

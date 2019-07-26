@@ -17,15 +17,17 @@ class HighLevelLinemodIcp
 {
 public:
 	HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance, float in_rejectionScale, uint16_t in_numIterations,
-	                    uint16_t in_sampleStep, std::vector<std::string> in_modelFiles,
-	                    std::string in_modFolder);
+		uint16_t in_sampleStep, std::vector<std::string> in_modelFiles,
+		std::string in_modFolder);
 	~HighLevelLinemodIcp();
 
 	void prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& in_camMatrix, cv::Rect& bb);
 	void registerToScene(std::vector<ObjectPose>& in_poses, uint16_t in_modelNumber);
 	uint16_t estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender* in_openglRend,
-	                         uint16_t in_modelIndice);
+		uint16_t in_modelIndice, uint16_t& in_bestPose);
 private:
+	uint16_t correctEstimateTreshold = 20;
+
 	cv::ppf_match_3d::ICP* icp;
 	std::vector<cv::Mat> modelVertices;
 	std::vector<std::string> modelFiles;

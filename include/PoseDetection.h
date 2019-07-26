@@ -1,6 +1,7 @@
 #pragma once
 
 #include <opencv2/core.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "OpenglRender.h"
 #include "HighLevelLinemod.h"

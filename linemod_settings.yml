@@ -3,10 +3,11 @@
 # ###### CAMERA PARAMETERS ######
 video width: 640
 video height: 480
-camera fx: 5.50e+02#5.7241137695312500e+02
-camera fy: 5.50e+02#5.7357043457031250e+02
-camera cx: 3.2526110839843750e+02
-camera cy: 2.4204899597167969e+02
+camera fx: 1044.87
+camera fy: 1045.69141
+camera cx: 320
+camera cy: 240
+
 distortion parameters: !!opencv-matrix
    rows: 1
    cols: 5
@@ -16,11 +17,11 @@ distortion parameters: !!opencv-matrix
 # ###### TEMPLATE GENERATION SETTINGS ######
 model folder: models/
 model file ending: ".ply"
-only use color modality: 0
+only use color modality: 1
 in plane rotation starting angle: -45
 in plane rotation stopping angle: 45
-in plane rotation angle step: 15
-distance start: 700
-distance stop: 1200
+in plane rotation angle step: 10
+distance start: 600
+distance stop: 1000
 distance step: 50
 icosahedron subdivisions: 2

@@ -28,7 +28,7 @@ struct TemplatePosition
 {
 	TemplatePosition();
 	TemplatePosition(std::string in_s, glm::vec3 in_v, float in_rotation, cv::Rect in_boundingBox,
-	                 uint16_t in_depthAtCenter);
+		uint16_t in_depthAtCenter);
 	std::string modelName;
 	glm::vec3 positionCam;
 	float rotation;
@@ -59,7 +59,7 @@ struct CameraParameters
 };
 
 struct TemplateGenerationSettings
-{	
+{
 	std::string modelFileEnding;
 	std::string modelFolder;
 
@@ -79,5 +79,5 @@ struct ModelProperties
 	cv::Scalar lowerColorRange;
 	cv::Scalar upperColorRange;
 	bool rotationallySymmetrical;
-	glm::vec3 symmetryProperties = glm::vec3(0,1,0);
+	glm::vec3 planesOfSymmetry;
 };

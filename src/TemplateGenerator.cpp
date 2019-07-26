@@ -6,13 +6,14 @@ TemplateGenerator::TemplateGenerator()
 	TemplateGenerationSettings templateSettings;
 	readSettings(camParams, templateSettings);
 	modelFolder = templateSettings.modelFolder;
-	startDistance=templateSettings.startDistance;
-	endDistance=templateSettings.endDistance;
-	stepSize=templateSettings.stepSize;
+	startDistance = templateSettings.startDistance;
+	endDistance = templateSettings.endDistance;
+	stepSize = templateSettings.stepSize;
 	subdivisions = templateSettings.subdivisions;
 
 	opengl = new OpenGLRender(camParams);
 	line = new HighLevelLineMOD(camParams, templateSettings);
+	camPoints = new CameraViewPoints();
 	filesInDirectory(modelFiles, modelFolder, templateSettings.modelFileEnding);
 }
 
@@ -21,7 +22,6 @@ TemplateGenerator::~TemplateGenerator()
 	cleanup();
 }
 
-
 void TemplateGenerator::cleanup() {
 	if (opengl) {
 		delete opengl;
@@ -29,12 +29,16 @@ void TemplateGenerator::cleanup() {
 	if (line) {
 		delete line;
 	}
+	if (camPoints) {
+		delete camPoints;
+	}
 }
 
 void TemplateGenerator::run()
 {
 	for (size_t i = 0; i < modelFiles.size(); i++)
 	{
+		camPoints->readModelProperties(modelFolder + modelFiles[i]);
 		opengl->creatModBuffFromFiles(modelFolder + modelFiles[i]);
 		for (uint16_t radiusToModel = startDistance; radiusToModel <= endDistance; radiusToModel += stepSize)
 		{
@@ -54,9 +58,8 @@ void TemplateGenerator::run()
 
 void TemplateGenerator::createCamViewPoints(float in_radiusToModel)
 {
-	//CameraViewPoints camPoints(in_radiusToModel); //TODO NON HARDCODE
-	CameraViewPoints camPoints(in_radiusToModel, subdivisions);
-	camVertices = camPoints.getVertices();
+	camPoints->createCameraViewPoints(in_radiusToModel, subdivisions);
+	camVertices = camPoints->getVertices();
 	numCameraVertices = camVertices.size();
 }
 
@@ -107,7 +110,6 @@ uint16_t TemplateGenerator::calculateCurrentPercent(uint16_t const& in_spehreRad
 		(float)(in_currentIteration + 1) * 100.0f / (float)numCameraVertices / (float)numberOfDiffRadius + (float)(
 			in_spehreRadius - startDistance) / (float)stepSize * 100 / (float)numberOfDiffRadius);
 }
-
 
 void TemplateGenerator::writeSettings() {
 	CameraParameters camParam = CameraParameters();

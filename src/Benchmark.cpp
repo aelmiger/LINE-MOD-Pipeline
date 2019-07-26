@@ -1,11 +1,8 @@
 #include "Benchmark.h"
 
-
-
 Benchmark::Benchmark()
 {
 }
-
 
 Benchmark::~Benchmark()
 {
@@ -19,7 +16,8 @@ void Benchmark::increaseImgCounter()
 
 float Benchmark::calculateErrorHodan(cv::Mat& in_depthImg, OpenGLRender* in_opengl, ObjectPose const& in_estimatePose, uint16_t const& in_modelIndice)
 {
-	readGroundTruthLinemodDataset();
+	//readGroundTruthLinemodDataset();
+	readGroundTruthPose();
 	inputDepth = in_depthImg;
 	groundTruthDepthRender = renderPose(in_opengl, groundTruth, in_modelIndice);
 	estimateDepthRender = renderPose(in_opengl, in_estimatePose, in_modelIndice);
@@ -143,7 +141,7 @@ cv::Mat Benchmark::renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose
 
 glm::mat4 Benchmark::calculateViewMat(ObjectPose const &in_pose)
 {
-	glm::vec3 eul = eulerAngles(in_pose.quaternions);
+	glm::vec3 eul = eulerAngles(in_pose.quaternions); //TODO FIX COODINATE TRANSFORM
 	glm::qua quats(glm::vec3(eul.x - M_PI, -eul.y, -eul.z)); //TODO IMPORTANT adjust to benchmark
 	return toMat4(quats);
 }
@@ -156,6 +154,19 @@ void Benchmark::subsamplingModel()
 		subsampledModel.vertices.push_back(model.vertices[i]);
 	}
 	subsampledModel.numVertices = subsampledModel.vertices.size();
+}
+
+void Benchmark::readGroundTruthPose() {
+	std::string filename = "benchmark/pose" + std::to_string(imageCounter) + ".yml";
+	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	cv::Matx33d rotMat;
+	cv::Vec3d transVec;
+	fs["rotMat"] >> rotMat;
+	fs["position"] >> transVec;
+
+	glm::mat3 glmRotMat;
+	fromCV2GLM(cv::Mat(rotMat), &glmRotMat);
+	groundTruth = { glm::vec3(transVec[0],transVec[1],transVec[2]), glm::toQuat(glmRotMat) };
 }
 
 void Benchmark::readGroundTruthLinemodDataset()
@@ -201,8 +212,8 @@ void Benchmark::readGroundTruthLinemodDataset()
 	glm::mat3 rotMatGlm;
 	fromCV2GLM(rotMat, &rotMatGlm);
 	glm::qua<float> quaternions = quat_cast(rotMatGlm);
-	glm::vec3 eul = eulerAngles(quaternions);
-	glm::qua adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); //TODO IMPORTANT adjust to benchmark
+	glm::vec3 eul = eulerAngles(quaternions); //TODO FIX COORDINATE TRANSFORM
+	glm::qua adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); // converts the LINEMOD coordinate system
 	translation *= 10;
 	groundTruth = { translation, adjustedQuats };
 }

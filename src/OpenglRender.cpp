@@ -46,7 +46,7 @@ cv::Mat OpenGLRender::getDepthImgFromBuff()
 }
 
 void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate, float in_x,
-                                          float in_y)
+	float in_y)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -93,7 +93,7 @@ void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_
 }
 
 void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate, float in_x,
-                                          float in_y)
+	float in_y)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 

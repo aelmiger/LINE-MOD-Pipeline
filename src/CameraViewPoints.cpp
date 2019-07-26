@@ -1,22 +1,39 @@
 #include "CameraViewPoints.h"
 
-CameraViewPoints::CameraViewPoints(float in_radius, uint8_t in_subdivions)
+CameraViewPoints::CameraViewPoints()
+{
+}
+
+CameraViewPoints::~CameraViewPoints()
+{
+}
+
+void CameraViewPoints::createCameraViewPoints(float in_radius, uint8_t in_subdivions)
 {
 	radius = in_radius;
 	numSubdivisions = in_subdivions;
-	icosahedronPointsFromRadius();
-	createIcosahedron();
-	vertices.reserve((20 * pow(4, (uint32_t)numSubdivisions)) / 2 + 2);
-	indices.reserve(20 * pow(4, (uint32_t)numSubdivisions));
-	subdivide();
-	ModelProperties modProps;
-	removeSuperfluousVertices(modProps);
+
+	if (modProps.rotationallySymmetrical)
+	{
+		createVerticesForRotSym();
+	}
+	else
+	{
+		icosahedronPointsFromRadius();
+		createIcosahedron();
+		vertices.reserve((20 * pow(4, (uint32_t)numSubdivisions)) / 2 + 2);
+		indices.reserve(20 * pow(4, (uint32_t)numSubdivisions));
+		subdivide();
+	}
+
+	removeSuperfluousVertices();
 }
-void CameraViewPoints::removeSuperfluousVertices(ModelProperties const& in_modProp) {
+
+void CameraViewPoints::removeSuperfluousVertices() {
 	std::vector<glm::vec3> tmpVertices;
 	for (const auto& vertice : vertices)
 	{
-		glm::vec3 tmpVertice = vertice * in_modProp.symmetryProperties;
+		glm::vec3 tmpVertice = vertice * modProps.planesOfSymmetry;
 		bool allElementsPositive = true;
 		if (tmpVertice.x < 0 || tmpVertice.y < 0 || tmpVertice.z < 0) {
 			allElementsPositive = false;
@@ -27,14 +44,6 @@ void CameraViewPoints::removeSuperfluousVertices(ModelProperties const& in_modPr
 	}
 	vertices.clear();
 	vertices = tmpVertices;
-}
-
-CameraViewPoints::CameraViewPoints(float in_radius)
-{
-	radius = in_radius;
-	createVerticesForRotSym();
-	ModelProperties modProps;
-	removeSuperfluousVertices(modProps);
 }
 
 uint32_t CameraViewPoints::getNumVertices()
@@ -50,6 +59,18 @@ uint32_t CameraViewPoints::getNumIndices()
 std::vector<glm::vec3>& CameraViewPoints::getVertices() { return vertices; }
 std::vector<Index>& CameraViewPoints::getIndices() { return indices; }
 
+void CameraViewPoints::readModelProperties(std::string in_modelFile) {
+	std::string filename = in_modelFile.substr(0, in_modelFile.size() - 4) + ".yml";
+	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	cv::Vec3b tempVec;
+
+	fs["lower color range"] >> modProps.lowerColorRange;
+	fs["upper color range"] >> modProps.upperColorRange;
+	fs["has rotational symmetry"] >> modProps.rotationallySymmetrical;
+	fs["planes of symmetry"] >> tempVec;
+	modProps.planesOfSymmetry = glm::vec3(tempVec[0], tempVec[1], tempVec[2]);
+}
+
 void CameraViewPoints::icosahedronPointsFromRadius()
 {
 	icosahedronPointA = sqrt((radius * radius) / (goldenRatio * goldenRatio + 1));
@@ -58,7 +79,7 @@ void CameraViewPoints::icosahedronPointsFromRadius()
 
 void CameraViewPoints::createVerticesForRotSym()
 {
-	for (uint16_t i = 0; i < 360; i = i + 5)
+	for (uint16_t i = 0; i < 360; i = i + 10)
 	{
 		vertices.emplace_back(0.0f, sin(i * M_PI / 180.0f) * radius, cos(i * M_PI / 180.0f) * radius);
 	}
@@ -99,19 +120,19 @@ void CameraViewPoints::createIcosahedron()
 	indices.push_back(Index{ 11, 0, 6 });
 	indices.push_back(Index{ 0, 1, 6 });
 
-	indices.push_back(Index{6, 1, 10 });
-	indices.push_back(Index{9, 0, 11});
-	indices.push_back(Index{9, 11, 2});
-	indices.push_back(Index{9, 2, 5});
-	indices.push_back(Index{7, 2, 11});
+	indices.push_back(Index{ 6, 1, 10 });
+	indices.push_back(Index{ 9, 0, 11 });
+	indices.push_back(Index{ 9, 11, 2 });
+	indices.push_back(Index{ 9, 2, 5 });
+	indices.push_back(Index{ 7, 2, 11 });
 }
 
 int32_t CameraViewPoints::checkForDuplicate(uint32_t vertSize)
 {
 	uint32_t index = -1;
 
-	#pragma omp parallel for
-	for(int32_t i = 0; i < vertSize; i++)
+#pragma omp parallel for
+	for (int32_t i = 0; i < vertSize; i++)
 	{
 		if (vertices[vertSize].x == vertices[i].x && vertices[vertSize].y == vertices[i].y && vertices[vertSize].z ==
 			vertices[i].z)
@@ -190,7 +211,7 @@ void CameraViewPoints::subdivide()
 			indices.push_back(Index{ indices[i].a, abIndex, acIndex });
 			indices.push_back(Index{ indices[i].b, abIndex, bcIndex });
 			indices.push_back(Index{ indices[i].c, bcIndex, acIndex });
-			indices[i] = {abIndex, bcIndex, acIndex};
+			indices[i] = { abIndex, bcIndex, acIndex };
 		}
 	}
 }

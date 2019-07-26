@@ -16,7 +16,7 @@ public:
 	float calculateErrorLMAmbigous(ObjectPose& in_estimate);
 
 private:
-	int32_t imageCounter=0;
+	int32_t imageCounter = 0;
 	int32_t hodanCounter = 0;
 	int32_t lineCounter = 0;
 	uint32_t subsampleStep = 20;
@@ -39,13 +39,11 @@ private:
 
 	ObjectPose groundTruth;
 
-
-
 	void calculateVisibilityMasks();
 	cv::Mat renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose, uint16_t const& in_modelIndice);
 	glm::mat4 calculateViewMat(ObjectPose const &in_pose);
 	void subsamplingModel();
+	void readGroundTruthPose();
 	void readGroundTruthLinemodDataset();
 	void printHodanScore();
 };
-

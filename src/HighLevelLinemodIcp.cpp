@@ -1,9 +1,9 @@
 #include "HighLevelLinemodIcp.h"
 
 HighLevelLinemodIcp::HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance, float in_rejectionScale,
-                                         uint16_t in_numIterations, uint16_t in_sampleStep,
-                                         std::vector<std::string> in_modelFiles,
-                                         std::string in_modFolder) :
+	uint16_t in_numIterations, uint16_t in_sampleStep,
+	std::vector<std::string> in_modelFiles,
+	std::string in_modFolder) :
 	modelFiles(std::move(in_modelFiles)),
 	modelFolder(std::move(in_modFolder)),
 	sampleStep(in_sampleStep)
@@ -80,13 +80,13 @@ void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uin
 }
 
 uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses,
-                                              OpenGLRender* in_openglRend, uint16_t in_modelIndice)
+	OpenGLRender* in_openglRend, uint16_t in_modelIndice, uint16_t& in_bestPose)
 {
 	uint16_t bestMean = 0;
 	uint16_t bestPose = 0;
-	for (size_t i = 0; i < poses.size(); i++)
+	for (size_t i = 0; i < in_poses.size(); i++)
 	{
-		glm::vec3 eul = eulerAngles(in_poses[i].quaternions);
+		glm::vec3 eul = eulerAngles(in_poses[i].quaternions); //TODO FIX COORDINATE TRANSFORM
 		glm::qua quats(glm::vec3(eul.x + M_PI, -eul.y, -eul.z)); //TODO IMPORTANT adjust to benchmark
 		glm::mat4 newViewMat = toMat4(quats);
 		in_openglRend->renderDepthToFrontBuff(in_modelIndice, newViewMat, in_poses[i].translation);
@@ -100,7 +100,7 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 		cv::Mat maskedDepthImg;
 		cv::Mat maskedDepth;
 		cv::Mat diffImg;
-		erodeMask(binary, binary, 2);
+		erodeMask(binary, binary, 1);
 		in_depthImg.copyTo(maskedDepthImg, binary);
 		depth.copyTo(maskedDepth, binary);
 		absdiff(maskedDepthImg, maskedDepth, diffImg);
@@ -113,7 +113,14 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 			bestMean = mean[0];
 		}
 	}
-	return bestPose;
+	if (bestMean <= 20 && !in_poses.empty())
+	{
+		in_bestPose = bestPose;
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void HighLevelLinemodIcp::remove_if(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows)

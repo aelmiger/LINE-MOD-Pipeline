@@ -59,22 +59,6 @@ private:
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	int32_t tempDepth;
 
-	struct ColorRangeOfObject
-	{
-		ColorRangeOfObject()
-		{
-		}
-
-		ColorRangeOfObject(cv::Scalar s1, cv::Scalar s2) :
-			lowerBoundary(std::move(s1)),
-			upperBoundary(std::move(s2))
-		{
-		}
-
-		cv::Scalar lowerBoundary;
-		cv::Scalar upperBoundary;
-	};
-
 	struct Template
 	{
 		Template()
@@ -109,18 +93,16 @@ private:
 
 	cv::Mat colorImgHue;
 	std::vector<Template> templates;
-	ColorRangeOfObject currentColorRange;
 	std::vector<std::vector<Template>> modelTemplates;
-	std::vector<ColorRangeOfObject> modelColors;
 	std::vector<std::vector<ObjectPose>> posesMultipleObj;
 	std::vector<cv::linemod::Match> matches;
 	std::vector<cv::linemod::Match> groupedMatches;
 	std::vector<PotentialMatch> potentialMatches;
+	std::vector<ModelProperties> modProps;
 
 	std::vector<std::string> modelFiles;
 	std::string modelFolder;
 
-	//Utility Functions
 	void generateRotMatForInplaneRotation();
 	uint16_t medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uint8_t in_medianPosition);
 	void calculateTemplatePose(glm::vec3 & in_translation, glm::qua<float>& in_quats, glm::vec3 & in_cameraPosition, int16_t & in_inplaneRot);
@@ -138,6 +120,6 @@ private:
 	void groupSimilarMatches();
 	void discardSmallMatchGroups();
 	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches,
-	                                                          const std::vector<uint32_t>& in_indices);
+		const std::vector<uint32_t>& in_indices);
 	void readColorRanges();
 };

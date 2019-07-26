@@ -6,7 +6,7 @@
 
 glm::qua<float> openGL2openCVRotation(glm::mat4& in_viewMat)
 {
-	glm::qua tempQuat = toQuat(in_viewMat);
+	glm::qua tempQuat = toQuat(in_viewMat);//TODO FIX COORDINATE TRANSFORM
 	glm::vec3 eul = eulerAngles(tempQuat);
 	return glm::qua(glm::vec3(eul.x - M_PI / 2.0f, -eul.y, -eul.z));
 }
@@ -79,7 +79,7 @@ bool fromGLM2CV(const glm::mat3& glmmat, cv::Matx33d* in_mat)
 */
 
 void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::string& in_path, const std::string&
-                      in_extension)
+	in_extension)
 {
 	in_filePathVector.clear();
 	std::filesystem::current_path(in_path);
@@ -149,7 +149,6 @@ float length(cv::Vec3f& in_vecA)
 	return sqrt(in_vecA[0] * in_vecA[0] + in_vecA[1] * in_vecA[1] + in_vecA[2] * in_vecA[2]);
 }
 
-
 /*
 #################### IMAGE UTILITY ####################
 */
@@ -160,7 +159,7 @@ void erodeMask(cv::Mat& in_mask, cv::Mat& in_erode, int in_numberIterations)
 }
 
 void drawResponse(const std::vector<cv::linemod::Template>& templates,
-                  int num_modalities, cv::Mat& dst, const cv::Point& offset, int T)
+	int num_modalities, cv::Mat& dst, const cv::Point& offset, int T)
 {
 	static const cv::Scalar COLORS[5] = {
 		CV_RGB(0, 0, 255),
@@ -182,7 +181,7 @@ void drawResponse(const std::vector<cv::linemod::Template>& templates,
 }
 
 void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
-                          ObjectPose& in_objPos)
+	ObjectPose& in_objPos)
 {
 	cv::Mat rotMat;
 	fromGLM2CV(toMat3(in_objPos.quaternions), &rotMat);
@@ -227,23 +226,23 @@ cv::Mat translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety)
 void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings) {
 	std::string filename = "linemod_settings.yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
-	in_camParams.videoWidth = (int)fs["video width"];
-	in_camParams.videoHeight = (int)fs["video height"];
-	in_camParams.fx = fs["camera fx"];
-	in_camParams.fy = fs["camera fy"];
-	in_camParams.cx = fs["camera cx"];
-	in_camParams.cy = fs["camera cy"];
+	fs["video width"] >> in_camParams.videoWidth;
+	fs["video height"] >> in_camParams.videoHeight;
+	fs["camera fx"] >> in_camParams.fx;
+	fs["camera fy"] >> in_camParams.fy;
+	fs["camera cx"] >> in_camParams.cx;
+	fs["camera cy"] >> in_camParams.cy;
 	in_camParams.cameraMatrix = (cv::Mat1d(3, 3) << in_camParams.fx, 0, in_camParams.cx, 0, in_camParams.fy, in_camParams.cy, 0, 0, 1);
 	fs["distortion parameters"] >> in_camParams.distortionCoefficients;
 
-	in_tempGenSettings.modelFolder = fs["model folder"];
-	in_tempGenSettings.modelFileEnding = fs["model file ending"];
-	in_tempGenSettings.onlyUseColorModality = (bool)(int)fs["only use color modality"];
-	in_tempGenSettings.angleStart = (int)fs["in plane rotation starting angle"];
-	in_tempGenSettings.angleStop = (int)fs["in plane rotation stopping angle"];
-	in_tempGenSettings.angleStep = (int)fs["in plane rotation angle step"];
-	in_tempGenSettings.startDistance = (int)fs["distance start"];
-	in_tempGenSettings.endDistance = (int)fs["distance stop"];
-	in_tempGenSettings.stepSize = (int)fs["distance step"];
-	in_tempGenSettings.subdivisions = (int)fs["icosahedron subdivisions"];
+	fs["model folder"] >> in_tempGenSettings.modelFolder;
+	fs["model file ending"] >> in_tempGenSettings.modelFileEnding;
+	fs["only use color modality"] >> in_tempGenSettings.onlyUseColorModality;
+	fs["in plane rotation starting angle"] >> in_tempGenSettings.angleStart;
+	fs["in plane rotation stopping angle"] >> in_tempGenSettings.angleStop;
+	fs["in plane rotation angle step"] >> in_tempGenSettings.angleStep;
+	fs["distance start"] >> in_tempGenSettings.startDistance;
+	fs["distance stop"] >> in_tempGenSettings.endDistance;
+	fs["distance step"] >> in_tempGenSettings.stepSize;
+	fs["icosahedron subdivisions"] >> in_tempGenSettings.subdivisions;
 }

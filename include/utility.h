@@ -35,7 +35,7 @@ bool fromGLM2CV(const glm::mat3& glmmat, cv::Matx33d* in_mat);
 */
 
 void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::string& in_path, const std::string&
-                      in_extension);
+	in_extension);
 std::string fileToString(const char* filename);
 cv::Mat loadDepth(const std::string& a_name);
 void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings);
@@ -51,8 +51,8 @@ float length(cv::Vec3f& in_vecA);
 
 void erodeMask(cv::Mat& in_mask, cv::Mat& in_erode, int in_numberIterations);
 void drawResponse(const std::vector<cv::linemod::Template>& templates,
-                  int num_modalities, cv::Mat& dst, const cv::Point& offset, int T);
+	int num_modalities, cv::Mat& dst, const cv::Point& offset, int T);
 void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
-                          ObjectPose& in_objPos);
+	ObjectPose& in_objPos);
 void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose);
 cv::Mat translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety);

@@ -7,7 +7,7 @@ PoseDetection::PoseDetection()
 	filesInDirectory(modelFiles, templateSettings.modelFolder, templateSettings.modelFileEnding);
 	opengl = new OpenGLRender(camParams); //TODO unique_ptr shared_ptr
 	line = new HighLevelLineMOD(camParams, templateSettings);
-	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8,5, modelFiles, templateSettings.modelFolder);
+	icp = new HighLevelLinemodIcp(5, 0.1f, 2.5f, 8, 5, modelFiles, templateSettings.modelFolder);
 }
 
 PoseDetection::~PoseDetection()
@@ -24,29 +24,33 @@ void PoseDetection::run()
 		opengl->creatModBuffFromFiles(templateSettings.modelFolder + modelFile);
 	}
 	readLinemodFromFile();
-	
+
 	//TODO eventuell noch eine exe für Benchmarks
 	Benchmark bench;
 	bench.loadModel(opengl, templateSettings.modelFolder + modelFiles[0]);
-	int counter=0;
+	int counter = 0;
 	//Kinect2 kin2;
-	cv::VideoCapture sequence("data/color%0d.jpg");
+	//cv::VideoCapture sequence("data/color%0d.jpg");
+
+	cv::VideoCapture sequence("benchmark/img%0d.png");
+	cv::VideoCapture sequencedepth("benchmark/depth%0d.png");
 
 	while (true)
 	{
 		std::string numb;
 		sequence >> colorImg;
+		sequencedepth >> depthImg;
 		//kin2.getKinectFrames(colorImg, depthImg);
-		
+
 		if (colorImg.empty())
 		{
 			std::cout << "End of Sequence" << std::endl;
 			break;
 		}
-		depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
+		//depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
 		cv::Mat correctedTranslationColor = colorImg.clone();
 		cv::Mat correctedTranslationDepth = depthImg.clone();
-		translateImg(correctedTranslationColor, -camParams.cx+camParams.videoWidth/2, -camParams.cy+camParams.videoHeight/2);
+		translateImg(correctedTranslationColor, -camParams.cx + camParams.videoWidth / 2, -camParams.cy + camParams.videoHeight / 2);
 		translateImg(correctedTranslationDepth, -camParams.cx + camParams.videoWidth / 2, -camParams.cy + camParams.videoHeight / 2);
 
 		float scoreNew = 100;
@@ -64,16 +68,24 @@ void PoseDetection::run()
 			{
 				for (auto& detectedPose : detectedPoses)
 				{
-					icp->prepareDepthForIcp(depthImg, camParams.cameraMatrix, detectedPose[0].boundingBox);
-					icp->registerToScene(detectedPose, numClass);
-					bestPose = icp->estimateBestMatch(correctedTranslationDepth, detectedPose, opengl, numClass);
+					//icp->prepareDepthForIcp(depthImg, camParams.cameraMatrix, detectedPose[0].boundingBox);
+					//icp->registerToScene(detectedPose, numClass);
+					//bool truePositivMatch = icp->estimateBestMatch(correctedTranslationDepth, detectedPose, opengl, numClass,bestPose);
+					//if (truePositivMatch) {
 					drawCoordinateSystem(colorImg, camParams.cameraMatrix, 75.0f, detectedPose[bestPose]);
 					finalObjectPoses.push_back(detectedPose[bestPose]);
+					//}
 				}
-				error = bench.calculateErrorHodan(correctedTranslationDepth, opengl, detectedPoses[0][bestPose], numClass);
-				scoreNew = bench.calculateErrorLM(detectedPoses[0][bestPose]);
-				scoreAmbig = bench.calculateErrorLMAmbigous(detectedPoses[0][bestPose]);
-				//std::cout << "final " << bestPose << ": " << scoreNew << "  newBench: "<<error<<std::endl;
+				if (!finalObjectPoses.empty()) {
+					//error = bench.calculateErrorHodan(correctedTranslationDepth, opengl, finalObjectPoses[0], numClass);
+					//scoreNew = bench.calculateErrorLM(detectedPoses[0][bestPose]);
+					//scoreAmbig = bench.calculateErrorLMAmbigous(detectedPoses[0][bestPose]);
+					//std::cout << "final " << bestPose << ": " << scoreNew << "  newBench: "<<error<<std::endl;
+
+					cv::putText(colorImg, glm::to_string(finalObjectPoses[0].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
+					//cv::putText(colorImg, glm::to_string(glm::degrees(glm::eulerAngles(finalObjectPoses[0].quaternions))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
+					//cv::putText(colorImg, std::to_string(error), cv::Point(50, 140), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(255, 0, 0), 2.0f);
+				}
 			}
 		}
 		bench.increaseImgCounter();

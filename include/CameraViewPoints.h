@@ -15,15 +15,21 @@ class CameraViewPoints
 	std::vector<glm::vec3> vertices;
 	std::vector<Index> indices;
 public:
-	CameraViewPoints(float in_radius, uint8_t in_subdivions);
-	void removeSuperfluousVertices(ModelProperties const & in_modProp);
-	CameraViewPoints(float in_radius);
+	CameraViewPoints();
+	~CameraViewPoints();
+
+	void createCameraViewPoints(float in_radius, uint8_t in_subdivions);
+	void readModelProperties(std::string in_modelFile);
+
 	uint32_t getNumVertices();
 	uint32_t getNumIndices();
 	std::vector<glm::vec3>& getVertices();
 	std::vector<Index>& getIndices();
 
 private:
+	ModelProperties modProps;
+
+	void removeSuperfluousVertices();
 	void icosahedronPointsFromRadius();
 	void createVerticesForRotSym();
 	void createIcosahedron();
