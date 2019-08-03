@@ -245,4 +245,9 @@ void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in
 	fs["distance stop"] >> in_tempGenSettings.endDistance;
 	fs["distance step"] >> in_tempGenSettings.stepSize;
 	fs["icosahedron subdivisions"] >> in_tempGenSettings.subdivisions;
+	fs["detector threshold"] >> in_tempGenSettings.detectorThreshold;
+	fs["percent to pass check"] >> in_tempGenSettings.percentToPassCheck;
+	fs["number of poses to compare"] >> in_tempGenSettings.numberWantedPoses;
+	fs["distance to match to be considered same object"] >> in_tempGenSettings.radiusThresholdNewObject;
+	fs["ratio to determine if group is too small"] >> in_tempGenSettings.discardGroupRatio;
 }

@@ -35,7 +35,7 @@ private:
 	cv::Mat sceneVertices;
 	uint16_t sampleStep;
 	std::vector<cv::ppf_match_3d::Pose3DPtr> poses;
-	void remove_if(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows = true);
+	void removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows = true);
 	void depthToBinary(cv::Mat& in_gray, cv::Mat& in_binary, uint32_t in_threshold = 1);
 	void loadModels();
 };

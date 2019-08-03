@@ -19,7 +19,7 @@ private:
 	int32_t imageCounter = 0;
 	int32_t hodanCounter = 0;
 	int32_t lineCounter = 0;
-	uint32_t subsampleStep = 20;
+	uint32_t subsampleStep = 40;
 
 	int32_t visibilityThreshold = 15;
 	int32_t errorThreshold = 20;
@@ -46,4 +46,5 @@ private:
 	void readGroundTruthPose();
 	void readGroundTruthLinemodDataset();
 	void printHodanScore();
+	void printLMScore();
 };

@@ -46,9 +46,9 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	modelMat = pointsModel.t();
 	modelMat = modelMat.reshape(1);
 	modelMat = modelMat * 1000;
-	patchNaNs(modelMat);
+	cv::patchNaNs(modelMat);
 	cv::Mat patchedNaNs;
-	remove_if(modelMat, patchedNaNs, true);
+	removeIfTooFarFromMean(modelMat, patchedNaNs, true);
 	cv::Vec3d viewpoint(0, 0, 0);
 	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint);
 	//TODO Change what to do if patchedNaNs = 0
@@ -100,7 +100,7 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 		cv::Mat maskedDepthImg;
 		cv::Mat maskedDepth;
 		cv::Mat diffImg;
-		erodeMask(binary, binary, 1);
+		erodeMask(binary, binary, 2);
 		in_depthImg.copyTo(maskedDepthImg, binary);
 		depth.copyTo(maskedDepth, binary);
 		absdiff(maskedDepthImg, maskedDepth, diffImg);
@@ -123,14 +123,16 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 	}
 }
 
-void HighLevelLinemodIcp::remove_if(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows)
+void HighLevelLinemodIcp::removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows)
 {
 	in_res.release();
+	cv::Mat depthCol = cv::Mat(in_mat, cv::Rect(2, 0, 1, in_mat.rows));
+	cv::Scalar mean = cv::mean(depthCol);
 	int n = in_removeRows ? in_mat.rows : in_mat.cols;
 	for (int i = 0; i < n; i++)
 	{
 		cv::Mat rc = in_removeRows ? in_mat.row(i) : in_mat.col(i);
-		if (sum(rc)[0] == 0)
+		if (abs(rc.at<float>(0,2) - mean[0]) > 300)
 		{
 			continue; // remove element
 		}

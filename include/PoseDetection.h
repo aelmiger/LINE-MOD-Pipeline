@@ -15,11 +15,13 @@ class PoseDetection
 public:
 	PoseDetection();
 	~PoseDetection();
-	void run();
+	void run(std::vector<cv::Mat>& in_imgs,std::string const& in_className, uint16_t const& in_numberOfObjects, std::vector<ObjectPose>& in_objPose);
+	void setupBenchmark(std::string const& in_className);
 private:
 	OpenGLRender* opengl;
 	HighLevelLineMOD* line;
 	HighLevelLinemodIcp* icp;
+	Benchmark* bench;
 
 	std::vector<cv::Mat> inputImg;
 	std::vector<std::vector<ObjectPose>> detectedPoses;
@@ -33,4 +35,6 @@ private:
 	std::vector<cv::String> ids;
 
 	void readLinemodFromFile();
+	uint16_t findIndexInVector(std::string const& in_stringToFind, std::vector<std::string>& in_vectorToLookIn);
+
 };

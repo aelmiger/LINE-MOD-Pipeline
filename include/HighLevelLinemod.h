@@ -35,9 +35,6 @@ public:
 	std::vector<std::vector<ObjectPose>> getObjectPoses();
 
 private:
-	const uint16_t percentToPassCheck = 60;
-	const uint16_t numberWantedPoses = 3;
-
 	cv::Ptr<cv::linemod::Detector> detector;
 
 	bool onlyColorModality;
@@ -55,7 +52,11 @@ private:
 	int16_t upperAngleStop;
 	uint16_t angleStep;
 	uint16_t stepSize;
-
+	float detectorThreshold;
+	uint16_t percentToPassCheck;
+	uint16_t numberWantedPoses;
+	float radiusThresholdNewObject;
+	float discardGroupRatio;
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	int32_t tempDepth;
 

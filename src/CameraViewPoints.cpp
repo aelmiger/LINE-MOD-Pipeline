@@ -10,6 +10,8 @@ CameraViewPoints::~CameraViewPoints()
 
 void CameraViewPoints::createCameraViewPoints(float in_radius, uint8_t in_subdivions)
 {
+	vertices.clear();
+	indices.clear();
 	radius = in_radius;
 	numSubdivisions = in_subdivions;
 

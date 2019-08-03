@@ -12,12 +12,13 @@ void Benchmark::increaseImgCounter()
 {
 	imageCounter++;
 	printHodanScore();
+	printLMScore();
 }
 
 float Benchmark::calculateErrorHodan(cv::Mat& in_depthImg, OpenGLRender* in_opengl, ObjectPose const& in_estimatePose, uint16_t const& in_modelIndice)
 {
-	//readGroundTruthLinemodDataset();
-	readGroundTruthPose();
+	readGroundTruthLinemodDataset();
+	//readGroundTruthPose();
 	inputDepth = in_depthImg;
 	groundTruthDepthRender = renderPose(in_opengl, groundTruth, in_modelIndice);
 	estimateDepthRender = renderPose(in_opengl, in_estimatePose, in_modelIndice);
@@ -60,6 +61,10 @@ float Benchmark::calculateErrorLM(ObjectPose& in_estimate)
 		difference.at<float>(i, 0) = length(differenceBetweenVec);
 	}
 	float mean = sum(difference)[0] / model.numVertices;
+	if (mean<= 15.2633)
+	{
+		lineCounter++;
+	}
 	return mean;
 }
 
@@ -107,6 +112,10 @@ float Benchmark::calculateErrorLMAmbigous(ObjectPose& in_estimate)
 		difference.at<float>(i, 0) = absDifference;
 	}
 	float mean = sum(difference)[0] / subsampledModel.numVertices;
+	if (mean <= 15.2633)
+	{
+		lineCounter++;
+	}
 	return mean;
 }
 
@@ -220,5 +229,9 @@ void Benchmark::readGroundTruthLinemodDataset()
 
 void Benchmark::printHodanScore()
 {
-	std::cout << "\r""Score: " << hodanCounter * 100 / imageCounter << " Counter: " << imageCounter << "            " << std::flush;
+	std::cout << "Hodan Score: " << (float)hodanCounter * 100 / (float)imageCounter << " Counter: " << imageCounter << "            " << std::endl;
+}
+void Benchmark::printLMScore()
+{
+	std::cout << "LM Score: " << (float)lineCounter * 100 / (float)imageCounter << " Counter: " << imageCounter << "            " << std::endl;
 }

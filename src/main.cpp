@@ -44,9 +44,42 @@ int main()
 	//templateGen.run();
 	//TODO 2 exe in cmake!
 	//templateGen.~Template_Generator();
-
 	PoseDetection poseDetect; //TODO YML als settings datei
-	poseDetect.run(); //TODO cleanup Funktion und nullptr abfrage
+	poseDetect.setupBenchmark("cat.ply");
+	int counter = 0;
+	cv::VideoCapture sequence("data/color%0d.jpg");
+
+	while (true) {
+
+
+		std::vector<cv::Mat> imgs;
+		cv::Mat colorImg;
+		cv::Mat depthImg;
+
+		//Kinect2 kin2;
+
+		//cv::VideoCapture sequence("benchmark/img%0d.png");
+		//cv::VideoCapture sequencedepth("benchmark/depth%0d.png");
+		sequence >> colorImg;
+		//sequencedepth >> depthImg;
+		//kin2.getKinectFrames(colorImg, depthImg);
+
+		if (colorImg.empty())
+		{
+			std::cout << "End of Sequence" << std::endl;
+		}
+
+		depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
+
+		imgs.push_back(colorImg);
+		imgs.push_back(depthImg);
+		std::vector<ObjectPose> objPose;
+		poseDetect.run(imgs, "cat.ply", 1, objPose); //TODO cleanup Funktion und nullptr abfrage
+
+
+
+		counter++;
+	}
 
 	//TODO implement nach welcher klasse suchen und wieviele Objekte
 	//TODO run mit funktionen austauschen!

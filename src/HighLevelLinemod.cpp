@@ -13,7 +13,8 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 	upperAngleStop(in_templateSettings.angleStop),
 	angleStep(in_templateSettings.angleStep),
 	stepSize(in_templateSettings.stepSize),
-	modelFolder(in_templateSettings.modelFolder)
+	modelFolder(in_templateSettings.modelFolder),
+	detectorThreshold(in_templateSettings.detectorThreshold)
 {
 	if (!onlyColorModality)
 	{
@@ -23,7 +24,7 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 		modality.emplace_back(cv::makePtr<cv::linemod::DepthNormal>());
 		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
-		static const int T_DEFAULTS[] = { 4, 8 };
+		static const int T_DEFAULTS[] = { 5, 8 };
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else
@@ -134,10 +135,9 @@ bool HighLevelLineMOD::detectTemplate(std::vector<cv::Mat>& in_imgs, uint16_t in
 	{
 		tmpDepth = in_imgs[1];
 		in_imgs.pop_back();
-
 		depthCheckForColorDetector = true;
 	}
-	detector->match(in_imgs, 75.0f, matches, currentClass);
+	detector->match(in_imgs, detectorThreshold, matches, currentClass);
 	if (depthCheckForColorDetector)
 	{
 		in_imgs.push_back(tmpDepth);
@@ -199,9 +199,8 @@ void HighLevelLineMOD::groupSimilarMatches()
 
 		for (size_t q = 0; q < numCurrentGroups; q++)
 		{
-			if (norm(matchPosition - potentialMatches[q].position) < 100)
+			if (cv::norm(matchPosition - potentialMatches[q].position) < radiusThresholdNewObject)
 			{
-				//TODO Non magic number
 				potentialMatches[q].matchIndices.push_back(i);
 				foundGroupForMatch = true;
 				break;
@@ -229,7 +228,7 @@ void HighLevelLineMOD::discardSmallMatchGroups()
 	for (size_t j = 0; j < numMatchGroups; j++)
 	{
 		float ratioToBiggestGroup = potentialMatches[j].matchIndices.size() * 100 / biggestGroup;
-		if (ratioToBiggestGroup > 35)
+		if (ratioToBiggestGroup > discardGroupRatio)
 		{
 			//TODO Non magic number
 			tmp.push_back(potentialMatches[j]);
@@ -357,7 +356,7 @@ glm::qua<float> HighLevelLineMOD::openglCoordinatesystem2opencv(glm::mat4& in_vi
 	glm::mat4 coordinateTransform(1.0f);
 	coordinateTransform[1][1] = -1.0f;
 	coordinateTransform[2][2] = -1.0f;
-	glm::qua<float> tempQuat = toQuat(glm::inverse(in_viewMat)*coordinateTransform);
+	glm::qua<float> tempQuat = toQuat(glm::transpose(glm::transpose(in_viewMat)*coordinateTransform));
 	return tempQuat;
 }
 
@@ -421,7 +420,7 @@ bool HighLevelLineMOD::depthCheck(cv::Mat& in_depth, uint32_t& in_numMatch)
 		templates[groupedMatches[in_numMatch].template_id].boundingBox.height);
 	int32_t depthDiff = (int32_t)medianMat(in_depth, bb, 4) - (int32_t)templates[groupedMatches[in_numMatch].template_id].
 		medianDepth;
-	tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z + depthDiff - 20; //TODO OFFSET MAGIC NUMBER
+	tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z + depthDiff; //TODO OFFSET MAGIC NUMBER
 	return abs(depthDiff) < stepSize;
 }
 

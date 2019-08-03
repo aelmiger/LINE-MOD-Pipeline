@@ -72,6 +72,12 @@ struct TemplateGenerationSettings
 	int16_t angleStart;
 	int16_t angleStop;
 	int16_t angleStep;
+
+	float detectorThreshold;
+	uint16_t percentToPassCheck;
+	uint16_t numberWantedPoses;
+	float radiusThresholdNewObject;
+	float discardGroupRatio;
 };
 
 struct ModelProperties
