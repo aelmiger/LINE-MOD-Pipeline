@@ -9,6 +9,7 @@ Necessary Pre and Postprocessing tools are included:
 Included libraries for testing are:
 * Kinect V2 tool to extract depth and rgb images
 * Implementation of the LINE-MOD Benchmark for validation
+* A class to generate RGB-D Images with a ground truth pose of a Aruco marker
 
 ## Getting Started
 
@@ -28,10 +29,22 @@ Currently the Windows ppl.h library is used for parallelism. This will be change
 
 ### Installing
 
+#### Dependencies
+For Linux the following command can be used to install most dependencies
+
+```bash
+sudo apt-get install libglew-dev libglm-dev libassimp-dev libsdl2-dev
+```
+freenect2 has to be compiled from source with the help of cmake.
+
 OpenCV 4 needs to be built with:
 * additional contrib libraries for LINE-MOD and ICP
-* atleast SSE 3 support
 * OpenMP
+
+To compile OpenCV the following command can be used. The path of the contrib modules has to be replaced.
+```bash
+cmake -D OPENCV_EXTRA_MODULES_PATH=<contrib modules path> -D WITH_OPENMP=ON -D CMAKE_BUILD_TYPE=Release
+```
 
 ## Authors
 
