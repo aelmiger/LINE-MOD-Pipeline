@@ -82,12 +82,12 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::st
 	in_extension)
 {
 	in_filePathVector.clear();
-	std::filesystem::current_path(in_path);
-	for (auto& p : std::filesystem::directory_iterator(""))
+	for (auto& p : std::filesystem::directory_iterator(in_path)){
 		if (p.path().extension() == in_extension)
 		{
-			in_filePathVector.push_back(p.path().string());
+			in_filePathVector.push_back(p.path().filename().string());
 		}
+	}
 	if (in_filePathVector.empty())
 	{
 		std::cout << "No " << in_extension << " files found in " << in_path << std::endl;
@@ -97,7 +97,6 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::st
 		std::cout << "Found " << in_filePathVector.size() << " " << in_extension << " files in " << in_path << std::
 			endl;
 	}
-	std::filesystem::current_path("../");
 }
 
 std::string fileToString(const char* filename)
