@@ -6,8 +6,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <opencv2/core.hpp>
 
-#define M_PI 3.141592653589793238
-
 struct Index
 {
 	uint32_t a;
