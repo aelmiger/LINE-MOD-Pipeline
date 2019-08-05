@@ -2,6 +2,7 @@
 
 #include <opencv2/core.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <iterator>
 
 #include "OpenglRender.h"
 #include "HighLevelLinemod.h"
