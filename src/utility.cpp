@@ -6,9 +6,9 @@
 
 glm::qua<float> openGL2openCVRotation(glm::mat4& in_viewMat)
 {
-	glm::qua tempQuat = toQuat(in_viewMat);//TODO FIX COORDINATE TRANSFORM
+	glm::qua<float> tempQuat = toQuat(in_viewMat);//TODO FIX COORDINATE TRANSFORM
 	glm::vec3 eul = eulerAngles(tempQuat);
-	return glm::qua(glm::vec3(eul.x - M_PI / 2.0f, -eul.y, -eul.z));
+	return glm::qua<float>(glm::vec3(eul.x - M_PI / 2.0f, -eul.y, -eul.z));
 }
 
 bool fromCV2GLM(const cv::Mat& cvmat, glm::mat4* glmmat)
