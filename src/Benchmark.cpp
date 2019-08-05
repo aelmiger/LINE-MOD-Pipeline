@@ -151,8 +151,8 @@ cv::Mat Benchmark::renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose
 glm::mat4 Benchmark::calculateViewMat(ObjectPose const &in_pose)
 {
 	glm::vec3 eul = eulerAngles(in_pose.quaternions); //TODO FIX COODINATE TRANSFORM
-	glm::qua quats(glm::vec3(eul.x - M_PI, -eul.y, -eul.z)); //TODO IMPORTANT adjust to benchmark
-	return toMat4(quats);
+	glm::qua<float> quats(glm::vec3(eul.x - M_PI, -eul.y, -eul.z)); //TODO IMPORTANT adjust to benchmark
+	return glm::toMat4(quats);
 }
 
 void Benchmark::subsamplingModel()
@@ -222,7 +222,7 @@ void Benchmark::readGroundTruthLinemodDataset()
 	fromCV2GLM(rotMat, &rotMatGlm);
 	glm::qua<float> quaternions = quat_cast(rotMatGlm);
 	glm::vec3 eul = eulerAngles(quaternions); //TODO FIX COORDINATE TRANSFORM
-	glm::qua adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); // converts the LINEMOD coordinate system
+	glm::qua<float> adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); // converts the LINEMOD coordinate system
 	translation *= 10;
 	groundTruth = { translation, adjustedQuats };
 }
