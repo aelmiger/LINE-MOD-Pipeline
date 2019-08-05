@@ -33,7 +33,7 @@ cv::Mat OpenGLRender::getColorImgFromBuff()
 {
 	glReadBuffer(GL_FRONT);
 	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, renderedColorImg.data);
-	flip(renderedColorImg, renderedColorImg, 0); //TODO Wird flip wirklich benötigt?
+	flip(renderedColorImg, renderedColorImg, 0); //TODO Wird flip wirklich benï¿½tigt?
 	return renderedColorImg;
 }
 
@@ -158,6 +158,9 @@ void OpenGLRender::setupSDLWindow()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3); 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
