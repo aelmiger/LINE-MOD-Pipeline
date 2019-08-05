@@ -1,96 +1,66 @@
-cmake_minimum_required(VERSION 3.14.1)
+cmake_minimum_required(VERSION 3.0.0)
+project(LINE-MOD VERSION 0.1.0)
 
-project(LINE-MOD)
+include(CTest)
+enable_testing()
+include_directories(${CMAKE_SOURCE_DIR}/include/)
+add_definitions(-D GLM_ENABLE_EXPERIMENTAL=TRUE)
+# Add source files
+file(GLOB_RECURSE SOURCE_FILES 
+	${CMAKE_SOURCE_DIR}/src/*.c
+	${CMAKE_SOURCE_DIR}/src/*.cpp)
+	
+# Add header files
+file(GLOB_RECURSE HEADER_FILES 
+	${CMAKE_SOURCE_DIR}/include/*.h
+	${CMAKE_SOURCE_DIR}/include/*.hpp)
 
-include_directories(include)
+add_executable(LINE-MOD main.cpp ${HEADER_FILES} ${SOURCE_FILES})
 
-file(GLOB SOURCES "src/*.cpp")
-# sources ohne die exe
-# daraus eine libraries
-# 
-
-#TEMPORARY ADJUSTMENT TODO
-list(APPEND CMAKE_PREFIX_PATH "C:/Users/Anton/Documents/libraries")
-
-list(APPEND CMAKE_PREFIX_PATH "C:/Users/Anton/Documents/libraries/glew")
-
-#--- Find OpenGL
-find_package(OPENGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
-link_directories(${OPENGL_LIBRARY_DIRS})
-if(NOT OPENGL_FOUND)
-    message(ERROR " OPENGL not found!")
-else()
-	message(STATUS "Found OpenGL")
-endif(NOT OPENGL_FOUND)
-
-#--- Find OpenGL
-find_package(GLM REQUIRED)
-include_directories(${GLM_INCLUDE_DIRS})
-link_directories(${GLM_LIBRARY_DIRS})
-if(NOT GLM_FOUND)
-    message(ERROR " GLM not found!")
-else()
-	message(STATUS "Found GLM")
-endif(NOT GLM_FOUND)
-
-
-#-- Find ASSIMP
-find_package(ASSIMP REQUIRED)
-include_directories(${ASSIMP_INCLUDE_DIRS})
-link_directories(${ASSIMP_LIBRARY_DIRS})
-if(NOT ASSIMP_FOUND)
-    message(ERROR " ASSIMP not found!")
-else()
-	message(STATUS "Found Assim")
-endif(NOT ASSIMP_FOUND)
-
-#-- Find SDL2
+# SDL2
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
-link_directories(${SDL2_LIBRARY_DIRS})
-if(NOT SDL2_FOUND)
-    message(ERROR " SDL2 not found!")
-else()
-	message(STATUS "Found SDL2")
-endif(NOT SDL2_FOUND)
+target_link_libraries(LINE-MOD ${SDL2_LIBRARY})
+target_include_directories(LINE-MOD PUBLIC ${SDL2_INCLUDE_DIR})
 
-#-- Find GLEW
-find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIRS})
-link_directories(${GLEW_LIBRARY_DIRS})
-if(NOT GLEW_FOUND)
-    message(ERROR " GLEW not found!")
-endif(NOT GLEW_FOUND)
+# GLM
+find_package(glm REQUIRED)
+target_link_libraries(LINE-MOD ${glm_LIBRARY})
+target_include_directories(LINE-MOD PUBLIC ${glm_INCLUDE_DIR})
 
-#-- Find freenect2
+# Assimp
+find_package(ASSIMP REQUIRED)
+find_library(ASSIMP_LIBRARY NAMES ${ASSIMP_LIBRARIES} PATH ${ASSIMP_LIBRARY_DIRS})
+target_link_libraries(LINE-MOD ${ASSIMP_LIBRARY})
+target_include_directories(LINE-MOD PUBLIC ${ASSIMP_INCLUDE_DIR})
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+target_link_libraries(LINE-MOD ${OPENGL_gl_LIBRARY})
+target_include_directories(LINE-MOD PUBLIC ${OPENGL_INCLUDE_DIR})
+
+#libfreenect2
+set(CMAKE_PREFIX_PATH "~/freenect2/lib/cmake/freenect2/")
+#set(freenect2_DIR ${HOME}/freenect2/lib/cmake/freenect2)
 find_package(freenect2 REQUIRED)
-include_directories(${freenect2_INCLUDE_DIRS})
-link_directories(${freenect2_LIBRARY_DIRS})
-if(NOT freenect2_FOUND)
-    message(ERROR "freenect2 not found!")
-endif(NOT freenect2_FOUND)
+target_link_libraries(LINE-MOD ${freenect2_LIBRARY})
+target_include_directories(LINE-MOD PUBLIC ${freenect2_INCLUDE_DIR})
 
+# GL Extension Wrangler (GLEW)
+find_package(GLEW REQUIRED)
+target_link_libraries(LINE-MOD ${GLEW_LIBRARIES})
+target_include_directories(LINE-MOD PUBLIC ${GLEW_INCLUDE_DIRS})
 
-#-- Find OpenCV
-find_package(OpenCV REQUIRED COMPONENTS core imgproc highgui imgcodecs rgbd videoio calib3d surface_matching aruco)
-include_directories(${OpenCV_INCLUDE_DIRS})
-link_directories(${OpenCV_LIBRARY_DIRS})
-if(NOT OpenCV_FOUND)
-    message(ERROR "OpenCV not found!")
-endif(NOT OpenCV_FOUND)
+# OpenCV
+find_package(OpenCV REQUIRED)
+target_link_libraries(LINE-MOD ${OpenCV_LIBRARIES})
+target_include_directories(LINE-MOD PUBLIC ${OpenCV_INCLUDE_DIRS})
 
-add_library(LINE-MOD ${SOURCES})
-add_executable(MAIN "src/main.cpp")
+target_link_libraries(LINE-MOD stdc++fs)
+add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
+
 set_property(TARGET LINE-MOD PROPERTY CXX_STANDARD 17)
 set_property(TARGET LINE-MOD PROPERTY CXX_STANDARD_REQUIRED ON)
 
-#target_link_libraries(MAIN ${OPENGL_LIBRARIES})
-
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${GLM_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${ASSIMP_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} GLEW::GLEW)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${freenect2_LIBRARIES})
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)
