@@ -36,7 +36,7 @@
 
 #endif
 
-int main()t
+int main()
 {
 	//Aruco ar;
 	//ar.detectBoard();
