@@ -16,7 +16,7 @@
 
 #include "defines.h"
 #include "utility.h"
-#include "model_buffer.h"
+#include "ModelBuffer.h"
 #include "ModelImporter.h"
 
 /**
