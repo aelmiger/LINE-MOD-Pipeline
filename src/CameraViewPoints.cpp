@@ -48,18 +48,7 @@ void CameraViewPoints::removeSuperfluousVertices() {
 	vertices = tmpVertices;
 }
 
-uint32_t CameraViewPoints::getNumVertices()
-{
-	return vertices.size();
-}
-
-uint32_t CameraViewPoints::getNumIndices()
-{
-	return indices.size();
-}
-
 std::vector<glm::vec3>& CameraViewPoints::getVertices() { return vertices; }
-std::vector<Index>& CameraViewPoints::getIndices() { return indices; }
 
 void CameraViewPoints::readModelProperties(std::string in_modelFile) {
 	std::string filename = in_modelFile.substr(0, in_modelFile.size() - 4) + ".yml";
