@@ -59,7 +59,6 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 
 	cv::Vec3d viewpoint(0, 0, 0);
 	cv::ppf_match_3d::computeNormalsPC3d(sampledpatchedNaNs, sceneVertices, 12, false, viewpoint);
-	//TODO Change what to do if patchedNaNs = 0
 }
 
 void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uint16_t in_modelNumber)
@@ -108,7 +107,7 @@ bool HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<Obj
 		cv::Mat maskedDepthImg;
 		cv::Mat maskedDepth;
 		cv::Mat diffImg;
-		erodeMask(binary, binary, 2);
+		cv::erode(binary, binary, cv::Mat(), cv::Point(-1, -1), 2);
 		in_depthImg.copyTo(maskedDepthImg, binary);
 		depth.copyTo(maskedDepth, binary);
 		absdiff(maskedDepthImg, maskedDepth, diffImg);

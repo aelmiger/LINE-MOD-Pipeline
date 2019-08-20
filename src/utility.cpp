@@ -93,7 +93,7 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::st
 }
 
 
-cv::Mat loadDepth(const std::string& a_name)
+cv::Mat loadDepthLineModDataset(const std::string& a_name)
 {
 	std::ifstream l_file(a_name, std::ios::in | std::ios::binary);
 

@@ -33,7 +33,7 @@ cv::Mat OpenGLRender::getColorImgFromBuff()
 {
 	glReadBuffer(GL_FRONT);
 	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, renderedColorImg.data);
-	flip(renderedColorImg, renderedColorImg, 0); //TODO Wird flip wirklich ben�tigt?
+	flip(renderedColorImg, renderedColorImg, 0);
 	return renderedColorImg;
 }
 

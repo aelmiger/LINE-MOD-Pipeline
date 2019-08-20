@@ -43,49 +43,42 @@ int main()
 	//TemplateGenerator templateGen;
 	//templateGen.run();
 	//TODO 2 exe in cmake!
-	//templateGen.~Template_Generator();
-	PoseDetection poseDetect; //TODO YML als settings datei
+	PoseDetection poseDetect;
 	poseDetect.setupBenchmark("bigBearing.ply");
 	int counter = 0;
 	//cv::VideoCapture sequence("data/color%0d.jpg");
-	//cv::VideoCapture sequence("benchmark/img%0d.png");
-	//cv::VideoCapture sequencedepth("benchmark/depth%0d.png");		
-	Kinect2 kin2;
+	cv::VideoCapture sequence("benchmark/img%0d.png");
+	cv::VideoCapture sequencedepth("benchmark/depth%0d.png");		
+	//Kinect2 kin2;
 
 	while (true) {
-
 
 		std::vector<cv::Mat> imgs;
 		cv::Mat colorImg;
 		cv::Mat depthImg;
 
+		sequence >> colorImg;
+		sequencedepth >> depthImg;
 
-
-		//sequence >> colorImg;
-		//sequencedepth >> depthImg;
-
-		kin2.getKinectFrames(colorImg, depthImg);
+		//kin2.getKinectFrames(colorImg, depthImg);
 
 		if (colorImg.empty())
-		{			std::cout << "End of Sequence" << std::endl;
+		{			
+			std::cout << "End of Sequence" << std::endl;
 		}
 
-		//depthImg = loadDepth("data/depth" + std::to_string(counter) + ".dpt");
+		//depthImg = loadDepthLineModDataset("data/depth" + std::to_string(counter) + ".dpt");
 
 		imgs.push_back(colorImg);
 		imgs.push_back(depthImg);
 		std::vector<ObjectPose> objPose;
-		poseDetect.run(imgs, "bigBearing.ply", 2, objPose); //TODO cleanup Funktion und nullptr abfrage
+		poseDetect.detect(imgs, "bigBearing.ply", 2, objPose);
 
 
 
 		counter++;
 	}
-
-	//TODO implement nach welcher klasse suchen und wieviele Objekte
 	//TODO run mit funktionen austauschen!
 	//TODO vector nicht per value bergeben
-	//TODO doxygen
-	//TODO Docker
 	std::getchar();
 }

@@ -126,7 +126,6 @@ private:
 	std::vector<cv::linemod::Match> elementsFromListOfIndices(std::vector<cv::linemod::Match>& in_matches,
 		const std::vector<uint32_t>& in_indices);
 	void readColorRanges();
-	void erodeMask(cv::Mat& in_mask, cv::Mat& in_erode, int in_numberIterations);
 	void drawResponse(const std::vector<cv::linemod::Template>& templates,
 		int num_modalities, cv::Mat& dst, const cv::Point& offset, int T);
 };

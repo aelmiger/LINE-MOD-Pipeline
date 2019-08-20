@@ -5,7 +5,7 @@ PoseDetection::PoseDetection()
 	readSettings(camParams, templateSettings);
 
 	filesInDirectory(modelFiles, templateSettings.modelFolder, templateSettings.modelFileEnding);
-	opengl = new OpenGLRender(camParams); //TODO unique_ptr shared_ptr
+	opengl = new OpenGLRender(camParams);
 	line = new HighLevelLineMOD(camParams, templateSettings);
 	icp = new HighLevelLinemodIcp(6, 0.1f, 2.5f, 8, templateSettings.icpSubsamplingFactor, modelFiles, templateSettings.modelFolder);
 
@@ -38,7 +38,7 @@ void PoseDetection::cleanup() {
 	}
 }
 
-void PoseDetection::run(std::vector<cv::Mat>& in_imgs,std::string const& in_className, uint16_t const& in_numberOfObjects,std::vector<ObjectPose>& in_objPose)
+void PoseDetection::detect(std::vector<cv::Mat>& in_imgs,std::string const& in_className, uint16_t const& in_numberOfObjects,std::vector<ObjectPose>& in_objPose)
 {
 	uint16_t numClassIndex = findIndexInVector(in_className, ids);
 

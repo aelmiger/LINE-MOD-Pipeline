@@ -31,5 +31,5 @@ bool fromGLM2CV(const glm::mat3& glmmat, cv::Matx33d* in_mat);
 
 void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::string& in_path, const std::string&
 	in_extension);
-cv::Mat loadDepth(const std::string& a_name);
+cv::Mat loadDepthLineModDataset(const std::string& a_name);
 void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings);

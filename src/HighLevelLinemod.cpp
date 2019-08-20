@@ -118,7 +118,7 @@ bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat>& in_images, const std::s
 		{
 			templateImgs.push_back(depthRotated);
 		}
-		erodeMask(maskRotated, maskRotated, 1);
+		cv::erode(maskRotated, maskRotated, cv::Mat(), cv::Point(-1, -1), 1);
 		cv::Rect boundingBox;
 		uint64_t template_id = detector->addTemplate(templateImgs, in_modelName, maskRotated, &boundingBox);
 		templateImgs.clear();
@@ -301,7 +301,6 @@ void HighLevelLineMOD::discardSmallMatchGroups()
 		float ratioToBiggestGroup = potentialMatches[j].matchIndices.size() * 100 / biggestGroup;
 		if (ratioToBiggestGroup > discardGroupRatio)
 		{
-			//TODO Non magic number
 			tmp.push_back(potentialMatches[j]);
 		}
 	}
@@ -364,10 +363,6 @@ void HighLevelLineMOD::readLinemod()
 	}
 
 	std::ifstream input = std::ifstream("linemod_tempPosFile.bin", std::ios::in | std::ios::binary);
-	if (!input.is_open())
-	{
-		//TODO raise error
-	}
 	uint32_t numTempVecs;
 	input.read((char*)&numTempVecs, sizeof(uint32_t));
 	for (uint32_t numTempVec = 0; numTempVec < numTempVecs; numTempVec++)
@@ -697,11 +692,6 @@ void HighLevelLineMOD::readColorRanges()
 
 		modProps.emplace_back(tmpModProp);
 	}
-}
-
-void HighLevelLineMOD::erodeMask(cv::Mat& in_mask, cv::Mat& in_erode, int in_numberIterations)
-{
-	erode(in_mask, in_erode, cv::Mat(), cv::Point(-1, -1), in_numberIterations);
 }
 
 void HighLevelLineMOD::drawResponse(const std::vector<cv::linemod::Template>& templates,
