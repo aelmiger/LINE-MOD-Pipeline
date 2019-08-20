@@ -76,6 +76,10 @@ struct TemplateGenerationSettings
 	uint16_t numberWantedPoses;
 	float radiusThresholdNewObject;
 	float discardGroupRatio;
+	bool useDepthImprovement;
+	float depthOffset;
+	bool useIcp;
+	uint16_t icpSubsamplingFactor;
 };
 
 struct ModelProperties

@@ -59,20 +59,19 @@ void Aruco::detectBoard()
 		cv::Vec3d rvec, tvec;
 		glm::mat3 glmRotMat;
 		cv::Mat cvCast;
-
 		// if at least one marker detected
 		if (!ids.empty())
 		{
 			//cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
 			int valid = estimatePoseBoard(corners, ids, board, cameraMatrix, distCoeffs, rvec, tvec);
 			Rodrigues(rvec, rotMat);
-			tvec *= 0.283f;
-			tvec += rotMat * cv::Vec3d(96, 136, 0);
+			tvec *= 0.283f; //convert to mm
+			tvec += rotMat * cv::Vec3d(96, 136, 0); //shift to center of board
 			// if at least one board marker detected
 
 			fromCV2GLM(cv::Mat(rotMat), &glmRotMat);
 			glm::vec3 eulAng = glm::eulerAngles(glm::toQuat(glmRotMat));
-			eulAng.x += M_PI / 2;
+			eulAng.x += CV_PI / 2;
 			glmRotMat = glm::toMat4(glm::qua<float>(glm::vec3(eulAng.x, eulAng.y, eulAng.z)));
 			cv::putText(imageCopy, glm::to_string(glm::vec3(tvec[0], tvec[1], tvec[2])), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
 			cv::putText(imageCopy, glm::to_string(glm::degrees(glm::eulerAngles(glm::toQuat(glmRotMat)))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);

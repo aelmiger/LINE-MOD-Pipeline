@@ -7,7 +7,7 @@ PoseDetection::PoseDetection()
 	filesInDirectory(modelFiles, templateSettings.modelFolder, templateSettings.modelFileEnding);
 	opengl = new OpenGLRender(camParams); //TODO unique_ptr shared_ptr
 	line = new HighLevelLineMOD(camParams, templateSettings);
-	icp = new HighLevelLinemodIcp(6, 0.1f, 2.5f, 8, 5, modelFiles, templateSettings.modelFolder);
+	icp = new HighLevelLinemodIcp(6, 0.1f, 2.5f, 8, templateSettings.icpSubsamplingFactor, modelFiles, templateSettings.modelFolder);
 
 	for (const auto& modelFile : modelFiles)
 	{
@@ -18,12 +18,14 @@ PoseDetection::PoseDetection()
 
 PoseDetection::~PoseDetection()
 {
-	if (opengl)
-	{
+	cleanup();
+}
+
+void PoseDetection::cleanup() {
+	if (opengl) {
 		delete opengl;
 	}
-	if (line)
-	{
+	if (line) {
 		delete line;
 	}
 	if (icp)
@@ -60,27 +62,32 @@ void PoseDetection::run(std::vector<cv::Mat>& in_imgs,std::string const& in_clas
 	{
 		for (auto& detectedPose : detectedPoses)
 		{
-			//icp->prepareDepthForIcp(depthImg, camParams.cameraMatrix, detectedPose[0].boundingBox);
-			//icp->registerToScene(detectedPose, numClassIndex);
-			uint16_t bestPose = 0;
-			//bool truePositivMatch = icp->estimateBestMatch(correctedTranslationDepth, detectedPose, opengl, numClassIndex,bestPose);
-			//if (truePositivMatch) {
-				finalObjectPoses.push_back(detectedPose[bestPose]);
-				if (finalObjectPoses.size() == in_numberOfObjects) {
-					break;
+			if (templateSettings.useIcp) {
+				uint16_t bestPose = 0;
+				icp->prepareDepthForIcp(depthImg, camParams.cameraMatrix, detectedPose[0].boundingBox);
+				icp->registerToScene(detectedPose, numClassIndex);
+				bool truePositivMatch = icp->estimateBestMatch(correctedTranslationDepth, detectedPose, opengl, numClassIndex,bestPose);
+				if (truePositivMatch) {
+					finalObjectPoses.push_back(detectedPose[bestPose]);
 				}
-			//}
+			}
+			else {
+				finalObjectPoses.push_back(detectedPose[0]);
+			}
+			if (finalObjectPoses.size() == in_numberOfObjects) {
+					break;
+			}
 		}
 		if (!finalObjectPoses.empty()) {
 			if (bench) {
 				float scoreNew = 100;
 				float error = 1;
 				error = bench->calculateErrorHodan(correctedTranslationDepth, opengl, finalObjectPoses[0], numClassIndex);
-				scoreNew = bench->calculateErrorLM(finalObjectPoses[0]);
+				//scoreNew = bench->calculateErrorLM(finalObjectPoses[0]);
 				//scoreNew = bench->calculateErrorLMAmbigous(finalObjectPoses[0]);
 				std::cout << "final " << ": " << scoreNew << "  newBench: " << error << std::endl;
 
-				cv::putText(colorImg, glm::to_string(finalObjectPoses[0].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
+				//cv::putText(colorImg, glm::to_string(finalObjectPoses[0].translation), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
 				//cv::putText(colorImg, glm::to_string(glm::degrees(glm::eulerAngles(finalObjectPoses[0].quaternions))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
 				//cv::putText(colorImg, std::to_string(error), cv::Point(50, 140), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(255, 0, 0), 2.0f);
 			}

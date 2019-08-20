@@ -16,7 +16,8 @@ class PoseDetection
 public:
 	PoseDetection();
 	~PoseDetection();
-	void run(std::vector<cv::Mat>& in_imgs,std::string const& in_className, uint16_t const& in_numberOfObjects, std::vector<ObjectPose>& in_objPose);
+	void cleanup();
+	void run(std::vector<cv::Mat>& in_imgs, std::string const& in_className, uint16_t const& in_numberOfObjects, std::vector<ObjectPose>& in_objPose);
 	void setupBenchmark(std::string const& in_className);
 private:
 	OpenGLRender* opengl;

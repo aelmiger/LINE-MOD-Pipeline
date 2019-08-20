@@ -8,21 +8,25 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 	cy(in_camParams.cy),
 	fx(in_camParams.fx),
 	fy(in_camParams.fy),
-	fieldOfViewHeight(360.0f / M_PI * atanf(videoHeight / (2 * in_camParams.fy))),
+	fieldOfViewHeight(360.0f / CV_PI * atanf(videoHeight / (2 * in_camParams.fy))),
 	lowerAngleStop(in_templateSettings.angleStart),
 	upperAngleStop(in_templateSettings.angleStop),
 	angleStep(in_templateSettings.angleStep),
 	stepSize(in_templateSettings.stepSize),
 	modelFolder(in_templateSettings.modelFolder),
-	detectorThreshold(in_templateSettings.detectorThreshold)
+	detectorThreshold(in_templateSettings.detectorThreshold),
+	percentToPassCheck(in_templateSettings.percentToPassCheck),
+	numberWantedPoses(in_templateSettings.numberWantedPoses),
+	radiusThresholdNewObject(in_templateSettings.radiusThresholdNewObject),
+	discardGroupRatio(in_templateSettings.discardGroupRatio),
+	useDepthImprovement(in_templateSettings.useDepthImprovement),
+	depthOffset(in_templateSettings.depthOffset)
 {
 	if (!onlyColorModality)
 	{
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
 		modality.emplace_back(cv::makePtr<cv::linemod::ColorGradient>());
-		//modality.push_back(cv::makePtr<cv::linemod::ColorGradient>(10.0f, 30, 55.0f));
 		modality.emplace_back(cv::makePtr<cv::linemod::DepthNormal>());
-		//modality.push_back(cv::makePtr<cv::linemod::DepthNormal>(2000, 50, 30, 2));
 
 		static const int T_DEFAULTS[] = { 5, 8 };
 		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
@@ -66,13 +70,15 @@ bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat>& in_images, const std::s
 	std::vector<cv::Mat> templateImgs;
 	cv::Mat colorRotated;
 	cv::Mat depthRotated;
+	cv::Mat colorToBinary;
+	cv::threshold(in_images[0], colorToBinary, 1, 255, cv::THRESH_BINARY);
 	cv::threshold(in_images[1], mask, 1, 65535, cv::THRESH_BINARY);
 	mask.convertTo(mask, CV_8UC1);
 
 	for (size_t q = 0; q < inPlaneRotationMat.size(); q++)
 	{
 		cv::warpAffine(mask, maskRotated, inPlaneRotationMat[q], maskRotated.size());
-		cv::warpAffine(in_images[0], colorRotated, inPlaneRotationMat[q], in_images[0].size());
+		cv::warpAffine(colorToBinary, colorRotated, inPlaneRotationMat[q], colorToBinary.size());
 		cv::warpAffine(in_images[1], depthRotated, inPlaneRotationMat[q], in_images[1].size());
 		templateImgs.push_back(colorRotated);
 		if (!onlyColorModality)
@@ -91,7 +97,7 @@ bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat>& in_images, const std::s
 		}
 		glm::vec3 translation;
 		glm::qua<float> quaternions;
-		uint16_t medianDepth = medianMat(depthRotated, boundingBox, 4);
+		uint16_t medianDepth = medianMat(depthRotated, boundingBox, 5);
 		int16_t currentInplaneAngle = -(lowerAngleStop + q * angleStep);
 		calculateTemplatePose(translation, quaternions, in_cameraPosition, currentInplaneAngle);
 		templates.emplace_back(translation, quaternions, boundingBox, medianDepth);
@@ -413,15 +419,24 @@ bool HighLevelLineMOD::colorCheck(cv::Mat& in_colImg, uint32_t& in_numMatch, flo
 
 bool HighLevelLineMOD::depthCheck(cv::Mat& in_depth, uint32_t& in_numMatch)
 {
-	cv::Rect bb(
-		groupedMatches[in_numMatch].x,
-		groupedMatches[in_numMatch].y,
-		templates[groupedMatches[in_numMatch].template_id].boundingBox.width,
-		templates[groupedMatches[in_numMatch].template_id].boundingBox.height);
-	int32_t depthDiff = (int32_t)medianMat(in_depth, bb, 4) - (int32_t)templates[groupedMatches[in_numMatch].template_id].
-		medianDepth;
-	tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z + depthDiff; //TODO OFFSET MAGIC NUMBER
-	return abs(depthDiff) < stepSize;
+	if (useDepthImprovement)
+	{
+
+		cv::Rect bb(
+			groupedMatches[in_numMatch].x,
+			groupedMatches[in_numMatch].y,
+			templates[groupedMatches[in_numMatch].template_id].boundingBox.width,
+			templates[groupedMatches[in_numMatch].template_id].boundingBox.height);
+		int32_t depthDiff = (int32_t)medianMat(in_depth, bb, 5) - (int32_t)templates[groupedMatches[in_numMatch].template_id].
+			medianDepth - depthOffset;
+		tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z + depthDiff;
+		return abs(depthDiff) < stepSize;
+	}
+	else {
+		tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z;
+		return true;
+	}
+
 }
 
 void HighLevelLineMOD::updateTranslationAndCreateObjectPose(uint32_t const& in_numMatch,

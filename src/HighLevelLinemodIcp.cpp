@@ -49,8 +49,16 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	cv::patchNaNs(modelMat);
 	cv::Mat patchedNaNs;
 	removeIfTooFarFromMean(modelMat, patchedNaNs, true);
+	int numRows = patchedNaNs.rows / sampleStep;
+	cv::Mat sampledpatchedNaNs = cv::Mat(numRows, patchedNaNs.cols, patchedNaNs.type());;
+	int c = 0;
+	for (int i = 0; i < patchedNaNs.rows && c < numRows; i += sampleStep)
+	{
+		patchedNaNs.row(i).copyTo(sampledpatchedNaNs.row(c++));
+	}
+
 	cv::Vec3d viewpoint(0, 0, 0);
-	cv::ppf_match_3d::computeNormalsPC3d(patchedNaNs, sceneVertices, 12, false, viewpoint);
+	cv::ppf_match_3d::computeNormalsPC3d(sampledpatchedNaNs, sceneVertices, 12, false, viewpoint);
 	//TODO Change what to do if patchedNaNs = 0
 }
 
@@ -71,8 +79,8 @@ void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uin
 		pose->updatePose(rotM, tranV);
 		poses.push_back(pose);
 	}
-	icp->registerModelToScene(modelVertices[in_modelNumber], sceneVertices, poses);
 
+	icp->registerModelToScene(modelVertices[in_modelNumber], sceneVertices, poses);
 	for (size_t n = 0; n < poses.size(); n++)
 	{
 		updatePosition(poses[n]->pose, in_poses[n]);
@@ -113,7 +121,7 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 			bestMean = mean[0];
 		}
 	}
-	if (bestMean <= 20 && !in_poses.empty())
+	if (bestMean <= 25 && !in_poses.empty())
 	{
 		in_bestPose = bestPose;
 		return true;

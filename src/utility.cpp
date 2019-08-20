@@ -8,7 +8,7 @@ glm::qua<float> openGL2openCVRotation(glm::mat4& in_viewMat)
 {
 	glm::qua<float> tempQuat = toQuat(in_viewMat);//TODO FIX COORDINATE TRANSFORM
 	glm::vec3 eul = eulerAngles(tempQuat);
-	return glm::qua<float>(glm::vec3(eul.x - M_PI / 2.0f, -eul.y, -eul.z));
+	return glm::qua<float>(glm::vec3(eul.x - CV_PI / 2.0f, -eul.y, -eul.z));
 }
 
 bool fromCV2GLM(const cv::Mat& cvmat, glm::mat4* glmmat)
@@ -165,7 +165,7 @@ void drawResponse(const std::vector<cv::linemod::Template>& templates,
 		CV_RGB(0, 255, 0),
 		CV_RGB(255, 255, 0),
 		CV_RGB(255, 140, 0),
-		CV_RGB(255, 0, 0)
+		CV_RGB(0, 0,255)
 	};
 
 	for (int m = 0; m < num_modalities; ++m)
@@ -249,4 +249,8 @@ void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in
 	fs["number of poses to compare"] >> in_tempGenSettings.numberWantedPoses;
 	fs["distance to match to be considered same object"] >> in_tempGenSettings.radiusThresholdNewObject;
 	fs["ratio to determine if group is too small"] >> in_tempGenSettings.discardGroupRatio;
+	fs["use depth improvement"] >> in_tempGenSettings.useDepthImprovement;
+	fs["depth offset"] >> in_tempGenSettings.depthOffset;
+	fs["use icp"] >> in_tempGenSettings.useIcp;
+	fs["icp subsampling factor"] >> in_tempGenSettings.icpSubsamplingFactor;
 }
