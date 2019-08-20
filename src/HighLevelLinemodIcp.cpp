@@ -87,7 +87,7 @@ void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uin
 	}
 }
 
-uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses,
+bool HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses,
 	OpenGLRender* in_openglRend, uint16_t in_modelIndice, uint16_t& in_bestPose)
 {
 	uint16_t bestMean = 0;
@@ -121,7 +121,7 @@ uint16_t HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector
 			bestMean = mean[0];
 		}
 	}
-	if (bestMean <= 25 && !in_poses.empty())
+	if (bestMean <= correctEstimateTreshold && !in_poses.empty())
 	{
 		in_bestPose = bestPose;
 		return true;
