@@ -36,7 +36,7 @@
 
 #endif
 
-int main()
+int main()t
 {
 	//Aruco ar;
 	//ar.detectBoard();
@@ -84,7 +84,7 @@ int main()
 
 	//TODO implement nach welcher klasse suchen und wieviele Objekte
 	//TODO run mit funktionen austauschen!
-	//TODO vector nicht per value übergeben
+	//TODO vector nicht per value bergeben
 	//TODO doxygen
 	//TODO Docker
 	std::getchar();
