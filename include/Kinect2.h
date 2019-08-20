@@ -12,12 +12,25 @@
 #include <libfreenect2/packet_pipeline.h>
 #include <libfreenect2/logger.h>
 
+/**
+ * @brief Class that wraps the communication with the Kinect V2 in a high level interface
+ * 
+ */
 class Kinect2
 {
 public:
-
+	/**
+	 * @brief Construct a new Kinect 2 object
+	 * 
+	 */
 	Kinect2();
 	~Kinect2();
+	/**
+	 * @brief Get 640x480 aligned RGB (8bit) and depth(16bit) images from the camera
+	 * 
+	 * @param[out] in_rgb 
+	 * @param[out] in_depth 
+	 */
 	void getKinectFrames(cv::Mat& in_rgb, cv::Mat& in_depth);
 private:
 	libfreenect2::Freenect2 freenect2;
