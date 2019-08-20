@@ -698,3 +698,30 @@ void HighLevelLineMOD::readColorRanges()
 		modProps.emplace_back(tmpModProp);
 	}
 }
+
+void HighLevelLineMOD::erodeMask(cv::Mat& in_mask, cv::Mat& in_erode, int in_numberIterations)
+{
+	erode(in_mask, in_erode, cv::Mat(), cv::Point(-1, -1), in_numberIterations);
+}
+
+void HighLevelLineMOD::drawResponse(const std::vector<cv::linemod::Template>& templates,
+	int num_modalities, cv::Mat& dst, const cv::Point& offset, int T)
+{
+	static const cv::Scalar COLORS[5] = {
+		CV_RGB(0, 0, 255),
+		CV_RGB(0, 255, 0),
+		CV_RGB(255, 255, 0),
+		CV_RGB(255, 140, 0),
+		CV_RGB(0, 0,255)
+	};
+
+	for (int m = 0; m < num_modalities; ++m)
+	{
+		cv::Scalar color = COLORS[m];
+		for (const auto f : templates[m].features)
+		{
+			const cv::Point pt(f.x + offset.x, f.y + offset.y);
+			circle(dst, pt, T / 2, color);
+		}
+	}
+}

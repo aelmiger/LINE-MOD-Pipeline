@@ -47,4 +47,5 @@ private:
 	void readGroundTruthLinemodDataset();
 	void printHodanScore();
 	void printLMScore();
+	float length(cv::Vec3f& in_vecA);
 };

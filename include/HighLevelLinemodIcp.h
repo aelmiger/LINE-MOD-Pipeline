@@ -84,4 +84,6 @@ private:
 	void removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows = true);
 	void depthToBinary(cv::Mat& in_gray, cv::Mat& in_binary, uint32_t in_threshold = 1);
 	void loadModels();
+	void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose);
+
 };

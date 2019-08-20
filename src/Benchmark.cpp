@@ -236,3 +236,8 @@ void Benchmark::printLMScore()
 {
 	//std::cout << "LM Score: " << (float)lineCounter * 100 / (float)imageCounter << " Counter: " << imageCounter << "            " << std::endl;
 }
+
+float Benchmark::length(cv::Vec3f& in_vecA)
+{
+	return sqrt(in_vecA[0] * in_vecA[0] + in_vecA[1] * in_vecA[1] + in_vecA[2] * in_vecA[2]);
+}

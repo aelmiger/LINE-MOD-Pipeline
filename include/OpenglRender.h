@@ -131,6 +131,7 @@ private:
 	void setupOpenGL();
 	void setupFramebuffer();
 	void setupShader();
+	std::string fileToString(const char* filename);
 	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3>& a, const std::vector<glm::vec3>& b);
 	void translateCam(glm::vec3 in_vec, float in_rotate, float in_x, float in_y);
 };

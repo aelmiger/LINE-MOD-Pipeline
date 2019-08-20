@@ -4,13 +4,6 @@
 #################### CONVERSION UTILITY ####################
 */
 
-glm::qua<float> openGL2openCVRotation(glm::mat4& in_viewMat)
-{
-	glm::qua<float> tempQuat = toQuat(in_viewMat);//TODO FIX COORDINATE TRANSFORM
-	glm::vec3 eul = eulerAngles(tempQuat);
-	return glm::qua<float>(glm::vec3(eul.x - CV_PI / 2.0f, -eul.y, -eul.z));
-}
-
 bool fromCV2GLM(const cv::Mat& cvmat, glm::mat4* glmmat)
 {
 	cv::Mat tempMat;
@@ -99,15 +92,6 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::st
 	}
 }
 
-std::string fileToString(const char* filename)
-{
-	std::ifstream t(filename);
-	std::stringstream buffer;
-	buffer << t.rdbuf();
-	t.close();
-	std::string fds = buffer.str();
-	return buffer.str();
-}
 
 cv::Mat loadDepth(const std::string& a_name)
 {
@@ -143,84 +127,16 @@ cv::Mat loadDepth(const std::string& a_name)
 #################### CALC UTILITY ####################
 */
 
-float length(cv::Vec3f& in_vecA)
-{
-	return sqrt(in_vecA[0] * in_vecA[0] + in_vecA[1] * in_vecA[1] + in_vecA[2] * in_vecA[2]);
-}
+
 
 /*
 #################### IMAGE UTILITY ####################
 */
 
-void erodeMask(cv::Mat& in_mask, cv::Mat& in_erode, int in_numberIterations)
-{
-	erode(in_mask, in_erode, cv::Mat(), cv::Point(-1, -1), in_numberIterations);
-}
 
-void drawResponse(const std::vector<cv::linemod::Template>& templates,
-	int num_modalities, cv::Mat& dst, const cv::Point& offset, int T)
-{
-	static const cv::Scalar COLORS[5] = {
-		CV_RGB(0, 0, 255),
-		CV_RGB(0, 255, 0),
-		CV_RGB(255, 255, 0),
-		CV_RGB(255, 140, 0),
-		CV_RGB(0, 0,255)
-	};
 
-	for (int m = 0; m < num_modalities; ++m)
-	{
-		cv::Scalar color = COLORS[m];
-		for (const auto f : templates[m].features)
-		{
-			const cv::Point pt(f.x + offset.x, f.y + offset.y);
-			circle(dst, pt, T / 2, color);
-		}
-	}
-}
 
-void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
-	ObjectPose& in_objPos)
-{
-	cv::Mat rotMat;
-	fromGLM2CV(toMat3(in_objPos.quaternions), &rotMat);
 
-	cv::Vec3f tVec(in_objPos.translation.x, in_objPos.translation.y, in_objPos.translation.z);
-	cv::Mat rVec;
-	std::vector<cv::Point3f> coordinatePoints;
-	std::vector<cv::Point2f> projectedPoints;
-	cv::Point3f center(0.0f, 0.0f, 0.0f);
-	cv::Point3f xm(in_coordinateSystemLength, 0.0f, 0.0f);
-	cv::Point3f ym(0.0f, in_coordinateSystemLength, 0.0f);
-	cv::Point3f zm(0.0f, 0.0f, in_coordinateSystemLength);
-
-	coordinatePoints.push_back(center);
-	coordinatePoints.push_back(xm);
-	coordinatePoints.push_back(ym);
-	coordinatePoints.push_back(zm);
-
-	Rodrigues(rotMat, rVec);
-
-	projectPoints(coordinatePoints, rVec, tVec, in_camMat, std::vector<double>(), projectedPoints);
-	line(in_srcDstImage, projectedPoints[0], projectedPoints[1], cv::Scalar(0, 0, 255), 2);
-	line(in_srcDstImage, projectedPoints[0], projectedPoints[2], cv::Scalar(0, 255, 0), 2);
-	line(in_srcDstImage, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 2);
-}
-
-void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose)
-{
-	glm::mat4 transMat;
-	fromCV2GLM(cv::Mat(in_mat), &transMat);
-	in_objPose.quaternions = toQuat(transMat);
-	in_objPose.translation = glm::vec3(in_mat(0, 3), in_mat(1, 3), in_mat(2, 3));
-}
-
-cv::Mat translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety)
-{
-	cv::Mat trans_mat = (cv::Mat_<double>(2, 3) << 1, 0, in_offsetx, 0, 1, in_offsety);
-	cv::warpAffine(in_img, in_img, trans_mat, in_img.size());
-	return in_img;
-}
 
 void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings) {
 	std::string filename = "linemod_settings.yml";

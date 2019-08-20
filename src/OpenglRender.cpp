@@ -303,6 +303,16 @@ void OpenGLRender::setupShader()
 	glDeleteShader(fragShadId);
 }
 
+std::string OpenGLRender::fileToString(const char* filename)
+{
+	std::ifstream t(filename);
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	t.close();
+	std::string fds = buffer.str();
+	return buffer.str();
+}
+
 std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3>& a, const std::vector<glm::vec3>& b)
 {
 	std::vector<glm::vec3> result;

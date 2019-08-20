@@ -135,3 +135,39 @@ void PoseDetection::readLinemodFromFile()
 		std::cout << "ERROR::Models in file folder do not match with generated models!" << std::endl;
 	}
 }
+
+void PoseDetection::drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
+	ObjectPose& in_objPos)
+{
+	cv::Mat rotMat;
+	fromGLM2CV(toMat3(in_objPos.quaternions), &rotMat);
+
+	cv::Vec3f tVec(in_objPos.translation.x, in_objPos.translation.y, in_objPos.translation.z);
+	cv::Mat rVec;
+	std::vector<cv::Point3f> coordinatePoints;
+	std::vector<cv::Point2f> projectedPoints;
+	cv::Point3f center(0.0f, 0.0f, 0.0f);
+	cv::Point3f xm(in_coordinateSystemLength, 0.0f, 0.0f);
+	cv::Point3f ym(0.0f, in_coordinateSystemLength, 0.0f);
+	cv::Point3f zm(0.0f, 0.0f, in_coordinateSystemLength);
+
+	coordinatePoints.push_back(center);
+	coordinatePoints.push_back(xm);
+	coordinatePoints.push_back(ym);
+	coordinatePoints.push_back(zm);
+
+	cv::Rodrigues(rotMat, rVec);
+
+	cv::projectPoints(coordinatePoints, rVec, tVec, in_camMat, std::vector<double>(), projectedPoints);
+	cv::line(in_srcDstImage, projectedPoints[0], projectedPoints[1], cv::Scalar(0, 0, 255), 2);
+	cv::line(in_srcDstImage, projectedPoints[0], projectedPoints[2], cv::Scalar(0, 255, 0), 2);
+	cv::line(in_srcDstImage, projectedPoints[0], projectedPoints[3], cv::Scalar(255, 0, 0), 2);
+}
+
+cv::Mat PoseDetection::translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety)
+{
+	cv::Mat trans_mat = (cv::Mat_<double>(2, 3) << 1, 0, in_offsetx, 0, 1, in_offsety);
+	cv::warpAffine(in_img, in_img, trans_mat, in_img.size());
+	return in_img;
+}
+

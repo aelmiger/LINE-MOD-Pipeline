@@ -163,3 +163,11 @@ void HighLevelLinemodIcp::depthToBinary(cv::Mat& in_gray, cv::Mat& in_binary, ui
 	cv::threshold(in_gray, in_binary, in_threshold, 65535, cv::THRESH_BINARY);
 	in_binary.convertTo(in_binary, CV_8UC1);
 }
+
+void HighLevelLinemodIcp::updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose)
+{
+	glm::mat4 transMat;
+	fromCV2GLM(cv::Mat(in_mat), &transMat);
+	in_objPose.quaternions = toQuat(transMat);
+	in_objPose.translation = glm::vec3(in_mat(0, 3), in_mat(1, 3), in_mat(2, 3));
+}
