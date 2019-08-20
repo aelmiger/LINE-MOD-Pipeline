@@ -44,7 +44,7 @@ void PoseDetection::run(std::vector<cv::Mat>& in_imgs,std::string const& in_clas
 
 	colorImg = in_imgs[0];
 	depthImg = in_imgs[1];
-	//TODO eventuell noch eine exe für Benchmarks
+	//TODO eventuell noch eine exe fï¿½r Benchmarks
 		
 	cv::Mat correctedTranslationColor = colorImg.clone();
 	cv::Mat correctedTranslationDepth = depthImg.clone();
