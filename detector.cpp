@@ -1,12 +1,7 @@
-#include "TemplateGenerator.h"
 #include "PoseDetection.h"
-#include "Aruco.h"
 
 int main()
 {
-	//Aruco ar;
-	//ar.detectBoard();
-	//TODO 2 exe in cmake!
 	PoseDetection poseDetect;
 	poseDetect.setupBenchmark("bigBearing.ply");
 	int counter = 0;
@@ -42,7 +37,6 @@ int main()
 
 		counter++;
 	}
-	//TODO run mit funktionen austauschen!
 	//TODO vector nicht per value bergeben
 	std::getchar();
 }
