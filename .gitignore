@@ -36,3 +36,7 @@
 
 #Ignore Build
 build/
+
+#Ignore Benchmark and model files
+models/
+benchmark/
