@@ -17,7 +17,9 @@ public:
 	PoseDetection();
 	~PoseDetection();
 	void cleanup();
-	void detect(std::vector<cv::Mat>& in_imgs, std::string const& in_className, uint16_t const& in_numberOfObjects, std::vector<ObjectPose>& in_objPose);
+	void detect(std::vector<cv::Mat>& in_imgs, std::string const& in_className,
+	            uint16_t const& in_numberOfObjects, std::vector<ObjectPose>& in_objPose,
+	            bool in_displayResults);
 	void setupBenchmark(std::string const& in_className);
 private:
 	OpenGLRender* opengl;
@@ -37,9 +39,11 @@ private:
 	std::vector<cv::String> ids;
 
 	void readLinemodFromFile();
-	uint16_t findIndexInVector(std::string const& in_stringToFind, std::vector<std::string>& in_vectorToLookIn);
+	uint16_t findIndexInVector(std::string const& in_stringToFind,
+	                           std::vector<std::string>& in_vectorToLookIn);
 
-	void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat, float in_coordinateSystemLength,
-		ObjectPose& in_objPos);
-	cv::Mat translateImg(cv::Mat &in_img, int in_offsetx, int in_offsety);
+	void drawCoordinateSystem(cv::Mat& in_srcDstImage, const cv::Mat& in_camMat,
+	                          float in_coordinateSystemLength,
+	                          ObjectPose& in_objPos);
+	cv::Mat translateImg(cv::Mat& in_img, int in_offsetx, int in_offsety);
 };

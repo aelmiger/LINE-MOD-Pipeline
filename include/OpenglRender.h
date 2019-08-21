@@ -57,8 +57,9 @@ public:
 	 * @param in_x Move camera on camera plane to the right/left
 	 * @param in_y Move camera on camera plane down/up
 	 */
-	void renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate = 0.0f,
-		float in_x = 0.0f, float in_y = 0.0f);
+	void renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
+	                            float in_rotate = 0.0f,
+	                            float in_x = 0.0f, float in_y = 0.0f);
 
 	/**
 	 * @brief Render color image to front buffer
@@ -78,8 +79,9 @@ public:
 	 * @param in_x Move camera on camera plane to the right/left
 	 * @param in_y Move camera on camera plane down/up
 	 */
-	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate = 0.0f,
-		float in_x = 0.0f, float in_y = 0.0f);
+	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
+	                            float in_rotate = 0.0f,
+	                            float in_x = 0.0f, float in_y = 0.0f);
 
 	/**
 	 * @brief Render depth image to front buffer
@@ -87,7 +89,7 @@ public:
 	 * @param in_modelIndice Index of model file
 	 * @param in_rotMat Rotation matrix of object
 	 * @param in_traVec Translation vector of object
-	 */	
+	 */
 	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec);
 
 	/**
@@ -132,6 +134,7 @@ private:
 	void setupFramebuffer();
 	void setupShader();
 	std::string fileToString(const char* filename);
-	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3>& a, const std::vector<glm::vec3>& b);
+	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3>& a,
+	                                  const std::vector<glm::vec3>& b);
 	void translateCam(glm::vec3 in_vec, float in_rotate, float in_x, float in_y);
 };

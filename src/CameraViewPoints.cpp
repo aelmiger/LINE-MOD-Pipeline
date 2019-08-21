@@ -31,16 +31,19 @@ void CameraViewPoints::createCameraViewPoints(float in_radius, uint8_t in_subdiv
 	removeSuperfluousVertices();
 }
 
-void CameraViewPoints::removeSuperfluousVertices() {
+void CameraViewPoints::removeSuperfluousVertices()
+{
 	std::vector<glm::vec3> tmpVertices;
 	for (const auto& vertice : vertices)
 	{
 		glm::vec3 tmpVertice = vertice * modProps.planesOfSymmetry;
 		bool allElementsPositive = true;
-		if (tmpVertice.x < 0 || tmpVertice.y < 0 || tmpVertice.z < 0) {
+		if (tmpVertice.x < 0 || tmpVertice.y < 0 || tmpVertice.z < 0)
+		{
 			allElementsPositive = false;
 		}
-		if (allElementsPositive) {
+		if (allElementsPositive)
+		{
 			tmpVertices.push_back(vertice);
 		}
 	}
@@ -50,7 +53,8 @@ void CameraViewPoints::removeSuperfluousVertices() {
 
 std::vector<glm::vec3>& CameraViewPoints::getVertices() { return vertices; }
 
-void CameraViewPoints::readModelProperties(std::string in_modelFile) {
+void CameraViewPoints::readModelProperties(std::string in_modelFile)
+{
 	std::string filename = in_modelFile.substr(0, in_modelFile.size() - 4) + ".yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	cv::Vec3b tempVec;
@@ -72,7 +76,8 @@ void CameraViewPoints::createVerticesForRotSym()
 {
 	for (uint16_t i = 0; i < 360; i = i + 10)
 	{
-		vertices.emplace_back(0.0f, sin(i * CV_PI / 180.0f) * radius, cos(i * CV_PI / 180.0f) * radius);
+		vertices.emplace_back(0.0f, sin(i * CV_PI / 180.0f) * radius,
+		                      cos(i * CV_PI / 180.0f) * radius);
 	}
 }
 
@@ -93,29 +98,29 @@ void CameraViewPoints::createIcosahedron()
 	vertices.emplace_back(icosahedronPointB, -icosahedronPointA, 0.0f);
 	vertices.emplace_back(-icosahedronPointB, -icosahedronPointA, 0.0f);
 
-	indices.push_back(Index{ 0, 4, 1 });
-	indices.push_back(Index{ 0, 9, 4 });
-	indices.push_back(Index{ 9, 5, 4 });
-	indices.push_back(Index{ 4, 5, 8 });
-	indices.push_back(Index{ 4, 8, 1 });
+	indices.push_back(Index{0, 4, 1});
+	indices.push_back(Index{0, 9, 4});
+	indices.push_back(Index{9, 5, 4});
+	indices.push_back(Index{4, 5, 8});
+	indices.push_back(Index{4, 8, 1});
 
-	indices.push_back(Index{ 8, 10, 1 });
-	indices.push_back(Index{ 8, 3, 10 });
-	indices.push_back(Index{ 5, 3, 8 });
-	indices.push_back(Index{ 5, 2, 3 });
-	indices.push_back(Index{ 2, 7, 3 });
+	indices.push_back(Index{8, 10, 1});
+	indices.push_back(Index{8, 3, 10});
+	indices.push_back(Index{5, 3, 8});
+	indices.push_back(Index{5, 2, 3});
+	indices.push_back(Index{2, 7, 3});
 
-	indices.push_back(Index{ 7, 10, 3 });
-	indices.push_back(Index{ 7, 6, 10 });
-	indices.push_back(Index{ 7, 11, 6 });
-	indices.push_back(Index{ 11, 0, 6 });
-	indices.push_back(Index{ 0, 1, 6 });
+	indices.push_back(Index{7, 10, 3});
+	indices.push_back(Index{7, 6, 10});
+	indices.push_back(Index{7, 11, 6});
+	indices.push_back(Index{11, 0, 6});
+	indices.push_back(Index{0, 1, 6});
 
-	indices.push_back(Index{ 6, 1, 10 });
-	indices.push_back(Index{ 9, 0, 11 });
-	indices.push_back(Index{ 9, 11, 2 });
-	indices.push_back(Index{ 9, 2, 5 });
-	indices.push_back(Index{ 7, 2, 11 });
+	indices.push_back(Index{6, 1, 10});
+	indices.push_back(Index{9, 0, 11});
+	indices.push_back(Index{9, 11, 2});
+	indices.push_back(Index{9, 2, 5});
+	indices.push_back(Index{7, 2, 11});
 }
 
 int32_t CameraViewPoints::checkForDuplicate(uint32_t vertSize)
@@ -125,7 +130,8 @@ int32_t CameraViewPoints::checkForDuplicate(uint32_t vertSize)
 #pragma omp parallel for
 	for (int32_t i = 0; i < vertSize; i++)
 	{
-		if (vertices[vertSize].x == vertices[i].x && vertices[vertSize].y == vertices[i].y && vertices[vertSize].z ==
+		if (vertices[vertSize].x == vertices[i].x && vertices[vertSize].y == vertices[i].y &&
+			vertices[vertSize].z ==
 			vertices[i].z)
 		{
 			index = i;
@@ -199,10 +205,10 @@ void CameraViewPoints::subdivide()
 				currentVertSize++;
 			}
 
-			indices.push_back(Index{ indices[i].a, abIndex, acIndex });
-			indices.push_back(Index{ indices[i].b, abIndex, bcIndex });
-			indices.push_back(Index{ indices[i].c, bcIndex, acIndex });
-			indices[i] = { abIndex, bcIndex, acIndex };
+			indices.push_back(Index{indices[i].a, abIndex, acIndex});
+			indices.push_back(Index{indices[i].b, abIndex, bcIndex});
+			indices.push_back(Index{indices[i].c, bcIndex, acIndex});
+			indices[i] = {abIndex, bcIndex, acIndex};
 		}
 	}
 }
@@ -210,7 +216,8 @@ void CameraViewPoints::subdivide()
 void CameraViewPoints::adjustVecToRadius(uint32_t index)
 {
 	float adjustValue = sqrt(
-		vertices[index].x * vertices[index].x + vertices[index].y * vertices[index].y + vertices[index].z * vertices[
+		vertices[index].x * vertices[index].x + vertices[index].y * vertices[index].y + vertices[
+			index].z * vertices[
 			index].z) / radius;
 	vertices[index].x /= adjustValue;
 	vertices[index].y /= adjustValue;

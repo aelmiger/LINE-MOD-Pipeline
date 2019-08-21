@@ -33,9 +33,11 @@ private:
 	uint32_t numCameraVertices;
 
 	void createCamViewPoints(float in_radiusToModel);
-	void renderImages(std::vector<cv::Mat>& in_imgVec, uint16_t in_modelIterator, uint16_t in_vertIterator);
+	void renderImages(std::vector<cv::Mat>& in_imgVec, uint16_t in_modelIterator,
+	                  uint16_t in_vertIterator);
 
 	void printProgBar(uint16_t in_percent, std::string const& in_mfile);
-	uint16_t calculateCurrentPercent(uint16_t const& in_spehreRadius, uint16_t const& in_currentIteration);
+	uint16_t calculateCurrentPercent(uint16_t const& in_spehreRadius,
+	                                 uint16_t const& in_currentIteration);
 	void writeSettings();
 };

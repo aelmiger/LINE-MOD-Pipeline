@@ -10,7 +10,8 @@ public:
 	~Benchmark();
 
 	void increaseImgCounter();
-	float calculateErrorHodan(cv::Mat& in_depthImg, OpenGLRender* in_opengl, ObjectPose const& in_estimatePose, uint16_t const& in_modelIndice);
+	float calculateErrorHodan(cv::Mat& in_depthImg, OpenGLRender* in_opengl,
+	                          ObjectPose const& in_estimatePose, uint16_t const& in_modelIndice);
 	float calculateErrorLM(ObjectPose& in_estimate);
 	void loadModel(OpenGLRender* in_opengl, std::string in_modelLocation);
 	float calculateErrorLMAmbigous(ObjectPose& in_estimate);
@@ -41,8 +42,9 @@ private:
 	ObjectPose groundTruth;
 
 	void calculateVisibilityMasks();
-	cv::Mat renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose, uint16_t const& in_modelIndice);
-	glm::mat4 calculateViewMat(ObjectPose const &in_pose);
+	cv::Mat renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose,
+	                   uint16_t const& in_modelIndice);
+	glm::mat4 calculateViewMat(ObjectPose const& in_pose);
 	void subsamplingModel();
 	void readGroundTruthPose();
 	void readGroundTruthLinemodDataset();

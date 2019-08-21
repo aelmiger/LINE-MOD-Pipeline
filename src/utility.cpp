@@ -71,11 +71,13 @@ bool fromGLM2CV(const glm::mat3& glmmat, cv::Matx33d* in_mat)
 #################### FILE UTILITY ####################
 */
 
-void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::string& in_path, const std::string&
-	in_extension)
+void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::string& in_path,
+                      const std::string&
+                      in_extension)
 {
 	in_filePathVector.clear();
-	for (auto& p : std::filesystem::directory_iterator(in_path)){
+	for (auto& p : std::filesystem::directory_iterator(in_path))
+	{
 		if (p.path().extension() == in_extension)
 		{
 			in_filePathVector.push_back(p.path().filename().string());
@@ -87,7 +89,8 @@ void filesInDirectory(std::vector<std::string>& in_filePathVector, const std::st
 	}
 	else
 	{
-		std::cout << "Found " << in_filePathVector.size() << " " << in_extension << " files in " << in_path << std::
+		std::cout << "Found " << in_filePathVector.size() << " " << in_extension << " files in " <<
+			in_path << std::
 			endl;
 	}
 }
@@ -128,17 +131,13 @@ cv::Mat loadDepthLineModDataset(const std::string& a_name)
 */
 
 
-
 /*
 #################### IMAGE UTILITY ####################
 */
 
 
-
-
-
-
-void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings) {
+void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in_tempGenSettings)
+{
 	std::string filename = "linemod_settings.yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	fs["video width"] >> in_camParams.videoWidth;
@@ -147,7 +146,8 @@ void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in
 	fs["camera fy"] >> in_camParams.fy;
 	fs["camera cx"] >> in_camParams.cx;
 	fs["camera cy"] >> in_camParams.cy;
-	in_camParams.cameraMatrix = (cv::Mat1d(3, 3) << in_camParams.fx, 0, in_camParams.cx, 0, in_camParams.fy, in_camParams.cy, 0, 0, 1);
+	in_camParams.cameraMatrix = (cv::Mat1d(3, 3) << in_camParams.fx, 0, in_camParams.cx, 0,
+		in_camParams.fy, in_camParams.cy, 0, 0, 1);
 	fs["distortion parameters"] >> in_camParams.distortionCoefficients;
 
 	fs["model folder"] >> in_tempGenSettings.modelFolder;
@@ -163,7 +163,8 @@ void readSettings(CameraParameters& in_camParams, TemplateGenerationSettings& in
 	fs["detector threshold"] >> in_tempGenSettings.detectorThreshold;
 	fs["percent to pass check"] >> in_tempGenSettings.percentToPassCheck;
 	fs["number of poses to compare"] >> in_tempGenSettings.numberWantedPoses;
-	fs["distance to match to be considered same object"] >> in_tempGenSettings.radiusThresholdNewObject;
+	fs["distance to match to be considered same object"] >> in_tempGenSettings.
+		radiusThresholdNewObject;
 	fs["ratio to determine if group is too small"] >> in_tempGenSettings.discardGroupRatio;
 	fs["use depth improvement"] >> in_tempGenSettings.useDepthImprovement;
 	fs["depth offset"] >> in_tempGenSettings.depthOffset;

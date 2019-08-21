@@ -26,7 +26,7 @@ struct TemplatePosition
 {
 	TemplatePosition();
 	TemplatePosition(std::string in_s, glm::vec3 in_v, float in_rotation, cv::Rect in_boundingBox,
-		uint16_t in_depthAtCenter);
+	                 uint16_t in_depthAtCenter);
 	std::string modelName;
 	glm::vec3 positionCam;
 	float rotation;

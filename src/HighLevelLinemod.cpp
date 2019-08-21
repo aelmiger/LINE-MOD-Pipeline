@@ -8,7 +8,8 @@
  * @param in_camParams Contains the Camera Parameters
  * @param in_templateSettings Contains the settings for template generation and detection
  */
-HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, TemplateGenerationSettings const& in_templateSettings) :
+HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams,
+                                   TemplateGenerationSettings const& in_templateSettings) :
 	onlyColorModality(in_templateSettings.onlyUseColorModality),
 	videoWidth(in_camParams.videoWidth),
 	videoHeight(in_camParams.videoHeight),
@@ -36,15 +37,17 @@ HighLevelLineMOD::HighLevelLineMOD(CameraParameters const& in_camParams, Templat
 		modality.emplace_back(cv::makePtr<cv::linemod::ColorGradient>());
 		modality.emplace_back(cv::makePtr<cv::linemod::DepthNormal>());
 
-		static const int T_DEFAULTS[] = { 5, 8 };
-		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
+		static const int T_DEFAULTS[] = {5, 8};
+		detector = cv::makePtr<cv::linemod::Detector>(
+			modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 	else
 	{
 		std::vector<cv::Ptr<cv::linemod::Modality>> modality;
 		modality.emplace_back(cv::makePtr<cv::linemod::ColorGradient>());
-		static const int T_DEFAULTS[] = { 2, 8 };
-		detector = cv::makePtr<cv::linemod::Detector>(modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
+		static const int T_DEFAULTS[] = {2, 8};
+		detector = cv::makePtr<cv::linemod::Detector>(
+			modality, std::vector<int>(T_DEFAULTS, T_DEFAULTS + 2));
 	}
 
 	generateRotMatForInplaneRotation();
@@ -96,7 +99,7 @@ uint32_t HighLevelLineMOD::getNumTemplates()
  * @return false Returns false if the templates cant be created. Usually its because they are too small
  */
 bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat>& in_images, const std::string& in_modelName,
-	glm::vec3 in_cameraPosition)
+                                   glm::vec3 in_cameraPosition)
 {
 	cv::Mat mask;
 	cv::Mat maskRotated;
@@ -120,7 +123,8 @@ bool HighLevelLineMOD::addTemplate(std::vector<cv::Mat>& in_images, const std::s
 		}
 		cv::erode(maskRotated, maskRotated, cv::Mat(), cv::Point(-1, -1), 1);
 		cv::Rect boundingBox;
-		uint64_t template_id = detector->addTemplate(templateImgs, in_modelName, maskRotated, &boundingBox);
+		uint64_t template_id = detector->addTemplate(templateImgs, in_modelName, maskRotated,
+		                                             &boundingBox);
 		templateImgs.clear();
 
 		if (template_id == -1)
@@ -198,7 +202,8 @@ bool HighLevelLineMOD::detectTemplate(std::vector<cv::Mat>& in_imgs, uint16_t in
 	if (!matches.empty())
 	{
 		cvtColor(in_imgs[0], colorImgHue, cv::COLOR_BGR2HSV);
-		inRange(colorImgHue, modProps[in_classNumber].lowerColorRange, modProps[in_classNumber].upperColorRange, colorImgHue);
+		inRange(colorImgHue, modProps[in_classNumber].lowerColorRange,
+		        modProps[in_classNumber].upperColorRange, colorImgHue);
 
 		groupSimilarMatches();
 		discardSmallMatchGroups();
@@ -392,10 +397,10 @@ std::vector<std::vector<ObjectPose>> HighLevelLineMOD::getObjectPoses()
 	return posesMultipleObj;
 }
 
- /**
-  * @brief Generation the matrices for image rotation
-  * 
-  */
+/**
+ * @brief Generation the matrices for image rotation
+ * 
+ */
 void HighLevelLineMOD::generateRotMatForInplaneRotation()
 {
 	for (int16_t angle = lowerAngleStop; angle <= upperAngleStop; angle = angle + angleStep)
@@ -413,7 +418,8 @@ void HighLevelLineMOD::generateRotMatForInplaneRotation()
  * @param in_medianPosition The wanted position of the sorted values. For median this should be 2. For lower quartile it is 4.
  * @return uint16_t 
  */
-uint16_t HighLevelLineMOD::medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uint8_t in_medianPosition)
+uint16_t HighLevelLineMOD::medianMat(cv::Mat const& in_mat, cv::Rect& in_bb,
+                                     uint8_t in_medianPosition)
 {
 	cv::Mat invBinRot; //Turn depth values 0 into 65535
 	threshold(in_mat, invBinRot, 1, 65535, cv::THRESH_BINARY);
@@ -422,7 +428,8 @@ uint16_t HighLevelLineMOD::medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uin
 	croppedDepth = croppedDepth(in_bb);
 
 	std::vector<uint16_t> vecFromMat(croppedDepth.begin<uint16_t>(), croppedDepth.end<uint16_t>());
-	std::nth_element(vecFromMat.begin(), vecFromMat.begin() + vecFromMat.size() / 4, vecFromMat.end());
+	std::nth_element(vecFromMat.begin(), vecFromMat.begin() + vecFromMat.size() / 4,
+	                 vecFromMat.end());
 	return vecFromMat[vecFromMat.size() / in_medianPosition];
 }
 
@@ -435,7 +442,7 @@ uint16_t HighLevelLineMOD::medianMat(cv::Mat const& in_mat, cv::Rect& in_bb, uin
  * @param in_inplaneRot 
  */
 void HighLevelLineMOD::calculateTemplatePose(glm::vec3& in_translation, glm::qua<float>& in_quats,
-	glm::vec3& in_cameraPosition, int16_t& in_inplaneRot)
+                                             glm::vec3& in_cameraPosition, int16_t& in_inplaneRot)
 {
 	in_translation.x = 0.0f;
 	in_translation.y = 0.0f;
@@ -447,7 +454,8 @@ void HighLevelLineMOD::calculateTemplatePose(glm::vec3& in_translation, glm::qua
 		in_cameraPosition[0] = 0.00000000001;
 	}
 	glm::vec3 camUp = normalize(cross(in_cameraPosition, cross(in_cameraPosition, up)));
-	glm::vec3 rotatedUp = rotate(-camUp, glm::radians((float)in_inplaneRot), normalize(in_cameraPosition));
+	glm::vec3 rotatedUp = rotate(-camUp, glm::radians((float)in_inplaneRot),
+	                             normalize(in_cameraPosition));
 	glm::mat4 view = lookAt(in_cameraPosition, glm::vec3(0.0f), rotatedUp);
 	in_quats = openglCoordinatesystem2opencv(view);
 }
@@ -464,7 +472,8 @@ glm::qua<float> HighLevelLineMOD::openglCoordinatesystem2opencv(glm::mat4& in_vi
 	glm::mat4 coordinateTransform(1.0f);
 	coordinateTransform[1][1] = -1.0f;
 	coordinateTransform[2][2] = -1.0f;
-	glm::qua<float> tempQuat = toQuat(glm::transpose(glm::transpose(in_viewMat)*coordinateTransform));
+	glm::qua<float> tempQuat = toQuat(
+		glm::transpose(glm::transpose(in_viewMat) * coordinateTransform));
 	return tempQuat;
 }
 
@@ -476,7 +485,8 @@ glm::qua<float> HighLevelLineMOD::openglCoordinatesystem2opencv(glm::mat4& in_vi
  * @return true True means that atleast one match passed the check
  * @return false False means that no match passed the checks 
  */
-bool HighLevelLineMOD::applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::vector<ObjectPose>& in_objPoses)
+bool HighLevelLineMOD::applyPostProcessing(std::vector<cv::Mat>& in_imgs,
+                                           std::vector<ObjectPose>& in_objPoses)
 {
 	for (uint32_t i = 0; i < groupedMatches.size(); i++)
 	{
@@ -525,7 +535,8 @@ bool HighLevelLineMOD::applyPostProcessing(std::vector<cv::Mat>& in_imgs, std::v
  * @return true 
  * @return false 
  */
-bool HighLevelLineMOD::colorCheck(cv::Mat& in_colImg, uint32_t& in_numMatch, float in_percentToPassCheck)
+bool HighLevelLineMOD::colorCheck(cv::Mat& in_colImg, uint32_t& in_numMatch,
+                                  float in_percentToPassCheck)
 {
 	cv::Mat croppedImage;
 	cv::Mat mask;
@@ -548,22 +559,22 @@ bool HighLevelLineMOD::depthCheck(cv::Mat& in_depth, uint32_t& in_numMatch)
 {
 	if (useDepthImprovement)
 	{
-
 		cv::Rect bb(
 			groupedMatches[in_numMatch].x,
 			groupedMatches[in_numMatch].y,
 			templates[groupedMatches[in_numMatch].template_id].boundingBox.width,
 			templates[groupedMatches[in_numMatch].template_id].boundingBox.height);
-		int32_t depthDiff = (int32_t)medianMat(in_depth, bb, 5) - (int32_t)templates[groupedMatches[in_numMatch].template_id].
+		int32_t depthDiff = (int32_t)medianMat(in_depth, bb, 5) - (int32_t)templates[groupedMatches[
+				in_numMatch].template_id].
 			medianDepth - depthOffset;
 		tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z + depthDiff;
 		return abs(depthDiff) < stepSize;
 	}
-	else {
+	else
+	{
 		tempDepth = templates[groupedMatches[in_numMatch].template_id].translation.z;
 		return true;
 	}
-
 }
 
 /**
@@ -573,7 +584,7 @@ bool HighLevelLineMOD::depthCheck(cv::Mat& in_depth, uint32_t& in_numMatch)
  * @param[out] in_objPoses 
  */
 void HighLevelLineMOD::updateTranslationAndCreateObjectPose(uint32_t const& in_numMatch,
-	std::vector<ObjectPose>& in_objPoses)
+                                                            std::vector<ObjectPose>& in_objPoses)
 {
 	glm::vec3 updatedTanslation;
 	glm::qua<float> updatedRotation;
@@ -594,7 +605,8 @@ void HighLevelLineMOD::updateTranslationAndCreateObjectPose(uint32_t const& in_n
  * @param[out] in_position translation of the object
  * @param in_directDepth depth check adjusted distance between camera and object
  */
-void HighLevelLineMOD::calcPosition(uint32_t const& in_numMatch, glm::vec3& in_position, float const& in_directDepth)
+void HighLevelLineMOD::calcPosition(uint32_t const& in_numMatch, glm::vec3& in_position,
+                                    float const& in_directDepth)
 {
 	float pixelX, pixelY;
 	matchToPixelCoord(in_numMatch, pixelX, pixelY);
@@ -614,10 +626,12 @@ void HighLevelLineMOD::calcPosition(uint32_t const& in_numMatch, glm::vec3& in_p
  * @param[out] in_quats Quaternions of the object
  */
 void HighLevelLineMOD::calcRotation(uint32_t const& in_numMatch, glm::vec3 const& in_position,
-	glm::qua<float>& in_quats)
+                                    glm::qua<float>& in_quats)
 {
-	glm::mat4 adjustRotation = lookAt(glm::vec3(-in_position.x, -in_position.y, in_position.z), glm::vec3(0.f), up);
-	in_quats = toQuat(adjustRotation * toMat4(templates[groupedMatches[in_numMatch].template_id].quaternions));
+	glm::mat4 adjustRotation = lookAt(glm::vec3(-in_position.x, -in_position.y, in_position.z),
+	                                  glm::vec3(0.f), up);
+	in_quats = toQuat(
+		adjustRotation * toMat4(templates[groupedMatches[in_numMatch].template_id].quaternions));
 }
 
 /**
@@ -629,8 +643,10 @@ void HighLevelLineMOD::calcRotation(uint32_t const& in_numMatch, glm::vec3 const
  */
 void HighLevelLineMOD::matchToPixelCoord(uint32_t const& in_numMatch, float& in_x, float& in_y)
 {
-	in_x = (groupedMatches[in_numMatch].x + videoWidth / 2 - templates[groupedMatches[in_numMatch].template_id].boundingBox.x);
-	in_y = (groupedMatches[in_numMatch].y + videoHeight / 2 - templates[groupedMatches[in_numMatch].template_id].boundingBox.y);
+	in_x = (groupedMatches[in_numMatch].x + videoWidth / 2 - templates[groupedMatches[in_numMatch].
+		template_id].boundingBox.x);
+	in_y = (groupedMatches[in_numMatch].y + videoHeight / 2 - templates[groupedMatches[in_numMatch].
+		template_id].boundingBox.y);
 }
 
 /**
@@ -656,7 +672,7 @@ float HighLevelLineMOD::pixelDistToCenter(float in_x, float in_y)
  */
 float HighLevelLineMOD::calcTrueZ(float const& in_directDist, float const& in_distFromCenter)
 {
-	return sqrt(in_directDist*in_directDist - (in_distFromCenter*in_distFromCenter));
+	return sqrt(in_directDist * in_directDist - (in_distFromCenter * in_distFromCenter));
 }
 
 /**
@@ -680,7 +696,8 @@ void HighLevelLineMOD::readColorRanges()
 	for (uint16_t i = 0; i < detector->numClasses(); i++)
 	{
 		ModelProperties tmpModProp;
-		std::string filename = modelFolder + modelFiles[i].substr(0, modelFiles[i].size() - 4) + ".yml";
+		std::string filename = modelFolder + modelFiles[i].substr(0, modelFiles[i].size() - 4) +
+			".yml";
 		cv::FileStorage fs(filename, cv::FileStorage::READ);
 		cv::Vec3b tempVec;
 
@@ -695,14 +712,15 @@ void HighLevelLineMOD::readColorRanges()
 }
 
 void HighLevelLineMOD::drawResponse(const std::vector<cv::linemod::Template>& templates,
-	int num_modalities, cv::Mat& dst, const cv::Point& offset, int T)
+                                    int num_modalities, cv::Mat& dst, const cv::Point& offset,
+                                    int T)
 {
 	static const cv::Scalar COLORS[5] = {
 		CV_RGB(0, 0, 255),
 		CV_RGB(0, 255, 0),
 		CV_RGB(255, 255, 0),
 		CV_RGB(255, 140, 0),
-		CV_RGB(0, 0,255)
+		CV_RGB(0, 0, 255)
 	};
 
 	for (int m = 0; m < num_modalities; ++m)

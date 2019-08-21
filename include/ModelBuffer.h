@@ -6,7 +6,8 @@
 
 struct ModelBuffer
 {
-	ModelBuffer(void* in_vertData, uint32_t in_numVertices, void* in_indData, uint32_t in_numIndices, uint8_t in_elementSize);
+	ModelBuffer(void* in_vertData, uint32_t in_numVertices, void* in_indData,
+	            uint32_t in_numIndices, uint8_t in_elementSize);
 
 	void bind();
 

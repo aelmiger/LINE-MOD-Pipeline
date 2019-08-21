@@ -13,8 +13,10 @@ ModelImporter::~ModelImporter()
 void ModelImporter::importModel(std::string const& in_modelFile, Model& in_model)
 {
 	const aiScene* scene = importer->ReadFile(in_modelFile,
-		aiProcess_Triangulate | aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph
-		| aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality);
+	                                          aiProcess_Triangulate | aiProcess_OptimizeMeshes |
+	                                          aiProcess_OptimizeGraph
+	                                          | aiProcess_JoinIdenticalVertices |
+	                                          aiProcess_ImproveCacheLocality);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE, !scene->mRootNode)
 	{
 		std::cout << "ERROR:: Reading file wih Assimp " << importer->GetErrorString() << std::endl;

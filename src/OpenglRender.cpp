@@ -7,7 +7,8 @@ OpenGLRender::OpenGLRender(CameraParameters const& in_camParams)
 	cx = in_camParams.cx;
 	cy = in_camParams.cy;
 	fieldOfView = 360.0f / M_PI * atanf(height / (2 * in_camParams.fy));
-	projection = glm::perspective(glm::radians(fieldOfView), (float)width / (float)height, 100.0f, 10000.0f);
+	projection = glm::perspective(glm::radians(fieldOfView), (float)width / (float)height, 100.0f,
+	                              10000.0f);
 
 	view = glm::mat4(1.0f);
 	position = glm::vec3(0.0f);
@@ -45,8 +46,9 @@ cv::Mat OpenGLRender::getDepthImgFromBuff()
 	return renderedDepthImg;
 }
 
-void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate, float in_x,
-	float in_y)
+void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
+                                          float in_rotate, float in_x,
+                                          float in_y)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -66,7 +68,8 @@ void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 cam
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec)
+void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat,
+                                          glm::vec3 in_traVec)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -92,8 +95,9 @@ void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon, float in_rotate, float in_x,
-	float in_y)
+void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
+                                          float in_rotate, float in_x,
+                                          float in_y)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -113,7 +117,8 @@ void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 cam
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat, glm::vec3 in_traVec)
+void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_rotMat,
+                                          glm::vec3 in_traVec)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -131,7 +136,7 @@ void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_
 	view[3][2] = -in_traVec[2];
 	view[3][3] = 1.0f;
 	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	viewProj = projection * view;// *modelMat;
+	viewProj = projection * view; // *modelMat;
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -145,7 +150,8 @@ void OpenGLRender::creatModBuffFromFiles(std::string const& in_modelLocation)
 	readModelFile(in_modelLocation, tmp);
 	std::vector<glm::vec3> tempVert;
 	tempVert = zipVectors(tmp.vertices, tmp.colors);
-	modBuff.emplace_back(tempVert.data(), tmp.numVertices, tmp.indices.data(), tmp.numIndices, sizeof(tmp.indices[0]));
+	modBuff.emplace_back(tempVert.data(), tmp.numVertices, tmp.indices.data(), tmp.numIndices,
+	                     sizeof(tmp.indices[0]));
 }
 
 void OpenGLRender::readModelFile(std::string const& in_file, Model& in_model)
@@ -158,9 +164,9 @@ void OpenGLRender::setupSDLWindow()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3); 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -170,7 +176,8 @@ void OpenGLRender::setupSDLWindow()
 	SDL_GL_SetSwapInterval(0);
 
 	uint32_t flags = SDL_WINDOW_OPENGL;
-	window = SDL_CreateWindow("Render Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+	window = SDL_CreateWindow("Render Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+	                          width, height, flags);
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 }
 
@@ -184,7 +191,8 @@ void OpenGLRender::setupOpenGL()
 	}
 	else
 	{
-		std::cout << "OpenGL successfully initiated. Version: " << glGetString(GL_VERSION) << std::endl;
+		std::cout << "OpenGL successfully initiated. Version: " << glGetString(GL_VERSION) << std::
+			endl;
 	}
 	glEnable(GL_DEPTH_TEST);
 }
@@ -313,7 +321,8 @@ std::string OpenGLRender::fileToString(const char* filename)
 	return buffer.str();
 }
 
-std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3>& a, const std::vector<glm::vec3>& b)
+std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3>& a,
+                                                const std::vector<glm::vec3>& b)
 {
 	std::vector<glm::vec3> result;
 	result.reserve(a.size() + b.size());

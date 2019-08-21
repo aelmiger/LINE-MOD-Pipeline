@@ -20,16 +20,17 @@ void Aruco::createArucoBoard()
 	cv::Ptr<cv::aruco::Dictionary> dictionary =
 		getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
 
-	cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(markersX, markersY, float(markerLength),
+	cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(
+		markersX, markersY, float(markerLength),
 		float(markerSeparation), dictionary);
 
 	cv::Mat boardImage;
 	board->draw(imageSize, boardImage, margins, borderBits);
 
-	imshow("board", boardImage);
+	cv::imshow("board", boardImage);
 	cv::waitKey(0);
 
-	imwrite("aruco_board.jpg", boardImage);
+	cv::imwrite("aruco_board.jpg", boardImage);
 }
 
 void Aruco::detectBoard()
@@ -43,7 +44,8 @@ void Aruco::detectBoard()
 	cv::Mat distCoeffs = camParam.distortionCoefficients;
 	cv::Ptr<cv::aruco::Dictionary> dictionary = getPredefinedDictionary(
 		cv::aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
-	cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(markersX, markersY, float(markerLength),
+	cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(
+		markersX, markersY, float(markerLength),
 		float(markerSeparation), dictionary);
 	uint16_t counter = 0;
 	while (true)
@@ -53,8 +55,9 @@ void Aruco::detectBoard()
 		image.copyTo(imageCopy);
 		std::vector<int> ids;
 		std::vector<std::vector<cv::Point2f>> corners, rejectedCandidates;
-		detectMarkers(image, dictionary, corners, ids, cv::aruco::DetectorParameters::create(), rejectedCandidates);
-		refineDetectedMarkers(image, board, corners, ids, rejectedCandidates);
+		cv::aruco::detectMarkers(image, dictionary, corners, ids,
+		                         cv::aruco::DetectorParameters::create(), rejectedCandidates);
+		cv::aruco::refineDetectedMarkers(image, board, corners, ids, rejectedCandidates);
 		cv::Matx33d rotMat;
 		cv::Vec3d rvec, tvec;
 		glm::mat3 glmRotMat;
@@ -62,29 +65,36 @@ void Aruco::detectBoard()
 		// if at least one marker detected
 		if (!ids.empty())
 		{
-			//cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
-			int valid = estimatePoseBoard(corners, ids, board, cameraMatrix, distCoeffs, rvec, tvec);
-			Rodrigues(rvec, rotMat);
+			int valid = cv::aruco::estimatePoseBoard(corners, ids, board, cameraMatrix, distCoeffs,
+			                                         rvec, tvec);
+			cv::Rodrigues(rvec, rotMat);
 			tvec *= 0.283f; //convert to mm
-			tvec += rotMat * cv::Vec3d(96, 136, 0); //shift to center of board
-			// if at least one board marker detected
+			tvec += rotMat * cv::Vec3d(96, 136, 0);
+			//shift cs to center of board. This was measuered by hand and should be adjusted for a new board
 
 			fromCV2GLM(cv::Mat(rotMat), &glmRotMat);
 			glm::vec3 eulAng = glm::eulerAngles(glm::toQuat(glmRotMat));
 			eulAng.x += CV_PI / 2;
 			glmRotMat = glm::toMat4(glm::qua<float>(glm::vec3(eulAng.x, eulAng.y, eulAng.z)));
-			cv::putText(imageCopy, glm::to_string(glm::vec3(tvec[0], tvec[1], tvec[2])), cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255), 2.0f);
-			cv::putText(imageCopy, glm::to_string(glm::degrees(glm::eulerAngles(glm::toQuat(glmRotMat)))), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255), 2.0f);
+			cv::putText(imageCopy, glm::to_string(glm::vec3(tvec[0], tvec[1], tvec[2])),
+			            cv::Point(50, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 0, 255),
+			            2.0f);
+			cv::putText(imageCopy,
+			            glm::to_string(glm::degrees(glm::eulerAngles(glm::toQuat(glmRotMat)))),
+			            cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5f, cv::Scalar(0, 255, 255),
+			            2.0f);
 			fromGLM2CV(glmRotMat, &rotMat);
-			Rodrigues(rotMat, rvec);
+			cv::Rodrigues(rotMat, rvec);
 
 			if (valid > 0)
 				cv::aruco::drawAxis(imageCopy, cameraMatrix, distCoeffs, rvec, tvec, 100);
 		}
 
-		imshow("out", imageCopy);
+		cv::imshow("Camera", imageCopy);
 		auto key = (char)cv::waitKey(1);
-		if (key == 9) {
+		if (key == 9)
+		{
+			//If TAB is pressed
 			std::string picEnding = ".png";
 			cv::imwrite("benchmark/img" + std::to_string(counter) + picEnding, image);
 			cv::imwrite("benchmark/depth" + std::to_string(counter) + picEnding, depthImg);

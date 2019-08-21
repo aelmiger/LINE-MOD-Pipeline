@@ -20,20 +20,21 @@
 class HighLevelLinemodIcp
 {
 public:
-/**
- * @brief Construct a new High Level Linemod Icp object
- * 
- * @param in_iteration The maximum amount of iterations the algorithm performs
- * @param in_tolerance The sought after matching score. Changing this is not advised
- * @param in_rejectionScale Rejection Scale of outlier points. Also not advised to change it
- * @param in_numIterations A quality setting for the icp algorithm. Does not seem to have any effect on the outcome.
- * @param in_sampleStep Factor that reduces the amont of points used for ICP. 
- * @param in_modelFiles Vector of model file names. It is equal to the class names of the detector
- * @param in_modFolder Location of the model files
- */
-	HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance, float in_rejectionScale, uint16_t in_numIterations,
-		uint16_t in_sampleStep, std::vector<std::string> in_modelFiles,
-		std::string in_modFolder);
+	/**
+	 * @brief Construct a new High Level Linemod Icp object
+	 * 
+	 * @param in_iteration The maximum amount of iterations the algorithm performs
+	 * @param in_tolerance The sought after matching score. Changing this is not advised
+	 * @param in_rejectionScale Rejection Scale of outlier points. Also not advised to change it
+	 * @param in_numIterations A quality setting for the icp algorithm. Does not seem to have any effect on the outcome.
+	 * @param in_sampleStep Factor that reduces the amont of points used for ICP. 
+	 * @param in_modelFiles Vector of model file names. It is equal to the class names of the detector
+	 * @param in_modFolder Location of the model files
+	 */
+	HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance, float in_rejectionScale,
+	                    uint16_t in_numIterations,
+	                    uint16_t in_sampleStep, std::vector<std::string> in_modelFiles,
+	                    std::string in_modFolder);
 	~HighLevelLinemodIcp();
 
 	/**
@@ -63,8 +64,9 @@ public:
 	 * @param[out] in_bestPose Index of the best pose from poses vector
 	 * @return bool Returns if a pose was found that fits to the depth image
 	 */
-	bool estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses, OpenGLRender* in_openglRend,
-		uint16_t in_modelIndice, uint16_t& in_bestPose);
+	bool estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses,
+	                       OpenGLRender* in_openglRend,
+	                       uint16_t in_modelIndice, uint16_t& in_bestPose);
 private:
 	/**
 	 * @brief Sets the threshold for the mean difference between the rendered pose and the depth image
@@ -85,5 +87,4 @@ private:
 	void depthToBinary(cv::Mat& in_gray, cv::Mat& in_binary, uint32_t in_threshold = 1);
 	void loadModels();
 	void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose);
-
 };

@@ -1,14 +1,16 @@
 #include "HighLevelLinemodIcp.h"
 
-HighLevelLinemodIcp::HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance, float in_rejectionScale,
-	uint16_t in_numIterations, uint16_t in_sampleStep,
-	std::vector<std::string> in_modelFiles,
-	std::string in_modFolder) :
+HighLevelLinemodIcp::HighLevelLinemodIcp(uint16_t in_iteration, float in_tolerance,
+                                         float in_rejectionScale,
+                                         uint16_t in_numIterations, uint16_t in_sampleStep,
+                                         std::vector<std::string> in_modelFiles,
+                                         std::string in_modFolder) :
 	modelFiles(std::move(in_modelFiles)),
 	modelFolder(std::move(in_modFolder)),
 	sampleStep(in_sampleStep)
 {
-	icp = new cv::ppf_match_3d::ICP(in_iteration, in_tolerance, in_rejectionScale, in_numIterations);
+	icp = new cv::ppf_match_3d::ICP(in_iteration, in_tolerance, in_rejectionScale,
+	                                in_numIterations);
 	loadModels();
 }
 
@@ -33,7 +35,8 @@ void HighLevelLinemodIcp::loadModels()
 	}
 }
 
-void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& in_camMatrix, cv::Rect& bb)
+void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& in_camMatrix,
+                                             cv::Rect& bb)
 {
 	cv::Mat blurredDepth;
 	cv::blur(in_depth, blurredDepth, cv::Size(3, 3));
@@ -61,7 +64,8 @@ void HighLevelLinemodIcp::prepareDepthForIcp(cv::Mat& in_depth, const cv::Mat& i
 	cv::ppf_match_3d::computeNormalsPC3d(sampledpatchedNaNs, sceneVertices, 12, false, viewpoint);
 }
 
-void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uint16_t in_modelNumber)
+void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses,
+                                          uint16_t in_modelNumber)
 {
 	poses.clear();
 	for (auto& in_pose : in_poses)
@@ -87,14 +91,15 @@ void HighLevelLinemodIcp::registerToScene(std::vector<ObjectPose>& in_poses, uin
 }
 
 bool HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<ObjectPose> in_poses,
-	OpenGLRender* in_openglRend, uint16_t in_modelIndice, uint16_t& in_bestPose)
+                                            OpenGLRender* in_openglRend, uint16_t in_modelIndice,
+                                            uint16_t& in_bestPose)
 {
 	uint16_t bestMean = 0;
 	uint16_t bestPose = 0;
 	for (size_t i = 0; i < in_poses.size(); i++)
 	{
-		glm::vec3 eul = eulerAngles(in_poses[i].quaternions); 
-		glm::qua<float> quats(glm::vec3(eul.x + M_PI, -eul.y, -eul.z)); 
+		glm::vec3 eul = eulerAngles(in_poses[i].quaternions);
+		glm::qua<float> quats(glm::vec3(eul.x + M_PI, -eul.y, -eul.z));
 		glm::mat4 newViewMat = glm::toMat4(quats);
 		in_openglRend->renderDepthToFrontBuff(in_modelIndice, newViewMat, in_poses[i].translation);
 		cv::Mat depth = in_openglRend->getDepthImgFromBuff();
@@ -125,12 +130,14 @@ bool HighLevelLinemodIcp::estimateBestMatch(cv::Mat in_depthImg, std::vector<Obj
 		in_bestPose = bestPose;
 		return true;
 	}
-	else {
+	else
+	{
 		return false;
 	}
 }
 
-void HighLevelLinemodIcp::removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows)
+void HighLevelLinemodIcp::removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat& in_res,
+                                                 bool in_removeRows)
 {
 	in_res.release();
 	cv::Mat depthCol = cv::Mat(in_mat, cv::Rect(2, 0, 1, in_mat.rows));
@@ -139,7 +146,7 @@ void HighLevelLinemodIcp::removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat&
 	for (int i = 0; i < n; i++)
 	{
 		cv::Mat rc = in_removeRows ? in_mat.row(i) : in_mat.col(i);
-		if (abs(rc.at<float>(0,2) - mean[0]) > 300)
+		if (abs(rc.at<float>(0, 2) - mean[0]) > 300)
 		{
 			continue; // remove element
 		}

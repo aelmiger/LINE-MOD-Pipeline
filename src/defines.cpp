@@ -5,8 +5,9 @@ TemplatePosition::TemplatePosition()
 {
 }
 
-TemplatePosition::TemplatePosition(std::string in_s, glm::vec3 in_v, float in_rotation, cv::Rect in_boundingBox,
-	uint16_t in_depthAtCenter)
+TemplatePosition::TemplatePosition(std::string in_s, glm::vec3 in_v, float in_rotation,
+                                   cv::Rect in_boundingBox,
+                                   uint16_t in_depthAtCenter)
 {
 	modelName = std::move(in_s);
 	positionCam = in_v;

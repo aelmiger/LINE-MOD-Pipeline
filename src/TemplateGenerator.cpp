@@ -22,14 +22,18 @@ TemplateGenerator::~TemplateGenerator()
 	cleanup();
 }
 
-void TemplateGenerator::cleanup() {
-	if (opengl) {
+void TemplateGenerator::cleanup()
+{
+	if (opengl)
+	{
 		delete opengl;
 	}
-	if (line) {
+	if (line)
+	{
 		delete line;
 	}
-	if (camPoints) {
+	if (camPoints)
+	{
 		delete camPoints;
 	}
 }
@@ -40,7 +44,8 @@ void TemplateGenerator::run()
 	{
 		camPoints->readModelProperties(modelFolder + modelFiles[i]);
 		opengl->creatModBuffFromFiles(modelFolder + modelFiles[i]);
-		for (uint16_t radiusToModel = startDistance; radiusToModel <= endDistance; radiusToModel += stepSize)
+		for (uint16_t radiusToModel = startDistance; radiusToModel <= endDistance; radiusToModel +=
+		     stepSize)
 		{
 			createCamViewPoints(radiusToModel);
 			for (size_t j = 0; j < numCameraVertices; j++)
@@ -63,7 +68,8 @@ void TemplateGenerator::createCamViewPoints(float in_radiusToModel)
 	numCameraVertices = camVertices.size();
 }
 
-void TemplateGenerator::renderImages(std::vector<cv::Mat>& in_imgVec, uint16_t in_modelIterator, uint16_t in_vertIterator)
+void TemplateGenerator::renderImages(std::vector<cv::Mat>& in_imgVec, uint16_t in_modelIterator,
+                                     uint16_t in_vertIterator)
 {
 	in_imgVec.clear();
 	opengl->renderDepthToFrontBuff(in_modelIterator, glm::vec3(camVertices[in_vertIterator]));
@@ -103,15 +109,18 @@ void TemplateGenerator::printProgBar(uint16_t in_percent, std::string const& in_
 	}
 }
 
-uint16_t TemplateGenerator::calculateCurrentPercent(uint16_t const& in_spehreRadius, uint16_t const& in_currentIteration)
+uint16_t TemplateGenerator::calculateCurrentPercent(uint16_t const& in_spehreRadius,
+                                                    uint16_t const& in_currentIteration)
 {
 	uint16_t numberOfDiffRadius = std::floor((endDistance - startDistance + stepSize) / stepSize);
 	return std::round(
-		(float)(in_currentIteration + 1) * 100.0f / (float)numCameraVertices / (float)numberOfDiffRadius + (float)(
+		(float)(in_currentIteration + 1) * 100.0f / (float)numCameraVertices / (float)
+		numberOfDiffRadius + (float)(
 			in_spehreRadius - startDistance) / (float)stepSize * 100 / (float)numberOfDiffRadius);
 }
 
-void TemplateGenerator::writeSettings() {
+void TemplateGenerator::writeSettings()
+{
 	CameraParameters camParam = CameraParameters();
 	TemplateGenerationSettings temp = TemplateGenerationSettings();
 	std::string filename = "linemod_settings.yml";

@@ -12,23 +12,26 @@ void Benchmark::increaseImgCounter()
 {
 	imageCounter++;
 	printHodanScore();
-	printLMScore();
+	//printLMScore();
 }
 
-float Benchmark::calculateErrorHodan(cv::Mat& in_depthImg, OpenGLRender* in_opengl, ObjectPose const& in_estimatePose, uint16_t const& in_modelIndice)
+float Benchmark::calculateErrorHodan(cv::Mat& in_depthImg, OpenGLRender* in_opengl,
+                                     ObjectPose const& in_estimatePose,
+                                     uint16_t const& in_modelIndice)
 {
 	//readGroundTruthLinemodDataset();
 	readGroundTruthPose();
 	inputDepth = in_depthImg;
 	groundTruthDepthRender = renderPose(in_opengl, groundTruth, in_modelIndice);
-	std::cout << (groundTruth.translation.z - in_estimatePose.translation.z) << " DIFF" << std::endl;
 	estimateDepthRender = renderPose(in_opengl, in_estimatePose, in_modelIndice);
 	calculateVisibilityMasks();
 	cv::absdiff(groundTruthDepthRender, estimateDepthRender, renderedAbsDiff);
 	cv::threshold(renderedAbsDiff, renderedAbsDiff, errorThreshold, 65536, cv::THRESH_BINARY_INV);
 	cv::bitwise_and(visibilityIntersection, renderedAbsDiff, absDiffMaskApplied);
-	float error = 1 - (float)cv::countNonZero(absDiffMaskApplied) / (float)cv::countNonZero(visibilityCombination);
-	if (error < 0.3f) {
+	float error = 1 - (float)cv::countNonZero(absDiffMaskApplied) / (float)cv::countNonZero(
+		visibilityCombination);
+	if (error < 0.3f)
+	{
 		hodanCounter++;
 	}
 	return error;
@@ -56,13 +59,15 @@ float Benchmark::calculateErrorLM(ObjectPose& in_estimate)
 		cv::Mat estimateTruthRotatedTranslated = rotMatEstimate * vertModel + cv::Matx31f(
 			in_estimate.translation.x, in_estimate.translation.y, in_estimate.translation.z);
 
-		cv::Mat differenceBetweenMat = groundTruthRotatedTranslated - estimateTruthRotatedTranslated;
-		cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float>(0, 0), differenceBetweenMat.at<float>(1, 0),
-			differenceBetweenMat.at<float>(2, 0));
+		cv::Mat differenceBetweenMat = groundTruthRotatedTranslated -
+			estimateTruthRotatedTranslated;
+		cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float>(0, 0),
+		                               differenceBetweenMat.at<float>(1, 0),
+		                               differenceBetweenMat.at<float>(2, 0));
 		difference.at<float>(i, 0) = length(differenceBetweenVec);
 	}
 	float mean = sum(difference)[0] / model.numVertices;
-	if (mean<= objectDiameter)
+	if (mean <= objectDiameter)
 	{
 		lineCounter++;
 	}
@@ -90,22 +95,27 @@ float Benchmark::calculateErrorLMAmbigous(ObjectPose& in_estimate)
 #pragma omp parallel for
 	for (int32_t i = 0; i < subsampledModel.numVertices; i++)
 	{
-		cv::Matx31f vertModelGT(subsampledModel.vertices[i].x, subsampledModel.vertices[i].y, subsampledModel.vertices[i].z);
+		cv::Matx31f vertModelGT(subsampledModel.vertices[i].x, subsampledModel.vertices[i].y,
+		                        subsampledModel.vertices[i].z);
 
 		cv::Mat groundTruthRotatedTranslated = rotMatGroundTruth * vertModelGT + cv::Matx31f(
 			groundTruth.translation.x, groundTruth.translation.y, groundTruth.translation.z);
 		float absDifference = 999999;
 		for (int32_t j = 0; j < subsampledModel.numVertices; j++)
 		{
-			cv::Matx31f vertModelEst(subsampledModel.vertices[j].x, subsampledModel.vertices[j].y, subsampledModel.vertices[j].z);
+			cv::Matx31f vertModelEst(subsampledModel.vertices[j].x, subsampledModel.vertices[j].y,
+			                         subsampledModel.vertices[j].z);
 
 			cv::Mat estimateTruthRotatedTranslated = rotMatEstimate * vertModelEst + cv::Matx31f(
 				in_estimate.translation.x, in_estimate.translation.y, in_estimate.translation.z);
-			cv::Mat differenceBetweenMat = groundTruthRotatedTranslated - estimateTruthRotatedTranslated;
-			cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float>(0, 0), differenceBetweenMat.at<float>(1, 0),
-				differenceBetweenMat.at<float>(2, 0));
+			cv::Mat differenceBetweenMat = groundTruthRotatedTranslated -
+				estimateTruthRotatedTranslated;
+			cv::Vec3f differenceBetweenVec(differenceBetweenMat.at<float>(0, 0),
+			                               differenceBetweenMat.at<float>(1, 0),
+			                               differenceBetweenMat.at<float>(2, 0));
 			float tmpDiff = length(differenceBetweenVec);
-			if (tmpDiff < absDifference) {
+			if (tmpDiff < absDifference)
+			{
 				absDifference = tmpDiff;
 			}
 		}
@@ -124,14 +134,16 @@ void Benchmark::calculateVisibilityMasks()
 {
 	cv::Mat binaryGTRender;
 	cv::Mat binaryEstRender;
-	
+
 	groundTruthVisibility = groundTruthDepthRender - inputDepth;
-	cv::threshold(groundTruthVisibility, groundTruthVisibility, visibilityThreshold, 65536, cv::THRESH_BINARY);
+	cv::threshold(groundTruthVisibility, groundTruthVisibility, visibilityThreshold, 65536,
+	              cv::THRESH_BINARY);
 	cv::threshold(groundTruthDepthRender, binaryGTRender, 1, 65536, cv::THRESH_BINARY);
 	groundTruthVisibility = binaryGTRender - groundTruthVisibility;
 
 	estimateVisibility = estimateDepthRender - inputDepth;
-	cv::threshold(estimateVisibility, estimateVisibility, visibilityThreshold, 65536, cv::THRESH_BINARY);
+	cv::threshold(estimateVisibility, estimateVisibility, visibilityThreshold, 65536,
+	              cv::THRESH_BINARY);
 	cv::threshold(estimateDepthRender, binaryEstRender, 1, 65536, cv::THRESH_BINARY);
 	estimateVisibility = binaryEstRender - estimateVisibility;
 	cv::bitwise_and(groundTruthVisibility, estimateDepthRender, binaryEstRender);
@@ -141,7 +153,8 @@ void Benchmark::calculateVisibilityMasks()
 	cv::bitwise_or(groundTruthVisibility, estimateVisibility, visibilityCombination);
 }
 
-cv::Mat Benchmark::renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose, uint16_t const& in_modelIndice)
+cv::Mat Benchmark::renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose,
+                              uint16_t const& in_modelIndice)
 {
 	glm::mat4 viewMat = calculateViewMat(in_pose);
 	in_opengl->renderDepthToFrontBuff(in_modelIndice, viewMat, in_pose.translation);
@@ -149,9 +162,9 @@ cv::Mat Benchmark::renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose
 	return renderedImg.clone();
 }
 
-glm::mat4 Benchmark::calculateViewMat(ObjectPose const &in_pose)
+glm::mat4 Benchmark::calculateViewMat(ObjectPose const& in_pose)
 {
-	glm::vec3 eul = eulerAngles(in_pose.quaternions); 
+	glm::vec3 eul = eulerAngles(in_pose.quaternions);
 	glm::qua<float> quats(glm::vec3(eul.x - M_PI, -eul.y, -eul.z));
 	return glm::toMat4(quats);
 }
@@ -166,7 +179,8 @@ void Benchmark::subsamplingModel()
 	subsampledModel.numVertices = subsampledModel.vertices.size();
 }
 
-void Benchmark::readGroundTruthPose() {
+void Benchmark::readGroundTruthPose()
+{
 	std::string filename = "benchmark/pose" + std::to_string(imageCounter) + ".yml";
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	cv::Matx33d rotMat;
@@ -176,7 +190,7 @@ void Benchmark::readGroundTruthPose() {
 
 	glm::mat3 glmRotMat;
 	fromCV2GLM(cv::Mat(rotMat), &glmRotMat);
-	groundTruth = { glm::vec3(transVec[0],transVec[1],transVec[2]), glm::toQuat(glmRotMat) };
+	groundTruth = {glm::vec3(transVec[0], transVec[1], transVec[2]), glm::toQuat(glmRotMat)};
 }
 
 void Benchmark::readGroundTruthLinemodDataset()
@@ -188,7 +202,8 @@ void Benchmark::readGroundTruthLinemodDataset()
 	std::ifstream fileStreamTranslation("data/tra" + std::to_string(imageCounter) + ".tra");
 	if (!fileStreamTranslation.is_open())
 	{
-		std::cout << "Error Opening Ground Truth Translation file from Linemod Dataset" << std::endl;
+		std::cout << "Error Opening Ground Truth Translation file from Linemod Dataset" << std::
+			endl;
 	}
 
 	//skip first to numbers
@@ -222,19 +237,23 @@ void Benchmark::readGroundTruthLinemodDataset()
 	glm::mat3 rotMatGlm;
 	fromCV2GLM(rotMat, &rotMatGlm);
 	glm::qua<float> quaternions = quat_cast(rotMatGlm);
-	glm::vec3 eul = eulerAngles(quaternions); 
-	glm::qua<float> adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); // converting to the correct coordinate system
+	glm::vec3 eul = eulerAngles(quaternions);
+	glm::qua<float> adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z));
+	// converting to the correct coordinate system
 	translation *= 10; //convert to millimeters
-	groundTruth = { translation, adjustedQuats };
+	groundTruth = {translation, adjustedQuats};
 }
 
 void Benchmark::printHodanScore()
 {
-	std::cout << "Hodan Score: " << (float)hodanCounter * 100 / (float)imageCounter << " Counter: " << imageCounter << "            " << std::endl;
+	std::cout << "Hodan Score: " << (float)hodanCounter * 100 / (float)imageCounter << " Counter: "
+		<< imageCounter << "            " << std::endl;
 }
+
 void Benchmark::printLMScore()
 {
-	//std::cout << "LM Score: " << (float)lineCounter * 100 / (float)imageCounter << " Counter: " << imageCounter << "            " << std::endl;
+	std::cout << "LM Score: " << (float)lineCounter * 100 / (float)imageCounter << " Counter: " <<
+		imageCounter << "            " << std::endl;
 }
 
 float Benchmark::length(cv::Vec3f& in_vecA)

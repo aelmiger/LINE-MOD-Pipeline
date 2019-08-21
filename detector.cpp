@@ -3,40 +3,44 @@
 int main()
 {
 	PoseDetection poseDetect;
-	poseDetect.setupBenchmark("bigBearing.ply");
+
+	poseDetect.setupBenchmark("bigBearing.ply"); //Uncomment if Benchmark is not wanted
+
 	int counter = 0;
-	//cv::VideoCapture sequence("data/color%0d.jpg");
+
+	///////IMAGE SOURCES:
 	cv::VideoCapture sequence("benchmark/img%0d.png");
+	//cv::VideoCapture sequence("data/color%0d.jpg");
 	//Kinect2 kin2;
+	/////////////////////
 
-	while (true) {
-
+	while (true)
+	{
 		std::vector<cv::Mat> imgs;
 		cv::Mat colorImg;
 		cv::Mat depthImg;
 
+		///////IMAGE SOURCES:
 		sequence >> colorImg;
-		depthImg = cv::imread("benchmark/depth" + std::to_string(counter) + ".png",cv::IMREAD_ANYDEPTH); //Video Capture does not work with 16bit png on linux
-		std::cout<<depthImg.type()<<std::endl;
-
+		depthImg = cv::imread("benchmark/depth" + std::to_string(counter) + ".png",
+		                      cv::IMREAD_ANYDEPTH);
+		//Video Capture does not work with 16bit png on linux
+		//depthImg = loadDepthLineModDataset("data/depth" + std::to_string(counter) + ".dpt");
 		//kin2.getKinectFrames(colorImg, depthImg);
+		////////////////////
 
 		if (colorImg.empty())
-		{			
+		{
 			std::cout << "End of Sequence" << std::endl;
+			std::getchar();
 		}
-
-		//depthImg = loadDepthLineModDataset("data/depth" + std::to_string(counter) + ".dpt");
 
 		imgs.push_back(colorImg);
 		imgs.push_back(depthImg);
+
 		std::vector<ObjectPose> objPose;
-		poseDetect.detect(imgs, "bigBearing.ply", 2, objPose);
-
-
+		poseDetect.detect(imgs, "bigBearing.ply", 2, objPose, true);
 
 		counter++;
 	}
-	//TODO vector nicht per value bergeben
-	std::getchar();
 }
