@@ -12,7 +12,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/rotate_vector.hpp>
 
 #include "defines.h"
 #include "utility.h"
@@ -53,13 +52,8 @@ public:
 	 * 
 	 * @param in_modelIndice Index of model file
 	 * @param camPositon Position of the camera in opengl coordinate space
-	 * @param in_rotate In plane camera rotation angle
-	 * @param in_x Move camera on camera plane to the right/left
-	 * @param in_y Move camera on camera plane down/up
 	 */
-	void renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
-	                            float in_rotate = 0.0f,
-	                            float in_x = 0.0f, float in_y = 0.0f);
+	void renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon);
 
 	/**
 	 * @brief Render color image to front buffer
@@ -75,13 +69,8 @@ public:
 	 * 
 	 * @param in_modelIndice Index of model file
 	 * @param camPositon Position of the camera in opengl coordinate space
-	 * @param in_rotate In plane camera rotation angle
-	 * @param in_x Move camera on camera plane to the right/left
-	 * @param in_y Move camera on camera plane down/up
 	 */
-	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
-	                            float in_rotate = 0.0f,
-	                            float in_x = 0.0f, float in_y = 0.0f);
+	void renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon);
 
 	/**
 	 * @brief Render depth image to front buffer
@@ -136,5 +125,5 @@ private:
 	std::string fileToString(const char* filename);
 	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3>& a,
 	                                  const std::vector<glm::vec3>& b);
-	void translateCam(glm::vec3 in_vec, float in_rotate, float in_x, float in_y);
+	void translateCam(glm::vec3 in_vec);
 };

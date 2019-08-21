@@ -46,9 +46,7 @@ cv::Mat OpenGLRender::getDepthImgFromBuff()
 	return renderedDepthImg;
 }
 
-void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
-                                          float in_rotate, float in_x,
-                                          float in_y)
+void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -60,7 +58,7 @@ void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::vec3 cam
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	translateCam(camPositon, in_rotate, in_x, in_y);
+	translateCam(camPositon);
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationColor, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -95,9 +93,7 @@ void OpenGLRender::renderColorToFrontBuff(uint16_t in_modelIndice, glm::mat4 in_
 	SDL_GL_SwapWindow(window);
 }
 
-void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon,
-                                          float in_rotate, float in_x,
-                                          float in_y)
+void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 camPositon)
 {
 	ModelBuffer* modPointer = &modBuff[in_modelIndice];
 
@@ -109,7 +105,7 @@ void OpenGLRender::renderDepthToFrontBuff(uint16_t in_modelIndice, glm::vec3 cam
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	modelMat = rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-	translateCam(camPositon, in_rotate, in_x, in_y);
+	translateCam(camPositon);
 	modPointer->bind();
 	glUniformMatrix4fv(modelViewProjMatrixLocationDepth, 1, GL_FALSE, &viewProj[0][0]);
 	glDrawElements(GL_TRIANGLES, modPointer->numIndices, GL_UNSIGNED_INT, nullptr);
@@ -335,7 +331,7 @@ std::vector<glm::vec3> OpenGLRender::zipVectors(const std::vector<glm::vec3>& a,
 	return result;
 }
 
-void OpenGLRender::translateCam(glm::vec3 in_vec, float in_rotate, float in_x, float in_y)
+void OpenGLRender::translateCam(glm::vec3 in_vec)
 {
 	position = in_vec;
 	if (in_vec[0] == 0 && in_vec[2] == 0)
@@ -344,11 +340,6 @@ void OpenGLRender::translateCam(glm::vec3 in_vec, float in_rotate, float in_x, f
 		position[0] = 0.000001;
 		position[2] = 0.000001;
 	}
-	glm::vec3 fakeup = normalize(cross(position, cross(position, up)));
-	glm::vec3 mov = (normalize(cross(position, up)) * in_x);
-	glm::vec3 movu = fakeup * in_y;
-
-	glm::vec3 temporaryUp = rotate(-fakeup, glm::radians(in_rotate), normalize(position));
-	view = lookAt(position + mov + movu, mov + movu, temporaryUp);
+	view = glm::lookAt(position,glm::vec3(0), up);
 	viewProj = projection * view;
 }
