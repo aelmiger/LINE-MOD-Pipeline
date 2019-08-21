@@ -1,15 +1,13 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(LINE-MOD VERSION 0.1.0)
 
-include(CTest)
-enable_testing()
 include_directories(${CMAKE_SOURCE_DIR}/include/)
 add_definitions(-D GLM_ENABLE_EXPERIMENTAL=TRUE)
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
 	${CMAKE_SOURCE_DIR}/src/*.c
 	${CMAKE_SOURCE_DIR}/src/*.cpp)
-	
+
 # Add header files
 file(GLOB_RECURSE HEADER_FILES 
 	${CMAKE_SOURCE_DIR}/include/*.h
