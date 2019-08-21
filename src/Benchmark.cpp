@@ -62,7 +62,7 @@ float Benchmark::calculateErrorLM(ObjectPose& in_estimate)
 		difference.at<float>(i, 0) = length(differenceBetweenVec);
 	}
 	float mean = sum(difference)[0] / model.numVertices;
-	if (mean<= 20.8394)
+	if (mean<= objectDiameter)
 	{
 		lineCounter++;
 	}
@@ -113,7 +113,7 @@ float Benchmark::calculateErrorLMAmbigous(ObjectPose& in_estimate)
 		difference.at<float>(i, 0) = absDifference;
 	}
 	float mean = sum(difference)[0] / subsampledModel.numVertices;
-	if (mean <= 20.8394) //todo non magic
+	if (mean <= objectDiameter)
 	{
 		lineCounter++;
 	}
@@ -151,8 +151,8 @@ cv::Mat Benchmark::renderPose(OpenGLRender* in_opengl, ObjectPose const& in_pose
 
 glm::mat4 Benchmark::calculateViewMat(ObjectPose const &in_pose)
 {
-	glm::vec3 eul = eulerAngles(in_pose.quaternions); //TODO FIX COODINATE TRANSFORM
-	glm::qua<float> quats(glm::vec3(eul.x - M_PI, -eul.y, -eul.z)); //TODO IMPORTANT adjust to benchmark
+	glm::vec3 eul = eulerAngles(in_pose.quaternions); 
+	glm::qua<float> quats(glm::vec3(eul.x - M_PI, -eul.y, -eul.z));
 	return glm::toMat4(quats);
 }
 
@@ -207,7 +207,7 @@ void Benchmark::readGroundTruthLinemodDataset()
 		std::cout << "Error Opening Ground Truth Rotation file from Linemod Dataset" << std::endl;
 	}
 	int cnt = 0;
-	//skip first to numbers
+	//skip first two numbers
 	fileStreamRotation >> tempNumber;
 	fileStreamRotation >> tempNumber;
 
@@ -222,9 +222,9 @@ void Benchmark::readGroundTruthLinemodDataset()
 	glm::mat3 rotMatGlm;
 	fromCV2GLM(rotMat, &rotMatGlm);
 	glm::qua<float> quaternions = quat_cast(rotMatGlm);
-	glm::vec3 eul = eulerAngles(quaternions); //TODO FIX COORDINATE TRANSFORM
-	glm::qua<float> adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); // converts the LINEMOD coordinate system
-	translation *= 10;
+	glm::vec3 eul = eulerAngles(quaternions); 
+	glm::qua<float> adjustedQuats(glm::vec3(eul.x - M_PI / 2, eul.y, eul.z)); // converting to the correct coordinate system
+	translation *= 10; //convert to millimeters
 	groundTruth = { translation, adjustedQuats };
 }
 

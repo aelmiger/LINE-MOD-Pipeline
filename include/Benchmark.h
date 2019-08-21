@@ -23,6 +23,7 @@ private:
 
 	int32_t visibilityThreshold = 15;
 	int32_t errorThreshold = 20;
+	float objectDiameter = 21;
 	cv::Mat inputDepth;
 	cv::Mat groundTruthDepthRender;
 	cv::Mat estimateDepthRender;
