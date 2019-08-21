@@ -124,7 +124,7 @@ void Benchmark::calculateVisibilityMasks()
 {
 	cv::Mat binaryGTRender;
 	cv::Mat binaryEstRender;
-
+	
 	groundTruthVisibility = groundTruthDepthRender - inputDepth;
 	cv::threshold(groundTruthVisibility, groundTruthVisibility, visibilityThreshold, 65536, cv::THRESH_BINARY);
 	cv::threshold(groundTruthDepthRender, binaryGTRender, 1, 65536, cv::THRESH_BINARY);
