@@ -8,13 +8,10 @@ Necessary Pre and Postprocessing tools are included:
 
 Included libraries for testing are:
 * Kinect V2 tool to extract depth and rgb images
-* Implementation of the LINE-MOD Benchmark for validation
-* A class to generate RGB-D Images with a ground truth pose of a Aruco marker
+* Implementation of the LINE-MOD Benchmark and the Benchmark for 6D Object Pose Estimation evaluation methods
+* A class to generate RGB-D Images with a ground truth pose of an Aruco marker
 
 ## Getting Started
-
-TODO
-
 ### Prerequisites
 
 For compilation the following libraries must be included and linked
@@ -24,8 +21,6 @@ For compilation the following libraries must be included and linked
 * [GLM](https://glm.g-truc.net/0.9.9/index.html) - Graphics math library
 * [libfreenect2](https://github.com/OpenKinect/libfreenect2) - Kinect V2 driver (only if Kinect is used)
 * [assimp](http://www.assimp.org/) - Open Asset Importer library
-
-Currently the Windows ppl.h library is used for parallelism. This will be changed to the platform independant OpenMP.
 
 ### Installing
 
@@ -45,6 +40,34 @@ To compile OpenCV the following command can be used. The path of the contrib mod
 ```bash
 cmake -D OPENCV_EXTRA_MODULES_PATH=<contrib modules path> -D WITH_OPENMP=ON -D CMAKE_BUILD_TYPE=Release
 ```
+
+#### Compiling the pipeline
+In a new folder start by cloning the repo.
+```bash
+git clone https://gitlab.tubit.tu-berlin.de/antone/LINE-MOD-Pipeline.git LINE-MOD
+cd LINE-MOD
+```
+Next step is to run cmake and compile the binaries.
+
+For cmake to properly locate the SDL2 libraries it needs a FindSDL2.cmake module which is not yet part of cmake. 
+
+[FindSDL2](https://github.com/aminosbh/sdl2-cmake-modules) can be downloaded here and has to be placed in the cmake modules folder.
+
+```bash
+cmake -H. -B build
+cmake --build build -- -j10
+```
+To test the applications run the template generator first.
+```bash
+./build/Template_Generator
+```
+A window should open and display the rendered object in white under different poses and save the template generation files.
+
+Now run the detector. An example image in the benchmark folder will be used.
+```bash
+./build/Detector
+``` 
+
 
 ## Authors
 
