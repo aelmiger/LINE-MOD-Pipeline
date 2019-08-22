@@ -8,13 +8,32 @@
 #include "Kinect2.h"
 #include "utility.h"
 
+/**
+ * @brief Class can create a benchmark dataset
+ * 
+ */
 class Aruco
 {
 public:
+	/**
+	 * @brief Construct a new Aruco object
+	 * 
+	 */
 	Aruco();
 	~Aruco();
 
+	/**
+	 * @brief Generates the aruco board image "aruco_board.jp"
+	 * 
+	 */
 	void createArucoBoard();
+
+	/**
+	 * @brief Uses the Kinect V2 camera to detect the aruco board and save images
+	 * @detail Pressing TAB will save RGB and Depth images to the "benchmark/" folder
+	 * with a corresponding YAML file containing the board pose with the origin at the center
+	 * 
+	 */
 	void detectBoard();
 
 private:

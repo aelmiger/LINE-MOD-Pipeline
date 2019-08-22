@@ -118,12 +118,52 @@ private:
 	float cx;
 	float cy;
 
+	/**
+	 * @brief Setting up the opengl context
+	 * 
+	 */
 	void setupSDLWindow();
+
+	/**
+	 * @brief Setup opengl
+	 * 
+	 */
 	void setupOpenGL();
+
+	/**
+	 * @brief Setting up the framebuffer
+	 * 
+	 */
 	void setupFramebuffer();
+
+	/**
+	 * @brief Setting up the different shader for rgb and depth image
+	 * 
+	 */
 	void setupShader();
+
+	/**
+	 * @brief Helper function to convert a shader file to a string
+	 * 
+	 * @param filename 
+	 * @return std::string 
+	 */
 	std::string fileToString(const char* filename);
+
+	/**
+	 * @brief Helper function to combine two vector in a zip style fashion
+	 * 
+	 * @param a 
+	 * @param b 
+	 * @return std::vector<glm::vec3> 
+	 */
 	std::vector<glm::vec3> zipVectors(const std::vector<glm::vec3>& a,
 	                                  const std::vector<glm::vec3>& b);
+
+	/**
+	 * @brief Function to calculate the view matrix depending on the camera position
+	 * 
+	 * @param in_vec 
+	 */
 	void translateCam(glm::vec3 in_vec);
 };

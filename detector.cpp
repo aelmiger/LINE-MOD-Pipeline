@@ -10,7 +10,7 @@ int main()
 
 	///////IMAGE SOURCES:
 	cv::VideoCapture sequence("benchmark/img%0d.png");
-	//cv::VideoCapture sequence("data/color%0d.jpg");
+	//cv::VideoCapture sequence("benchmarkLINEMOD/color%0d.jpg");
 	//Kinect2 kin2;
 	/////////////////////
 
@@ -25,7 +25,7 @@ int main()
 		depthImg = cv::imread("benchmark/depth" + std::to_string(counter) + ".png",
 		                      cv::IMREAD_ANYDEPTH);
 		//Video Capture does not work with 16bit png on linux
-		//depthImg = loadDepthLineModDataset("data/depth" + std::to_string(counter) + ".dpt");
+		//depthImg = loadDepthLineModDataset("benchmarkLINEMOD/depth" + std::to_string(counter) + ".dpt");
 		//kin2.getKinectFrames(colorImg, depthImg);
 		////////////////////
 

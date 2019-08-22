@@ -199,7 +199,7 @@ void Benchmark::readGroundTruthLinemodDataset()
 	cv::Vec3f angles;
 	double tempNumber;
 
-	std::ifstream fileStreamTranslation("data/tra" + std::to_string(imageCounter) + ".tra");
+	std::ifstream fileStreamTranslation("benchmarkLINEMOD/tra" + std::to_string(imageCounter) + ".tra");
 	if (!fileStreamTranslation.is_open())
 	{
 		std::cout << "Error Opening Ground Truth Translation file from Linemod Dataset" << std::
@@ -216,7 +216,7 @@ void Benchmark::readGroundTruthLinemodDataset()
 	fileStreamTranslation.close();
 
 	cv::Mat rotMat = cv::Mat::zeros(3, 3, CV_64FC1);
-	std::ifstream fileStreamRotation("data/rot" + std::to_string(imageCounter) + ".rot");
+	std::ifstream fileStreamRotation("benchmarkLINEMOD/rot" + std::to_string(imageCounter) + ".rot");
 	if (!fileStreamRotation.is_open())
 	{
 		std::cout << "Error Opening Ground Truth Rotation file from Linemod Dataset" << std::endl;

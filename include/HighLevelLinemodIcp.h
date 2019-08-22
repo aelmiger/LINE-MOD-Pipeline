@@ -83,8 +83,36 @@ private:
 	cv::Mat sceneVertices;
 	uint16_t sampleStep;
 	std::vector<cv::ppf_match_3d::Pose3DPtr> poses;
+
+	/**
+	 * @brief Removing points from cloud that are too far off
+	 * 
+	 * @param in_mat Input pointcloud
+	 * @param in_res Corrected pointcloud
+	 * @param in_removeRows If rows shoudl be removed. Keep this true
+	 */
 	void removeIfTooFarFromMean(const cv::Mat& in_mat, cv::Mat& in_res, bool in_removeRows = true);
+
+	/**
+	 * @brief Convert a depth image to a binary image with one channel and 8bit 
+	 * 
+	 * @param in_gray Input depth image
+	 * @param in_binary Output binary image
+	 * @param in_threshold Threshold at what value a pixel will become white or 255
+	 */
 	void depthToBinary(cv::Mat& in_gray, cv::Mat& in_binary, uint32_t in_threshold = 1);
+
+	/**
+	 * @brief Load a model from ply file
+	 * 
+	 */
 	void loadModels();
+
+	/**
+	 * @brief Convert the cv mat4x4 into translation and rotation
+	 * 
+	 * @param in_mat 
+	 * @param in_objPose 
+	 */
 	void updatePosition(cv::Matx44d in_mat, ObjectPose& in_objPose);
 };
