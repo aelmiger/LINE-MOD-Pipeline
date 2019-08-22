@@ -4,7 +4,7 @@ int main()
 {
 	PoseDetection poseDetect;
 
-	poseDetect.setupBenchmark("p1.ply"); //Uncomment if Benchmark is not wanted
+	poseDetect.setupBenchmark("lagergehaeuse.ply"); //Uncomment if Benchmark is not wanted
 
 	int counter = 0;
 
@@ -39,7 +39,7 @@ int main()
 		imgs.push_back(depthImg);
 
 		std::vector<ObjectPose> objPose;
-		poseDetect.detect(imgs, "p1.ply", 1, objPose, true);
+		poseDetect.detect(imgs, "lagergehaeuse.ply", 1, objPose, true);
 
 		counter++;
 	}
