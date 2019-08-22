@@ -24,9 +24,9 @@ in plane rotation angle step: 10
 distance start: 500
 distance stop: 1200
 distance step: 50
-icosahedron subdivisions: 2
+icosahedron subdivisions: 3
 # ###### TEMPLATE DETECTOR SETTINGS ######
-detector threshold: 78
+detector threshold: 80
 percent to pass check: 50
 number of poses to compare: 1
 distance to match to be considered same object: 45

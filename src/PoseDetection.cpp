@@ -119,7 +119,7 @@ void PoseDetection::detect(std::vector<cv::Mat>& in_imgs, std::string const& in_
 			bench->increaseImgCounter();
 		}
 		imshow("color", colorImg);
-		cv::waitKey(0);
+		cv::waitKey(1);
 	}
 
 	inputImg.clear();

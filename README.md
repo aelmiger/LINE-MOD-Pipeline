@@ -55,7 +55,7 @@ For cmake to properly locate the SDL2 libraries it needs a FindSDL2.cmake module
 
 ```bash
 cmake -H. -B build
-cmake --build build -- -j10
+cmake --build build --config Release --target all -- -j4
 ```
 To test the applications run the template generator first.
 ```bash

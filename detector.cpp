@@ -4,7 +4,7 @@ int main()
 {
 	PoseDetection poseDetect;
 
-	poseDetect.setupBenchmark("bigBearing.ply"); //Uncomment if Benchmark is not wanted
+	poseDetect.setupBenchmark("p1.ply"); //Uncomment if Benchmark is not wanted
 
 	int counter = 0;
 
@@ -32,14 +32,14 @@ int main()
 		if (colorImg.empty())
 		{
 			std::cout << "End of Sequence" << std::endl;
-			std::getchar();
+			cv::waitKey(0);
 		}
 
 		imgs.push_back(colorImg);
 		imgs.push_back(depthImg);
 
 		std::vector<ObjectPose> objPose;
-		poseDetect.detect(imgs, "bigBearing.ply", 2, objPose, true);
+		poseDetect.detect(imgs, "p1.ply", 1, objPose, true);
 
 		counter++;
 	}

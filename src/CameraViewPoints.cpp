@@ -74,7 +74,7 @@ void CameraViewPoints::icosahedronPointsFromRadius()
 
 void CameraViewPoints::createVerticesForRotSym()
 {
-	for (uint16_t i = 0; i < 360; i = i + (60/numSubdivisions))
+	for (uint16_t i = 0; i < 360; i = i + (60/pow(2,numSubdivisions)))
 	{
 		vertices.emplace_back(0.0f, sin(i * CV_PI / 180.0f) * radius,
 		                      cos(i * CV_PI / 180.0f) * radius);
