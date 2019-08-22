@@ -1,0 +1,11 @@
+%YAML:1.0
+---
+# HSV color range of Objekt 
+lower color range: [ 0., 0., 0., 0. ]
+upper color range: [ 255., 150., 255., 0. ]
+
+# rotational symmetry 1=yes 0=no
+has rotational symmetry: 1
+
+# (y/z-plane, x/z-plane, y/z-plane)
+planes of symmetry: [ 1, 1, 1 ]
