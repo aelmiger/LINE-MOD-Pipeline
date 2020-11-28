@@ -71,7 +71,7 @@ Now run the detector. An example image in the benchmark folder will be used.
 
 ## Authors
 
-* **Anton Elmiger** - *Initial work* - [GitLab](https://gitlab.tubit.tu-berlin.de/antone)
+* **Anton Elmiger** - *Initial work* - [GitHub](https://github.com/aelmiger)
 
 ## License
 
