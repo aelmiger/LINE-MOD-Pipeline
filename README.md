@@ -2,6 +2,8 @@
 
 The pipeline implements the OpenCV LINE-MOD Detector to estimate the pose of a known Object. Postprocessing steps for detection of shiny objects with corrupted depth information are added. The goal of this pipeline is to locate and detect the pose of industrial objects like bearings to aide a robotic arm during assembly (bin picking). The pipeline implements the creation of templates from CAD objects, which makes it possible to detect new objects in a matter of minutes.
 
+The accompanying bachelor thesis (german) is here: [Bachelor Thesis (german)](bachelor_thesis.pdf)
+
 Necessary Pre- and Postprocessing tools that are implemented:
 * Generation of Templates from CAD-Models with OpenGL
 * Color and depth checks to validate a match
