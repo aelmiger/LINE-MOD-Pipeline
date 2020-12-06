@@ -1,15 +1,24 @@
 # LINE-MOD-Pipeline for object detection and pose estimation
 
-The pipeline uses the OpenCV LINE-MOD Detector to estimate the pose of a known Object. 
-Necessary Pre and Postprocessing tools are included:
+The pipeline implements the OpenCV LINE-MOD Detector to estimate the pose of a known Object. Postprocessing steps for detection of shiny objects with corrupted depth information are added. The goal of this pipeline is to locate and detect the pose of industrial objects like bearings to aide a robotic arm during assembly (bin picking). The pipeline implements the creation of templates from CAD objects, which makes it possible to detect new objects in a matter of minutes.
+
+Necessary Pre- and Postprocessing tools that are implemented:
 * Generation of Templates from CAD-Models with OpenGL
 * Color and depth checks to validate a match
+* Steps to correct for corrupted depth information on reflective objects
 * ICP algorithm from OpenCV for pose refinement
 
-Included libraries for testing are:
+Included libraries for testing and validation are:
 * Kinect V2 tool to extract depth and rgb images
 * Implementation of the LINE-MOD Benchmark and the Benchmark for 6D Object Pose Estimation evaluation methods
 * A class to generate RGB-D Images with a ground truth pose of an Aruco marker
+
+**Examples of pose estimation results:**
+<p float="left">
+<img src="https://i.ibb.co/1npYc5g/korrekt-Double-Pose.png" alt="korrekt-Double-Pose" border="0" width="300">
+<img src="https://i.ibb.co/QpjDh10/correct-Pose-Estimation2.png" alt="correct-Pose-Estimation2" border="0" width="300">
+<img src="https://i.ibb.co/D1TSMHd/correct-Pose-Estimation.png" alt="correct-Pose-Estimation" border="0" width="300">
+</p>
 
 ## Getting Started
 ### Prerequisites
